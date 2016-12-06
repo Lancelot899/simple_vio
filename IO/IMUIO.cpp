@@ -4,7 +4,7 @@ IMUIO::IMUIO()
 {
 }
 
-std::shared_ptr<IMUData> IMUIO::pop()
+std::shared_ptr<IMUMeasure> IMUIO::pop()
 {
 
 }
