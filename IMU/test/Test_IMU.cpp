@@ -6,7 +6,6 @@
 #include "DataStructure/IMUMeasure.h"
 #include "IMU/IMU.h"
 
-
 TEST(imuPropagation, IMU) {
 
     /// get test data
@@ -49,7 +48,10 @@ TEST(imuPropagation, IMU) {
         testIMUDeque.push_back(IMUMeasure(0, timeStamp, acceleration, gyroscopes));
     }
 
-    printf("load data over!\n");
+    ImuParamenters imuParam;
+    imuParam.a_max = 1;
+    imuParam.g_max = 1;
+
 
     Py_DECREF(getDataArgs);
     Py_DECREF(IMUTest);
@@ -72,6 +74,7 @@ TEST(imuPropagation, IMU) {
     std::cout << "<<<<<<<<<<<< get data right!\n" << std::endl;
 #endif // for python data test
 
-
+    ///< test okvis integration
+    IMU imu(IMU::IntegalType::OKVIS_INTEGRATION);
 
 }

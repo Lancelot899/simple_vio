@@ -15,7 +15,13 @@ typedef IMUMeasure::jacobian_t      jacobian_t;
 class IMU
 {
 public:
-    IMU();
+    enum IntegalType {
+        PRE_INTEGRATION,
+        OKVIS_INTEGRATION
+    };
+
+public:
+    IMU(IntegalType type = PRE_INTEGRATION);
     int propagation(const ImuMeasureDeque & imuMeasurements,
                     const ImuParamenters & imuParams,
                     Transformation& T_WS,

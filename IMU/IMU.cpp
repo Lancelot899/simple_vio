@@ -1,9 +1,19 @@
 #include "IMU.h"
 #include "Implement/IMUImplOKVIS.h"
+#include "Implement/IMUImplPRE.h"
 
-IMU::IMU()
+IMU::IMU(IntegalType type)
 {
-    impl = std::make_shared<IMUImplOKVIS>();
+    switch(type) {
+    case OKVIS_INTEGRATION:
+        impl = std::make_shared<IMUImplOKVIS>();
+        break;
+    case PRE_INTEGRATION:
+        impl = std::make_shared<IMUImplPRE>();
+        break;
+    }
+
+
 }
 
 int IMU::propagation(const ImuMeasureDeque &imuMeasurements,

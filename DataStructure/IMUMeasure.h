@@ -18,23 +18,6 @@ struct IMUData {
     double                    time;
 };
 
-struct ImuParamenters {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    double a_max;  ///< Accelerometer saturation. [m/s^2]
-    double g_max;  ///< Gyroscope saturation. [rad/s]
-    double sigma_g_c;  ///< Gyroscope noise density.
-    double sigma_bg;  ///< Initial gyroscope bias.
-    double sigma_a_c;  ///< Accelerometer noise density.
-    double sigma_ba;  ///< Initial accelerometer bias
-    double sigma_gw_c; ///< Gyroscope drift noise density.
-    double sigma_aw_c; ///< Accelerometer drift noise density.
-    double tau;  ///< Reversion time constant of accerometer bias. [s]
-    double g;  ///< Earth acceleration.
-    Eigen::Vector3d a0;  ///< Mean of the prior accelerometer bias.
-    int rate;  ///< IMU rate in Hz.
-};
-
 struct IMUMeasure : public MeasurementBase<IMUData> {
     IMUMeasure(int sensorId, double timeStamp, Eigen::Vector3d acceleration, Eigen::Vector3d gyroscopes,
                Eigen::Vector3d geomagnetism = Eigen::Vector3d(), Eigen::Quaternion<double> orientation = Eigen::Quaternion<double>()) {
@@ -53,6 +36,25 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
     typedef Eigen::Matrix<double, 15, 15>                                covariance_t;
     typedef Eigen::Matrix<double, 15, 15>                                jacobian_t;
 };
+
+
+struct ImuParamenters {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    IMUMeasure::Transformation T_BS; ///< Transformation from Body frame to IMU (sensor frame S).
+    double a_max;  ///< Accelerometer saturation. [m/s^2]
+    double g_max;  ///< Gyroscope saturation. [rad/s]
+    double sigma_g_c;  ///< Gyroscope noise density.
+    double sigma_bg;  ///< Initial gyroscope bias.
+    double sigma_a_c;  ///< Accelerometer noise density.
+    double sigma_ba;  ///< Initial accelerometer bias
+    double sigma_gw_c; ///< Gyroscope drift noise density.
+    double sigma_aw_c; ///< Accelerometer drift noise density.
+    double tau;  ///< Reversion time constant of accerometer bias. [s]
+    double g;    ///< Earth acceleration.
+    Eigen::Vector3d a0;  ///< Mean of the prior accelerometer bias.
+    int rate;  ///< IMU rate in Hz.
+};
+
 
 
 
