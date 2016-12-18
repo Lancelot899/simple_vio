@@ -1,20 +1,11 @@
 #ifndef IMUIMPL_H
 #define IMUIMPL_H
 
-class IMUImpl;
-class ImuMeasureDeque;
-class ImuParamenters;
-class Transformation;
-class SpeedAndBias;
-class jacobian_t;
-class covariance_t;
+#include "IMU/IMU.h"
 
-class IMUImpl
-{
+class IMUImpl {
 public:
-    IMUImpl() {
-
-    }
+    IMUImpl();
 
     virtual int propagation(const ImuMeasureDeque & imuMeasurements,
                     const ImuParamenters & imuParams,

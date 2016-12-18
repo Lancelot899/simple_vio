@@ -11,7 +11,8 @@ SOURCES += main.cpp \
     IMU/test/Test_IMU.cpp \
     IO/IMUIO.cpp \
     IMU/Implement/IMUImpl.cpp \
-    IMU/Implement/IMUImplOKVIS.cpp
+    IMU/Implement/IMUImplOKVIS.cpp \
+    util/util.cpp
 
 HEADERS += \
     IMU/IMU.h \
@@ -19,5 +20,7 @@ HEADERS += \
     IO/IMUIO.h \
     DataStructure/Measurements.h \
     DataStructure/IMUMeasure.h \
-    IMU/Implement/IMUImpl.h
+    IMU/Implement/IMUImpl.h \
+    IMU/Implement/IMUImplOKVIS.h \
+    util/util.h
 

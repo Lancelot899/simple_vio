@@ -14,6 +14,7 @@ TEST(imuPropagation, IMU) {
     ASSERT_TRUE(Py_IsInitialized());
     PyObject *IMUTest = NULL;
     PyObject *getData = NULL;
+    PyObject *pModule = NULL;
     pModule =PyImport_ImportModule("./IMU/test/IMUTest.py");
     ASSERT_TRUE(IMUTest!= NULL);
     getData = PyObject_GetAttrString(IMUTest, "getData");
@@ -22,7 +23,7 @@ TEST(imuPropagation, IMU) {
     PyTuple_SetItem(getDataArgs, 0, Py_BuildValue("s", "./IMU/test/data.csv"));
     PyTuple_SetItem(getDataArgs, 1, Py_BuildValue("i", 100));     ///< get 100 data
     PyObject *pyDatas = NULL;
-    pyDatas = PyEval_CallObject(pFunc, pArgs);
+    pyDatas = PyEval_CallObject(getData, getDataArgs);
     ASSERT_TRUE(pyDatas!= NULL);
 
     int dataSize = PyList_Size(pyDatas);
@@ -30,7 +31,7 @@ TEST(imuPropagation, IMU) {
     PyObject* pyData = NULL;
     PyObject* pyItem = NULL;
     for(int i = 0; i < dataSize; ++i) {
-        pyData = PyList_GetItem(pyDatas);
+        pyData = PyList_GetItem(pyDatas, i);
         ASSERT_TRUE(PyList_Size(pyData) == 7);
         double pyArg[7];
         for(int j = 0; j < 7; ++j) {
@@ -43,6 +44,7 @@ TEST(imuPropagation, IMU) {
         testIMUDeque.push_back(IMUMeasure(0, timeStamp, acceleration, gyroscopes));
     }
 
+    Py_DECREF(pModule);
     Py_DECREF(getDataArgs);
     Py_DECREF(IMUTest);
     Py_Finalize();

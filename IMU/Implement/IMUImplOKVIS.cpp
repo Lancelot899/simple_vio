@@ -1,61 +1,43 @@
-#include "IMUImpl.h"
-#include "DataStructure/IMUMeasure.h"
-
-typedef IMUMeasure::ImuMeasureDeque ImuMeasureDeque;
-typedef IMUMeasure::Transformation  Transformation;
-typedef IMUMeasure::SpeedAndBias    SpeedAndBias;
-typedef IMUMeasure::covariance_t    covariance_t;
-typedef IMUMeasure::jacobian_t      jacobian_t;
+#include "IMUImplOKVIS.h"
+#include "util/util.h"
 
 template<typename Derived_T>
 inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> crossMx(
-    Eigen::MatrixBase<Derived_T> const & v)
-{
+    Eigen::MatrixBase<Derived_T> const & v) {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Eigen::MatrixBase<Derived_T>, 3);
   assert((v.cols()==3 && v.rows()==1)||(v.rows()==3 && v.cols()==1));
   return crossMx(v(0, 0), v(1, 0), v(2, 0));
 }
 
-class IMUImplOKVIS : public IMUImpl {
-    __inline__ Eigen::Matrix3d rightJacobian(const Eigen::Vector3d & PhiVec) {
-        const double Phi = PhiVec.norm();
-        Eigen::Matrix3d retMat = Eigen::Matrix3d::Identity();
-        const Eigen::Matrix3d Phi_x =  crossMx(PhiVec);
-        const Eigen::Matrix3d Phi_x2 = Phi_x*Phi_x;
-        if(Phi < 1.0e-4) {
-          retMat += -0.5*Phi_x + 1.0/6.0*Phi_x2;
-        } else {
-          const double Phi2 = Phi*Phi;
-          const double Phi3 = Phi2*Phi;
-          retMat += -(1.0-cos(Phi))/(Phi2)*Phi_x + (Phi-sin(Phi))/Phi3*Phi_x2;
-        }
-        return retMat;
+Eigen::Matrix3d IMUImplOKVIS::rightJacobian(const Eigen::Vector3d &PhiVec) {
+    const double Phi = PhiVec.norm();
+    Eigen::Matrix3d retMat = Eigen::Matrix3d::Identity();
+    const Eigen::Matrix3d Phi_x =  crossMx(PhiVec);
+    const Eigen::Matrix3d Phi_x2 = Phi_x*Phi_x;
+    if(Phi < 1.0e-4) {
+        retMat += -0.5*Phi_x + 1.0/6.0*Phi_x2;
+    } else {
+        const double Phi2 = Phi*Phi;
+        const double Phi3 = Phi2*Phi;
+        retMat += -(1.0-cos(Phi))/(Phi2)*Phi_x + (Phi-sin(Phi))/Phi3*Phi_x2;
     }
-
-    int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
-                             const ImuParamenters &imuParams,
-                             Transformation &T_WS,
-                             SpeedAndBias &speedAndBiases,
-                             double &t_start,
-                             double &t_end,
-                             covariance_t *covariance,
-                             jacobian_t *jacobian);
-};
+    return retMat;
+}
 
 int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
-                         const ImuParamenters &imuParams,
-                         Transformation &T_WS,
-                         SpeedAndBias &speedAndBiases,
-                         double &t_start,
-                         double &t_end,
-                         covariance_t *covariance,
-                         jacobian_t *jacobian) {
-    double time = t_start;
+                              const ImuParamenters &imuParams,
+                              Transformation &T_WS,
+                              SpeedAndBias &speedAndBiases,
+                              double &t_start,
+                              double &t_end,
+                              covariance_t *covariance,
+                              jacobian_t *jacobian) {
+/*    double time = t_start;
     double end = t_end;
 
     assert(imuMeasurements.front().timeStamp<=time);
     if (!(imuMeasurements.back().timeStamp >= end))
-      return -1;
+        return -1;
 
     Eigen::Vector3d r_0 = T_WS.translation();
     Eigen::Quaterniond q_WS_0 = T_WS.so3().unit_quaternion();
@@ -233,7 +215,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
       P = T * P_delta * T.transpose();
     }
     return i;
-
+*/
 }
 
 

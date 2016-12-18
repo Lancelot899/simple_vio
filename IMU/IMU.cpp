@@ -1,10 +1,9 @@
 #include "IMU.h"
-#include "Implement/IMUImpl.h"
-
+#include "Implement/IMUImplOKVIS.h"
 
 IMU::IMU()
 {
-    imuIO = std::make_shared<IMUIO>();
+    impl = std::make_shared<IMUImplOKVIS>();
 }
 
 int IMU::propagation(const ImuMeasureDeque &imuMeasurements,
@@ -16,5 +15,5 @@ int IMU::propagation(const ImuMeasureDeque &imuMeasurements,
                      covariance_t *covariance,
                      jacobian_t *jacobian)
 {
-    impl->propagation(imuMeasurements, imuParams, T_WS, speedAndBiases, t_start, t_end, covariance, jacobian);
+    return impl->propagation(imuMeasurements, imuParams, T_WS, speedAndBiases, t_start, t_end, covariance, jacobian);
 }

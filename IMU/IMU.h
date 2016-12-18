@@ -2,14 +2,15 @@
 #define IMU_H
 
 #include <memory>
+#include "DataStructure/IMUMeasure.h"
 
 class IMUImpl;
-class ImuMeasureDeque;
-class ImuParamenters;
-class Transformation;
-class SpeedAndBias;
-class jacobian_t;
-class covariance_t;
+
+typedef IMUMeasure::ImuMeasureDeque ImuMeasureDeque;
+typedef IMUMeasure::Transformation  Transformation;
+typedef IMUMeasure::SpeedAndBias    SpeedAndBias;
+typedef IMUMeasure::covariance_t    covariance_t;
+typedef IMUMeasure::jacobian_t      jacobian_t;
 
 class IMU
 {
