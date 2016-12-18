@@ -3,7 +3,7 @@ CONFIG += console
 
 QMAKE_CXXFLAGS += -std=c++11
 
-INCLUDEPATH += /usr/local/include/eigen3
+INCLUDEPATH += /usr/include/eigen3
 INCLUDEPATH += /usr/include/python2.7
 
 SOURCES += main.cpp \

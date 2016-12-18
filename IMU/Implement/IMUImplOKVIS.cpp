@@ -16,7 +16,6 @@ inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> 
   return crossMx(v(0, 0), v(1, 0), v(2, 0));
 }
 
-
 class IMUImplOKVIS : public IMUImpl {
     __inline__ Eigen::Matrix3d rightJacobian(const Eigen::Vector3d & PhiVec) {
         const double Phi = PhiVec.norm();
@@ -50,8 +49,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                          double &t_start,
                          double &t_end,
                          covariance_t *covariance,
-                         jacobian_t *jacobian)
-{
+                         jacobian_t *jacobian) {
     double time = t_start;
     double end = t_end;
 

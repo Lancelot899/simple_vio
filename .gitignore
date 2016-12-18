@@ -1,0 +1,8 @@
+*.pro
+*.pro.*
+*pro*
+build
+build*
+build-*
+*.o
+vio

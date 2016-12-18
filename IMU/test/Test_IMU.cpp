@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <gtest/gtest.h>
 #include <Python.h>
 
@@ -47,5 +49,17 @@ TEST(imuPropagation, IMU) {
 
     ///< over!
     ASSERT_TRUE(testIMUDeque.size() == 100);
+
+#if 1
+    std::cout << "<<<<<<<<<<< test for imu data : \n " << std::endl;
+    for(unsigned i = 0; i < testIMUDeque.size(); ++i) {
+        IMUMeasure &imu = testIMUDeque.back();
+        std::cout << "\timu data: " << i << std::endl
+                << "\ttimeStamp: " << imu.timeStamp << std::endl
+                << "\tacc: " << imu.measurement.acceleration << std::endl
+                << "\tgyroscopes " << imu.measurement.gyroscopes << std::endl;
+        testIMUDeque.pop_back();
+    }
+#endif // for python data test
 
 }
