@@ -5,7 +5,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
-#include <sophus/se3.h>
+#include <sophus/se3.hpp>
 
 #include "DataStructure/Measurements.h"
 
@@ -48,7 +48,7 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
     }
 
     typedef std::deque<IMUMeasure, Eigen::aligned_allocator<IMUMeasure>> ImuMeasureDeque;
-    typedef Sophus::SE3                                                  Transformation;
+    typedef Sophus::SE3d                                                 Transformation;
     typedef Eigen::Matrix<double, 9, 1>                                  SpeedAndBias;
     typedef Eigen::Matrix<double, 15, 15>                                covariance_t;
     typedef Eigen::Matrix<double, 15, 15>                                jacobian_t;

@@ -7,7 +7,7 @@ template<typename DataType>
 class IOBase
 {
 public:
-    IOBase();
+    IOBase() {}
     virtual void push(std::shared_ptr<DataType> data) {
         data.reset();
         return;

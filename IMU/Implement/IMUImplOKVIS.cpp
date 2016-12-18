@@ -32,7 +32,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               double &t_end,
                               covariance_t *covariance,
                               jacobian_t *jacobian) {
-/*    double time = t_start;
+    double time = t_start;
     double end = t_end;
 
     assert(imuMeasurements.front().timeStamp<=time);
@@ -41,7 +41,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
     Eigen::Vector3d r_0 = T_WS.translation();
     Eigen::Quaterniond q_WS_0 = T_WS.so3().unit_quaternion();
-    Eigen::Matrix3d C_WS_0 = T_WS.rotation_matrix();
+    Eigen::Matrix3d C_WS_0 = T_WS.rotationMatrix();
 
     Eigen::Quaterniond Delta_q(1,0,0,0);
     Eigen::Matrix3d C_integral = Eigen::Matrix3d::Zero();
@@ -117,7 +117,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
         Eigen::Quaterniond dq;
         const Eigen::Vector3d omega_S_true = (0.5*(omega_S_0+omega_S_1) - speedAndBiases.segment<3>(3));
         const double theta_half = omega_S_true.norm() * 0.5 * dt;
-        const double sinc_theta_half = ode::sinc(theta_half);
+        const double sinc_theta_half = sin(theta_half);
         const double cos_theta_half = cos(theta_half);
         dq.vec() = sinc_theta_half * omega_S_true * 0.5 * dt;
         dq.w() = cos_theta_half;
@@ -187,10 +187,9 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
     }
 
     const Eigen::Vector3d g_W = imuParams.g * Eigen::Vector3d(0, 0, 6371009).normalized();
-    T_WS.set(r_0+speedAndBiases.head<3>()*Delta_t
-               + C_WS_0*(acc_doubleintegral)
-               - 0.5*g_W*Delta_t*Delta_t,
-               q_WS_0*Delta_q);
+    T_WS = Sophus::SE3d(q_WS_0*Delta_q, r_0+speedAndBiases.head<3>()*Delta_t
+                       + C_WS_0*(acc_doubleintegral)
+                       - 0.5*g_W*Delta_t*Delta_t);
     speedAndBiases.head<3>() += C_WS_0*(acc_integral)-g_W*Delta_t;
 
     if (jacobian) {
@@ -215,7 +214,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
       P = T * P_delta * T.transpose();
     }
     return i;
-*/
+
 }
 
 
