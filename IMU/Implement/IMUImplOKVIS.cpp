@@ -1,28 +1,7 @@
+#include <assert.h>
+
 #include "IMUImplOKVIS.h"
 #include "util/util.h"
-
-template<typename Derived_T>
-inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> crossMx(
-    Eigen::MatrixBase<Derived_T> const & v) {
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Eigen::MatrixBase<Derived_T>, 3);
-  assert((v.cols()==3 && v.rows()==1)||(v.rows()==3 && v.cols()==1));
-  return crossMx(v(0, 0), v(1, 0), v(2, 0));
-}
-
-Eigen::Matrix3d IMUImplOKVIS::rightJacobian(const Eigen::Vector3d &PhiVec) {
-    const double Phi = PhiVec.norm();
-    Eigen::Matrix3d retMat = Eigen::Matrix3d::Identity();
-    const Eigen::Matrix3d Phi_x =  crossMx(PhiVec);
-    const Eigen::Matrix3d Phi_x2 = Phi_x*Phi_x;
-    if(Phi < 1.0e-4) {
-        retMat += -0.5*Phi_x + 1.0/6.0*Phi_x2;
-    } else {
-        const double Phi2 = Phi*Phi;
-        const double Phi3 = Phi2*Phi;
-        retMat += -(1.0-cos(Phi))/(Phi2)*Phi_x + (Phi-sin(Phi))/Phi3*Phi_x2;
-    }
-    return retMat;
-}
 
 int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               const ImuParamenters &imuParams,
@@ -69,51 +48,52 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
         double nexttime;
         if ((it + 1) == imuMeasurements.end()) {
-          nexttime = t_end;
+            nexttime = t_end;
         } else
-          nexttime = (it + 1)->timeStamp;
+            nexttime = (it + 1)->timeStamp;
         double dt = nexttime - time;
 
         if (end < nexttime) {
-          double interval = nexttime - it->timeStamp;
-          nexttime = t_end;
-          dt = nexttime - time;
-          const double r = dt / interval;
-          omega_S_1 = ((1.0 - r) * omega_S_0 + r * omega_S_1).eval();
-          acc_S_1 = ((1.0 - r) * acc_S_0 + r * acc_S_1).eval();
+            double interval = nexttime - it->timeStamp;
+            nexttime = t_end;
+            dt = nexttime - time;
+            const double r = dt / interval;
+            omega_S_1 = ((1.0 - r) * omega_S_0 + r * omega_S_1).eval();
+            acc_S_1 = ((1.0 - r) * acc_S_0 + r * acc_S_1).eval();
         }
 
         if (dt <= 0.0) {
-          continue;
+            continue;
         }
         Delta_t += dt;
 
         if (!hasStarted) {
-          hasStarted = true;
-          const double r = dt / (nexttime - it->timeStamp);
-          omega_S_0 = (r * omega_S_0 + (1.0 - r) * omega_S_1).eval();
-          acc_S_0 = (r * acc_S_0 + (1.0 - r) * acc_S_1).eval();
+            hasStarted = true;
+            const double r = dt / (nexttime - it->timeStamp);
+            omega_S_0 = (r * omega_S_0 + (1.0 - r) * omega_S_1).eval();
+            acc_S_0 = (r * acc_S_0 + (1.0 - r) * acc_S_1).eval();
         }
 
         double sigma_g_c = imuParams.sigma_g_c;
         double sigma_a_c = imuParams.sigma_a_c;
 
         if (fabs(omega_S_0[0]) > imuParams.g_max
-            || fabs(omega_S_0[1]) > imuParams.g_max
-            || fabs(omega_S_0[2]) > imuParams.g_max
-            || fabs(omega_S_1[0]) > imuParams.g_max
-            || fabs(omega_S_1[1]) > imuParams.g_max
-            || fabs(omega_S_1[2]) > imuParams.g_max) {
-          sigma_g_c *= 100;
+                || fabs(omega_S_0[1]) > imuParams.g_max
+                || fabs(omega_S_0[2]) > imuParams.g_max
+                || fabs(omega_S_1[0]) > imuParams.g_max
+                || fabs(omega_S_1[1]) > imuParams.g_max
+                || fabs(omega_S_1[2]) > imuParams.g_max) {
+            sigma_g_c *= 100;
         }
 
         if (fabs(acc_S_0[0]) > imuParams.a_max || fabs(acc_S_0[1]) > imuParams.a_max
-            || fabs(acc_S_0[2]) > imuParams.a_max
-            || fabs(acc_S_1[0]) > imuParams.a_max
-            || fabs(acc_S_1[1]) > imuParams.a_max
-            || fabs(acc_S_1[2]) > imuParams.a_max) {
-          sigma_a_c *= 100;
+                || fabs(acc_S_0[2]) > imuParams.a_max
+                || fabs(acc_S_1[0]) > imuParams.a_max
+                || fabs(acc_S_1[1]) > imuParams.a_max
+                || fabs(acc_S_1[2]) > imuParams.a_max) {
+            sigma_a_c *= 100;
         }
+
         Eigen::Quaterniond dq;
         const Eigen::Vector3d omega_S_true = (0.5*(omega_S_0+omega_S_1) - speedAndBiases.segment<3>(3));
         const double theta_half = omega_S_true.norm() * 0.5 * dt;
@@ -140,37 +120,38 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
         dp_db_g += dt*dv_db_g + 0.25*dt*dt*(C*acc_S_x*cross + C_1*acc_S_x*cross_1);
 
         if (covariance) {
-          Eigen::Matrix<double,15,15> F_delta = Eigen::Matrix<double,15,15>::Identity();
+            assert(covariance->cols() == 15 && covariance->rows() == 15);
+            Eigen::Matrix<double,15,15> F_delta = Eigen::Matrix<double,15,15>::Identity();
 
-          F_delta.block<3,3>(0,3) = -crossMx(acc_integral*dt + 0.25*(C + C_1)*acc_S_true*dt*dt);
-          F_delta.block<3,3>(0,6) = Eigen::Matrix3d::Identity()*dt;
-          F_delta.block<3,3>(0,9) = dt*dv_db_g + 0.25*dt*dt*(C*acc_S_x*cross + C_1*acc_S_x*cross_1);
-          F_delta.block<3,3>(0,12) = -C_integral*dt + 0.25*(C + C_1)*dt*dt;
-          F_delta.block<3,3>(3,9) = -dt*C_1;
-          F_delta.block<3,3>(6,3) = -crossMx(0.5*(C + C_1)*acc_S_true*dt);
-          F_delta.block<3,3>(6,9) = 0.5*dt*(C*acc_S_x*cross + C_1*acc_S_x*cross_1);
-          F_delta.block<3,3>(6,12) = -0.5*(C + C_1)*dt;
-          P_delta = F_delta*P_delta*F_delta.transpose();
-          const double sigma2_dalpha = dt * sigma_g_c * sigma_g_c;
-          P_delta(3,3) += sigma2_dalpha;
-          P_delta(4,4) += sigma2_dalpha;
-          P_delta(5,5) += sigma2_dalpha;
-          const double sigma2_v = dt * sigma_a_c * imuParams.sigma_a_c;
-          P_delta(6,6) += sigma2_v;
-          P_delta(7,7) += sigma2_v;
-          P_delta(8,8) += sigma2_v;
-          const double sigma2_p = 0.5*dt*dt*sigma2_v;
-          P_delta(0,0) += sigma2_p;
-          P_delta(1,1) += sigma2_p;
-          P_delta(2,2) += sigma2_p;
-          const double sigma2_b_g = dt * imuParams.sigma_gw_c * imuParams.sigma_gw_c;
-          P_delta(9,9)   += sigma2_b_g;
-          P_delta(10,10) += sigma2_b_g;
-          P_delta(11,11) += sigma2_b_g;
-          const double sigma2_b_a = dt * imuParams.sigma_aw_c * imuParams.sigma_aw_c;
-          P_delta(12,12) += sigma2_b_a;
-          P_delta(13,13) += sigma2_b_a;
-          P_delta(14,14) += sigma2_b_a;
+            F_delta.block<3,3>(0,3) = -crossMx(acc_integral*dt + 0.25*(C + C_1)*acc_S_true*dt*dt);
+            F_delta.block<3,3>(0,6) = Eigen::Matrix3d::Identity()*dt;
+            F_delta.block<3,3>(0,9) = dt*dv_db_g + 0.25*dt*dt*(C*acc_S_x*cross + C_1*acc_S_x*cross_1);
+            F_delta.block<3,3>(0,12) = -C_integral*dt + 0.25*(C + C_1)*dt*dt;
+            F_delta.block<3,3>(3,9) = -dt*C_1;
+            F_delta.block<3,3>(6,3) = -crossMx(0.5*(C + C_1)*acc_S_true*dt);
+            F_delta.block<3,3>(6,9) = 0.5*dt*(C*acc_S_x*cross + C_1*acc_S_x*cross_1);
+            F_delta.block<3,3>(6,12) = -0.5*(C + C_1)*dt;
+            P_delta = F_delta*P_delta*F_delta.transpose();
+            const double sigma2_dalpha = dt * sigma_g_c * sigma_g_c;
+            P_delta(3,3) += sigma2_dalpha;
+            P_delta(4,4) += sigma2_dalpha;
+            P_delta(5,5) += sigma2_dalpha;
+            const double sigma2_v = dt * sigma_a_c * imuParams.sigma_a_c;
+            P_delta(6,6) += sigma2_v;
+            P_delta(7,7) += sigma2_v;
+            P_delta(8,8) += sigma2_v;
+            const double sigma2_p = 0.5*dt*dt*sigma2_v;
+            P_delta(0,0) += sigma2_p;
+            P_delta(1,1) += sigma2_p;
+            P_delta(2,2) += sigma2_p;
+            const double sigma2_b_g = dt * imuParams.sigma_gw_c * imuParams.sigma_gw_c;
+            P_delta(9,9)   += sigma2_b_g;
+            P_delta(10,10) += sigma2_b_g;
+            P_delta(11,11) += sigma2_b_g;
+            const double sigma2_b_a = dt * imuParams.sigma_aw_c * imuParams.sigma_aw_c;
+            P_delta(12,12) += sigma2_b_a;
+            P_delta(13,13) += sigma2_b_a;
+            P_delta(14,14) += sigma2_b_a;
         }
 
         Delta_q = Delta_q_1;
@@ -183,35 +164,36 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
         ++i;
 
         if (nexttime == t_end)
-          break;
+            break;
     }
 
     const Eigen::Vector3d g_W = imuParams.g * Eigen::Vector3d(0, 0, 6371009).normalized();
     T_WS = Sophus::SE3d(q_WS_0*Delta_q, r_0+speedAndBiases.head<3>()*Delta_t
-                       + C_WS_0*(acc_doubleintegral)
-                       - 0.5*g_W*Delta_t*Delta_t);
+                        + C_WS_0*(acc_doubleintegral)
+                        - 0.5*g_W*Delta_t*Delta_t);
     speedAndBiases.head<3>() += C_WS_0*(acc_integral)-g_W*Delta_t;
 
-    if (jacobian) {
-      Eigen::Matrix<double,15,15> & F = *jacobian;
-      F.setIdentity();
-      F.block<3,3>(0,3) = -crossMx(C_WS_0*acc_doubleintegral);
-      F.block<3,3>(0,6) = Eigen::Matrix3d::Identity()*Delta_t;
-      F.block<3,3>(0,9) = C_WS_0*dp_db_g;
-      F.block<3,3>(0,12) = -C_WS_0*C_doubleintegral;
-      F.block<3,3>(3,9) = -C_WS_0*dalpha_db_g;
-      F.block<3,3>(6,3) = -crossMx(C_WS_0*acc_integral);
-      F.block<3,3>(6,9) = C_WS_0*dv_db_g;
-      F.block<3,3>(6,12) = -C_WS_0*C_integral;
+    if(jacobian) {
+        assert(jacobian->cols() == 15 && jacobian->rows() == 15);
+        Eigen::Matrix<double,15,15> & F = *jacobian;
+        F.setIdentity();
+        F.block<3,3>(0,3) = -crossMx(C_WS_0*acc_doubleintegral);
+        F.block<3,3>(0,6) = Eigen::Matrix3d::Identity()*Delta_t;
+        F.block<3,3>(0,9) = C_WS_0*dp_db_g;
+        F.block<3,3>(0,12) = -C_WS_0*C_doubleintegral;
+        F.block<3,3>(3,9) = -C_WS_0*dalpha_db_g;
+        F.block<3,3>(6,3) = -crossMx(C_WS_0*acc_integral);
+        F.block<3,3>(6,9) = C_WS_0*dv_db_g;
+        F.block<3,3>(6,12) = -C_WS_0*C_integral;
     }
 
     if (covariance) {
-      Eigen::Matrix<double,15,15> & P = *covariance;
-      Eigen::Matrix<double,15,15> T = Eigen::Matrix<double,15,15>::Identity();
-      T.topLeftCorner<3,3>() = C_WS_0;
-      T.block<3,3>(3,3) = C_WS_0;
-      T.block<3,3>(6,6) = C_WS_0;
-      P = T * P_delta * T.transpose();
+        Eigen::Matrix<double,15,15> & P = *covariance;
+        Eigen::Matrix<double,15,15> T = Eigen::Matrix<double,15,15>::Identity();
+        T.topLeftCorner<3,3>() = C_WS_0;
+        T.block<3,3>(3,3) = C_WS_0;
+        T.block<3,3>(6,6) = C_WS_0;
+        P = T * P_delta * T.transpose();
     }
     return i;
 

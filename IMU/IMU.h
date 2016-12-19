@@ -11,6 +11,9 @@ typedef IMUMeasure::Transformation  Transformation;
 typedef IMUMeasure::SpeedAndBias    SpeedAndBias;
 typedef IMUMeasure::covariance_t    covariance_t;
 typedef IMUMeasure::jacobian_t      jacobian_t;
+typedef IMUMeasure::error_t         error_t;
+
+class imuFrame;
 
 class IMU
 {
@@ -30,6 +33,10 @@ public:
                     double & t_end,
                     covariance_t* covariance,
                     jacobian_t* jacobian);
+
+    int repropagation();
+    int error(imuFrame& frame_i, imuFrame& frame_j, error_t &err/* out */);
+    int Jacobian(error_t& err, imuFrame& frame_i, jacobian_t& jacobian_i, imuFrame& frame_j, jacobian_t& jacobian_j);
 
 private:
     std::shared_ptr<IMUImpl> impl;

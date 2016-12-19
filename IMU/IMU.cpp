@@ -27,3 +27,13 @@ int IMU::propagation(const ImuMeasureDeque &imuMeasurements,
 {
     return impl->propagation(imuMeasurements, imuParams, T_WS, speedAndBiases, t_start, t_end, covariance, jacobian);
 }
+
+int IMU::error(imuFrame &frame_i, imuFrame &frame_j, error_t &err)
+{
+    return impl->error(frame_i, frame_j, err);
+}
+
+int IMU::Jacobian(error_t &err, imuFrame &frame_i, jacobian_t &jacobian_i, imuFrame &frame_j, jacobian_t &jacobian_j)
+{
+    return impl->Jacobian(err, frame_i, jacobian_i, frame_j, jacobian_j);
+}

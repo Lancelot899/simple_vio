@@ -33,8 +33,9 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
     typedef std::deque<IMUMeasure, Eigen::aligned_allocator<IMUMeasure>> ImuMeasureDeque;
     typedef Sophus::SE3d                                                 Transformation;
     typedef Eigen::Matrix<double, 9, 1>                                  SpeedAndBias;
-    typedef Eigen::Matrix<double, 15, 15>                                covariance_t;
-    typedef Eigen::Matrix<double, 15, 15>                                jacobian_t;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        covariance_t;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        jacobian_t;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, 1>                     error_t;
 };
 
 
