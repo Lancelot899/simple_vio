@@ -175,25 +175,25 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
     if(jacobian) {
         assert(jacobian->cols() == 15 && jacobian->rows() == 15);
-        Eigen::Matrix<double,15,15> & F = *jacobian;
-        F.setIdentity();
-        F.block<3,3>(0,3) = -crossMx(C_WS_0*acc_doubleintegral);
-        F.block<3,3>(0,6) = Eigen::Matrix3d::Identity()*Delta_t;
-        F.block<3,3>(0,9) = C_WS_0*dp_db_g;
-        F.block<3,3>(0,12) = -C_WS_0*C_doubleintegral;
-        F.block<3,3>(3,9) = -C_WS_0*dalpha_db_g;
-        F.block<3,3>(6,3) = -crossMx(C_WS_0*acc_integral);
-        F.block<3,3>(6,9) = C_WS_0*dv_db_g;
-        F.block<3,3>(6,12) = -C_WS_0*C_integral;
+        jacobian->setIdentity();
+        jacobian->block<3,3>(0,3) = -crossMx(C_WS_0*acc_doubleintegral);
+        jacobian->block<3,3>(0,6) = Eigen::Matrix3d::Identity()*Delta_t;
+        jacobian->block<3,3>(0,9) = C_WS_0*dp_db_g;
+        jacobian->block<3,3>(0,12) = -C_WS_0*C_doubleintegral;
+        jacobian->block<3,3>(3,9) = -C_WS_0*dalpha_db_g;
+        jacobian->block<3,3>(6,3) = -crossMx(C_WS_0*acc_integral);
+        jacobian->block<3,3>(6,9) = C_WS_0*dv_db_g;
+        jacobian->block<3,3>(6,12) = -C_WS_0*C_integral;
     }
 
     if (covariance) {
-        Eigen::Matrix<double,15,15> & P = *covariance;
+        assert(covariance->cols() == 15 && covariance->rows() == 15);
+        //Eigen::Matrix<double,15,15> & P = *covariance;
         Eigen::Matrix<double,15,15> T = Eigen::Matrix<double,15,15>::Identity();
         T.topLeftCorner<3,3>() = C_WS_0;
         T.block<3,3>(3,3) = C_WS_0;
         T.block<3,3>(6,6) = C_WS_0;
-        P = T * P_delta * T.transpose();
+        *covariance = T * P_delta * T.transpose();
     }
     return i;
 

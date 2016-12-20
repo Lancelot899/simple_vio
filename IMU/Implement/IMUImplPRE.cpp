@@ -19,6 +19,12 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     if (!(imuMeasurements.back().timeStamp >= end))
         return -1;
 
+
+    std::vector<Sophus::SO3d>    VecRotation;
+    std::vector<Eigen::Matrix3d> VecRightJac;
+    std::vector<double>          VecDt;
+    std::vector<Eigen::Vector3d> VecAcc;
+
     const Eigen::Vector3d gbias = speedAndBiases.segment<3>(3);
     const Eigen::Vector3d abias = speedAndBiases.segment<3>(6);
     Sophus::SO3d D_rotation(Eigen::Quaternion<double>(1, 0, 0, 0));
@@ -55,6 +61,8 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
         if (dt <= 0.0) continue;
         Delta_t += dt;
 
+        VecDt.push_back(dt);
+
         if (!hasStarted) {
             hasStarted = true;
             const double r = dt / (nexttime - it->timeStamp);
@@ -83,29 +91,35 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
         }
 
         Sophus::SO3d dR = Sophus::SO3d::exp((0.5*(omega_S_0 + omega_S_1) - gbias) * dt);
-        D_rotation *= dq;
+        Eigen::Matrix<double, 3, 3> rJac = rightJacobian(dR.log());
+        VecRightJac.push_back(rJac);
+        D_rotation *= dR;
+        VecRotation.push_back(D_rotation);
+        const Eigen::Matrix<double, 3, 3> D_rMat = D_rotation.matrix();
+
         const Eigen::Vector3d acc_S_true = 0.5*(acc_S_0+acc_S_1) - abias;
-        Eigen::Vector3d dv = D_rotation * (acc_S_true * dt);
+        VecAcc.push_back(acc_S_true);
+        Eigen::Vector3d dv = D_rMat * (acc_S_true * dt);
         D_vec += dv;
-        Eigen::Vector3d dp = 1.5 * D_rotation * (acc_S_true) * dt * dt;
+        Eigen::Vector3d dp = 1.5 * D_rMat * (acc_S_true) * dt * dt;
         D_pos += dp;
 
         if (covariance) {
-            assert(covariance->cols() = 9 && covariance->rows() = 9);
+            assert(covariance->cols() == 9 && covariance->rows() == 9);
             Eigen::Matrix<double, 9, 6> B;
             B.setZero();
-            B.block<3, 3>(0, 0) = dt * rightJacobian(dR.log());
-            B.block<3, 3>(3, 3) = dt * D_rotation;
-            B.block<3, 3>(6, 3) = 0.5 * dt * dt * D_rotation;
+            B.block<3, 3>(0, 0) = dt * rJac;
+            B.block<3, 3>(3, 3) = dt * D_rMat;
+            B.block<3, 3>(6, 3) = 0.5 * dt * dt * D_rMat;
 
             Eigen::Matrix<double, 9, 9> A;
             A.setZero();
 
             if(i != 0) {
                 A.block<3, 3>(0, 0) = dR.inverse().matrix();
-                A.block<3, 3>(3, 0) = -dt * D_rotation.matrix() * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(3, 0) = -dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
                 A.block<3, 3>(3, 3) = Eigen::Matrix<double, 3, 3>::Identity();
-                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rotation.matrix() * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
                 A.block<3, 3>(6, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
                 A.block<3, 3>(6, 6) = Eigen::Matrix<double, 3, 3>::Identity();
             }
@@ -113,18 +127,13 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
                 covariance->setZero();
 
             Eigen::Matrix<double, 6, 6> Cov_eta;
-            Cov_eta.setOnes();
+            Cov_eta.setZero();
             Cov_eta.block<3, 3>(0, 0) = dt * sigma_g_c * Eigen::Matrix<double, 3, 3>::Identity();
             Cov_eta.block<3, 3>(3, 3) = dt * sigma_a_c * Eigen::Matrix<double, 3, 3>::Identity();
-            Eigen::Matrix<double, 9, 9> &Cov = *covariance;
-            Cov = A * Cov * A.transpose() + B * Cov_eta * B.transpose();
+            *covariance = A * *covariance * A.transpose() + B * Cov_eta * B.transpose();
         }
 
         time = nexttime;
-
-        if(jacobian) {
-
-        }
 
         ++i;
 
@@ -132,6 +141,33 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             break;
     }
 
-    return 0;
+
+    if(jacobian) {
+        assert(jacobian->rows() == 15 && jacobian->cols() == 3);
+        jacobian->setZero();
+        Sophus::SO3d R_ij = VecRotation[VecRotation.size()];
+        Eigen::Matrix<double, 3, 3> matR_ij = R_ij.matrix();
+        //VecRotation.pop_back();
+        for(auto it = VecRotation.begin(); it != VecRotation.end(); ++it)
+            *it = it->inverse() * R_ij;
+
+        for(unsigned i = 0; i < VecRightJac.size(); ++i) {
+            jacobian->block<3, 3>(0, 0) -= VecRotation[i].inverse().matrix() * VecRightJac[i] * VecDt[i];
+            jacobian->block<3, 3>(3, 0) -= matR_ij * VecDt[i];
+            jacobian->block<3, 3>(9, 0) -= 1.5 * matR_ij * VecDt[i];
+        }
+
+        const Eigen::Matrix<double, 3, 3> &dR_dbg = jacobian->block<3, 3>(0, 0);
+        for(unsigned i = 0; i < VecAcc.size(); ++i) {
+            jacobian->block<3, 3>(6, 0)  -= matR_ij * Sophus::SO3d::hat(VecAcc[i]) * dR_dbg * VecDt[i];
+            jacobian->block<3, 3>(12, 0) -= 1.5 * matR_ij * Sophus::SO3d::hat(VecAcc[i]) * dR_dbg * VecDt[i] * VecDt[i];
+        }
+
+    }
+
+    T_WS = Sophus::SE3d(D_rotation, D_pos);
+    speedAndBiases.head<3>() = D_vec;
+
+    return i;
 }
 

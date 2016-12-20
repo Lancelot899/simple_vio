@@ -11,7 +11,7 @@ typedef IMUMeasure::Transformation  Transformation;
 typedef IMUMeasure::SpeedAndBias    SpeedAndBias;
 typedef IMUMeasure::covariance_t    covariance_t;
 typedef IMUMeasure::jacobian_t      jacobian_t;
-typedef IMUMeasure::error_t         error_t;
+typedef IMUMeasure::Error_t         Error_t;
 
 class imuFrame;
 

@@ -35,7 +35,7 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
     typedef Eigen::Matrix<double, 9, 1>                                  SpeedAndBias;
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        covariance_t;
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        jacobian_t;
-    typedef Eigen::Matrix<double, Eigen::Dynamic, 1>                     error_t;
+    typedef Eigen::Matrix<double, Eigen::Dynamic, 1>                     Error_t;
 };
 
 
