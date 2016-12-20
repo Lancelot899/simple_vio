@@ -23,6 +23,12 @@ public:
         OKVIS_INTEGRATION
     };
 
+    struct PreFac {
+        typedef Sophus::SE3d                   FacPose;
+        typedef Eigen::Matrix<double, 6, 1>    FacSpeed;
+        typedef Eigen::Matrix<double, 15, 3>   FacJBias;
+    };
+
 public:
     IMU(IntegalType type = PRE_INTEGRATION);
     int propagation(const ImuMeasureDeque & imuMeasurements,
@@ -35,8 +41,8 @@ public:
                     jacobian_t* jacobian);
 
     int repropagation();
-    int error(imuFrame& frame_i, imuFrame& frame_j, error_t &err/* out */);
-    int Jacobian(error_t& err, imuFrame& frame_i, jacobian_t& jacobian_i, imuFrame& frame_j, jacobian_t& jacobian_j);
+    int error(const imuFrame& frame_i, const imuFrame& frame_j, Error_t &err/* out */, void *info = NULL);
+    int Jacobian(const error_t& err, const imuFrame& frame_i, jacobian_t& jacobian_i, const imuFrame& frame_j, jacobian_t& jacobian_j);
 
 private:
     std::shared_ptr<IMUImpl> impl;

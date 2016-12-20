@@ -20,10 +20,10 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
         return -1;
 
 
-    std::vector<Sophus::SO3d>    VecRotation;
-    std::vector<Eigen::Matrix3d> VecRightJac;
-    std::vector<double>          VecDt;
-    std::vector<Eigen::Vector3d> VecAcc;
+    std::vector<double> VecDt;
+    std::vector<Sophus::SO3d, Eigen::aligned_allocator<IMUMeasure>>    VecRotation;
+    std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<IMUMeasure>> VecRightJac;
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<IMUMeasure>> VecAcc;
 
     const Eigen::Vector3d gbias = speedAndBiases.segment<3>(3);
     const Eigen::Vector3d abias = speedAndBiases.segment<3>(6);
@@ -169,5 +169,22 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     speedAndBiases.head<3>() = D_vec;
 
     return i;
+}
+
+int IMUImplPRE::error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info)
+{
+    if(info == NULL)
+        return -1;
+
+    IMU::PreFac * preFac = static_cast<IMU::PreFac*>(info);
+
+
+    return 0;
+}
+
+int IMUImplPRE::Jacobian(const error_t &err, const imuFrame &frame_i, jacobian_t &jacobian_i, const imuFrame &frame_j, jacobian_t &jacobian_j)
+{
+
+    return 0;
 }
 

@@ -199,5 +199,20 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
 }
 
+int IMUImplOKVIS::error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info)
+{
+    return 0;
+}
+
+int IMUImplOKVIS::repropagation()
+{
+
+}
+
+int IMUImplOKVIS::Jacobian(const error_t &err, const imuFrame &frame_i, jacobian_t &jacobian_i, const imuFrame &frame_j, jacobian_t &jacobian_j)
+{
+    return 0;
+}
+
 
 
