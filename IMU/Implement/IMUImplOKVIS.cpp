@@ -2,6 +2,7 @@
 
 #include "IMUImplOKVIS.h"
 #include "util/util.h"
+#include "DataStructure/viFrame.h"
 
 int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               const ImuParamenters &imuParams,
@@ -199,7 +200,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
 }
 
-int IMUImplOKVIS::error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info)
+int IMUImplOKVIS::error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info)
 {
     return 0;
 }
@@ -209,7 +210,7 @@ int IMUImplOKVIS::repropagation()
 
 }
 
-int IMUImplOKVIS::Jacobian(const error_t &err, const imuFrame &frame_i, jacobian_t &jacobian_i, const imuFrame &frame_j, jacobian_t &jacobian_j)
+int IMUImplOKVIS::Jacobian(const error_t &err, const viFrame &frame_i, jacobian_t &jacobian_i, const viFrame &frame_j, jacobian_t &jacobian_j)
 {
     return 0;
 }

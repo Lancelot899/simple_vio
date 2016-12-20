@@ -14,9 +14,9 @@ class IMUImplOKVIS : public IMUImpl {
                              covariance_t *covariance,
                              jacobian_t *jacobian);
 
-    int error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info);
+    int error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info);
     int repropagation();
-    int Jacobian(const error_t& err, const imuFrame& frame_i, jacobian_t& jacobian_i, const imuFrame& frame_j, jacobian_t& jacobian_j);
+    int Jacobian(const error_t& err, const viFrame& frame_i, jacobian_t& jacobian_i, const viFrame& frame_j, jacobian_t& jacobian_j);
 
 };
 

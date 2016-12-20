@@ -16,8 +16,8 @@ public:
                     covariance_t* covariance,
                     jacobian_t* jacobian);
 
-    int error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info);
-    int Jacobian(const error_t& err, const imuFrame& frame_i, jacobian_t& jacobian_i, const imuFrame& frame_j, jacobian_t& jacobian_j);
+    int error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info);
+    int Jacobian(const error_t& err, const viFrame& frame_i, jacobian_t& jacobian_i, const viFrame& frame_j, jacobian_t& jacobian_j);
 };
 
 #endif // IMUIMPLPRE_H

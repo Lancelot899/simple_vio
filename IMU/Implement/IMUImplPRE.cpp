@@ -1,6 +1,7 @@
 #include "IMUImplPRE.h"
 #include "DataStructure/IMUMeasure.h"
 #include "util/util.h"
+#include "DataStructure/viFrame.h"
 
 IMUImplPRE::IMUImplPRE()
 {
@@ -171,18 +172,15 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     return i;
 }
 
-int IMUImplPRE::error(const imuFrame &frame_i, const imuFrame &frame_j, Error_t &err, void *info)
+int IMUImplPRE::error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info)
 {
     if(info == NULL)
         return -1;
 
-    IMU::PreFac * preFac = static_cast<IMU::PreFac*>(info);
-
-
     return 0;
 }
 
-int IMUImplPRE::Jacobian(const error_t &err, const imuFrame &frame_i, jacobian_t &jacobian_i, const imuFrame &frame_j, jacobian_t &jacobian_j)
+int IMUImplPRE::Jacobian(const error_t &err, const viFrame &frame_i, jacobian_t &jacobian_i, const viFrame &frame_j, jacobian_t &jacobian_j)
 {
 
     return 0;

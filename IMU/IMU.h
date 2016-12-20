@@ -6,14 +6,7 @@
 
 class IMUImpl;
 
-typedef IMUMeasure::ImuMeasureDeque ImuMeasureDeque;
-typedef IMUMeasure::Transformation  Transformation;
-typedef IMUMeasure::SpeedAndBias    SpeedAndBias;
-typedef IMUMeasure::covariance_t    covariance_t;
-typedef IMUMeasure::jacobian_t      jacobian_t;
-typedef IMUMeasure::Error_t         Error_t;
-
-class imuFrame;
+class viFrame;
 
 class IMU
 {
@@ -23,26 +16,20 @@ public:
         OKVIS_INTEGRATION
     };
 
-    struct PreFac {
-        typedef Sophus::SE3d                   FacPose;
-        typedef Eigen::Matrix<double, 6, 1>    FacSpeed;
-        typedef Eigen::Matrix<double, 15, 3>   FacJBias;
-    };
-
 public:
     IMU(IntegalType type = PRE_INTEGRATION);
-    int propagation(const ImuMeasureDeque & imuMeasurements,
+    int propagation(const IMUMeasure::ImuMeasureDeque & imuMeasurements,
                     const ImuParamenters & imuParams,
-                    Transformation& T_WS,
-                    SpeedAndBias & speedAndBiases,
+                    IMUMeasure::Transformation& T_WS,
+                    IMUMeasure::SpeedAndBias & speedAndBiases,
                     double & t_start,
                     double & t_end,
-                    covariance_t* covariance,
-                    jacobian_t* jacobian);
+                    IMUMeasure::covariance_t* covariance,
+                    IMUMeasure::jacobian_t* jacobian);
 
     int repropagation();
-    int error(const imuFrame& frame_i, const imuFrame& frame_j, Error_t &err/* out */, void *info = NULL);
-    int Jacobian(const error_t& err, const imuFrame& frame_i, jacobian_t& jacobian_i, const imuFrame& frame_j, jacobian_t& jacobian_j);
+    int error(const viFrame& frame_i, const viFrame& frame_j, IMUMeasure::Error_t &err/* out */, void *info = NULL);
+    int Jacobian(const error_t& err, const viFrame& frame_i, IMUMeasure::jacobian_t& jacobian_i, const viFrame& frame_j, IMUMeasure::jacobian_t& jacobian_j);
 
 private:
     std::shared_ptr<IMUImpl> impl;
