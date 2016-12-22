@@ -34,7 +34,7 @@ public:
 
     virtual int error(const IMU::pViFrame& frame_i, const IMU::pViFrame& frame_j, Error_t &err/* out */, void *info) = 0;
     virtual int repropagation();
-    virtual int Jacobian(const error_t& err, const IMU::pViFrame& frame_i, jacobian_t& jacobian_i, const IMU::pViFrame& frame_j, jacobian_t& jacobian_j) = 0;
+    virtual int Jacobian(const Error_t& err, const IMU::pViFrame& frame_i, jacobian_t& jacobian_i, const IMU::pViFrame& frame_j, jacobian_t& jacobian_j, void *info) = 0;
 };
 
 #endif // IMUIMPL_H

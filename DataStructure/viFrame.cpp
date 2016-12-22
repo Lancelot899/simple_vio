@@ -1,5 +1,6 @@
 #include "viFrame.h"
 #include "IMUMeasure.h"
+#include "cvFrame.h"
 
 #ifndef IMUTYPE_DEF_
 #define IMUTYPE_DEF_
@@ -27,11 +28,19 @@ viFrame::~viFrame()
 
 }
 
+const viFrame::pose_t &viFrame::getPose() {
+    return cvframe->getPose();
+}
+
 const std::shared_ptr<cvFrame> &viFrame::getCVFrame() {
     return cvframe;
 }
 
-const IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias()
-{
+const IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias() {
     return spbs;
 }
+
+double viFrame::getTimeStamp() {
+    return cvframe->getTimestamp();
+}
+

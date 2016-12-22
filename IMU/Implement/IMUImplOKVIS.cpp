@@ -212,7 +212,7 @@ int IMUImplOKVIS::repropagation()
 
 }
 
-int IMUImplOKVIS::Jacobian(const error_t &err, const pViFrame &frame_i, jacobian_t &jacobian_i, const pViFrame &frame_j, jacobian_t &jacobian_j)
+int IMUImplOKVIS::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t &jacobian_i, const pViFrame &frame_j, jacobian_t &jacobian_j, void *info)
 {
     return 0;
 }
