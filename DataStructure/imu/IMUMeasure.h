@@ -41,7 +41,7 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
 };
 
 
-struct ImuParamenters {
+struct ImuParameters {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     IMUMeasure::Transformation T_BS; ///< Transformation from Body frame to IMU (sensor frame S).
     double a_max;  ///< Accelerometer saturation. [m/s^2]

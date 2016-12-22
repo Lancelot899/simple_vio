@@ -5,7 +5,7 @@
 #include <Eigen/Geometry>
 
 #include "IOBase.h"
-#include "DataStructure/IMUMeasure.h"
+#include "DataStructure/imu/IMUMeasure.h"
 
 class IMUIO : public IOBase<IMUMeasure>
 {

@@ -1,5 +1,9 @@
 #include "util.h"
 
+const double EPS = 0.0000000001;
+const double PI = 3.14159265;
+
+
 Eigen::Matrix3d rightJacobian(const Eigen::Vector3d &PhiVec) {
     const double Phi = PhiVec.norm();
     Eigen::Matrix3d retMat = Eigen::Matrix3d::Identity();

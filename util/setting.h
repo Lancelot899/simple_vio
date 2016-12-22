@@ -3,5 +3,4 @@
 
 #define IMG_LEVEL           5
 
-
 #endif // SETTING_H

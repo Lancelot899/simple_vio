@@ -1,9 +1,9 @@
 #include "IMUImplPRE.h"
-#include "DataStructure/IMUMeasure.h"
+#include "DataStructure/imu/IMUMeasure.h"
 #include "util/util.h"
 #include "DataStructure/viFrame.h"
-#include "DataStructure/imuFactor.h"
-#include "DataStructure/cvFrame.h"
+#include "DataStructure/imu/imuFactor.h"
+#include "DataStructure/cv/cvFrame.h"
 #include "sophus/so3.hpp"
 
 typedef IMU::pViFrame pViFrame;
@@ -14,7 +14,7 @@ IMUImplPRE::IMUImplPRE()
 }
 
 int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
-                            const ImuParamenters &imuParams,
+                            const ImuParameters &imuParams,
                             Transformation &T_WS, SpeedAndBias &speedAndBiases,
                             double &t_start, double &t_end,
                             covariance_t *covariance, jacobian_t *jacobian) {
