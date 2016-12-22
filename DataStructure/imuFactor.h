@@ -8,6 +8,7 @@
 class viFrame;
 
 class imuFactor {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 public:
     typedef std::shared_ptr<viFrame>          connection_t;
 

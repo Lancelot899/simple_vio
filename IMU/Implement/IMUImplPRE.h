@@ -26,7 +26,6 @@ public:
                     jacobian_t* jacobian);
 
     int error(const IMU::pViFrame &frame_i, const IMU::pViFrame &frame_j, Error_t &err, void *info);
-
     /**
      * @brief Jacobian
      * @param jacobian_t: drdphi drdb, dvdphi dvdv dvdb, dpdphi dpdv dpdp dpdb, for bias i->b_g, j->b_a

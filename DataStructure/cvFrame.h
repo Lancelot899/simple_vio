@@ -29,7 +29,7 @@ public:
         this->pose = pose;
     }
 
-    const pose_t getPose() {
+    const pose_t& getPose() {
         return pose;
     }
 

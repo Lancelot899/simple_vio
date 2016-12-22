@@ -178,7 +178,6 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
 
 int IMUImplPRE::error(const pViFrame &frame_i, const pViFrame &frame_j, Error_t &err, void *info) {
     assert(err.rows() == 9 && err.cols() == 1);
-
     if(info == NULL) {
         printf("factor don't arrive\n");
         return -1;

@@ -10,6 +10,7 @@
 #include "DataStructure/Measurements.h"
 
 struct IMUData {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::Vector3d           acceleration;
     Eigen::Vector3d           gyroscopes;
     Eigen::Quaternion<double> orientation;
@@ -19,6 +20,7 @@ struct IMUData {
 };
 
 struct IMUMeasure : public MeasurementBase<IMUData> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     IMUMeasure(int sensorId, double timeStamp, Eigen::Vector3d acceleration, Eigen::Vector3d gyroscopes,
                Eigen::Vector3d geomagnetism = Eigen::Vector3d(), Eigen::Quaternion<double> orientation = Eigen::Quaternion<double>()) {
         this->sensorId = sensorId;

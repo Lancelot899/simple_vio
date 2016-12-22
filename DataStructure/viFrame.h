@@ -11,6 +11,7 @@ class imuFactor;
 class viFrame
 {
 public:
+
     typedef std::shared_ptr<imuFactor>        linked_t;
     typedef std::shared_ptr<viFrame>          imuConnection_t;
     typedef std::shared_ptr<ImuParamenters>   ImuParam;
@@ -22,12 +23,14 @@ public:
     int getID() {
         return id;
     }
+
     const pose_t& getPose();
     const std::shared_ptr<cvFrame>& getCVFrame();
     const IMUMeasure::SpeedAndBias &getSpeedAndBias();
     const ImuParam& getImuParam() {
         return imuParam;
     }
+
     double getTimeStamp();
 
 private:
