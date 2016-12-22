@@ -3,17 +3,8 @@
 
 #include "IMUImpl.h"
 
-class imuFactor;
-
 class IMUImplPRE : public IMUImpl
 {
-public:
-    struct PreInfo {
-        std::shared_ptr<imuFactor> imufactor;
-        bias_t                     dBias;
-    };
-
-
 public:
     IMUImplPRE();
     int propagation(const ImuMeasureDeque & imuMeasurements,
