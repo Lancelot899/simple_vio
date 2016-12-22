@@ -2,7 +2,7 @@
 #define IMU_H
 
 #include <memory>
-#include "DataStructure/IMUMeasure.h"
+#include "DataStructure/imu/IMUMeasure.h"
 
 class IMUImpl;
 
@@ -22,7 +22,7 @@ public:
 public:
     IMU(IntegalType type = PRE_INTEGRATION);
     int propagation(const IMUMeasure::ImuMeasureDeque & imuMeasurements,
-                    const ImuParamenters & imuParams,
+                    const ImuParameters & imuParams,
                     IMUMeasure::Transformation& T_WS,
                     IMUMeasure::SpeedAndBias & speedAndBiases,
                     double & t_start,

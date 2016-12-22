@@ -7,7 +7,7 @@
 typedef IMU::pViFrame pViFrame;
 
 int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
-                              const ImuParamenters &imuParams,
+                              const ImuParameters &imuParams,
                               Transformation &T_WS,
                               SpeedAndBias &speedAndBiases,
                               double &t_start,

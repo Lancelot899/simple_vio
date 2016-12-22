@@ -1,6 +1,9 @@
-#include "viFrame.h"
-#include "imu/IMUMeasure.h"
-#include "cv/cvFrame.h"
+#include <iostream>
+
+#include <gtest/gtest.h>
+
+#include "DataStructure/imu/IMUMeasure.h"
+#include "IMU/IMU.h"
 
 #ifndef IMUTYPE_DEF_
 #define IMUTYPE_DEF_
@@ -17,30 +20,7 @@ typedef Eigen::Matrix<double, 6, 1> bias_t;
 #endif // IMUTYPE_DEF_
 
 
+TEST(test_ImuPre, IMU) {
 
-viFrame::viFrame()
-{
-
-}
-
-viFrame::~viFrame()
-{
 
 }
-
-const viFrame::pose_t &viFrame::getPose() {
-    return cvframe->getPose();
-}
-
-const std::shared_ptr<cvFrame> &viFrame::getCVFrame() {
-    return cvframe;
-}
-
-const IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias() {
-    return spbs;
-}
-
-double viFrame::getTimeStamp() {
-    return cvframe->getTimestamp();
-}
-

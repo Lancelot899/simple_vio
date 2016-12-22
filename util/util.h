@@ -3,6 +3,10 @@
 
 #include <Eigen/Dense>
 
+extern const double EPS;
+extern const double PI;
+
+typedef Eigen::Matrix<double, 2, 3>  Matrix23d;
 
 template<typename Scalar_T>
 inline Eigen::Matrix<Scalar_T, 3, 3> crossMx(Scalar_T x, Scalar_T y, Scalar_T z)

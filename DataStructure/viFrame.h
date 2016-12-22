@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "IMUMeasure.h"
+#include "imu/IMUMeasure.h"
 
 class cvFrame;
 class imuFactor;
@@ -14,7 +14,7 @@ public:
 
     typedef std::shared_ptr<imuFactor>        linked_t;
     typedef std::shared_ptr<viFrame>          imuConnection_t;
-    typedef std::shared_ptr<ImuParamenters>   ImuParam;
+    typedef std::shared_ptr<ImuParameters>   ImuParam;
     typedef Sophus::SE3d                      pose_t;
 
 public:

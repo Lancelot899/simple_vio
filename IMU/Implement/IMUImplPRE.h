@@ -8,7 +8,7 @@ class IMUImplPRE : public IMUImpl
 public:
     IMUImplPRE();
     int propagation(const ImuMeasureDeque & imuMeasurements,
-                    const ImuParamenters & imuParams,
+                    const ImuParameters & imuParams,
                     Transformation& T_WS,
                     SpeedAndBias & speedAndBiases,
                     double & t_start,

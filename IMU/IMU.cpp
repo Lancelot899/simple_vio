@@ -32,7 +32,7 @@ IMU::IMU(IntegalType type)
 }
 
 int IMU::propagation(const ImuMeasureDeque &imuMeasurements,
-                     const ImuParamenters &imuParams,
+                     const ImuParameters &imuParams,
                      Transformation &T_WS,
                      SpeedAndBias &speedAndBiases,
                      double &t_start,
