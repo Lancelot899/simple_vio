@@ -11,6 +11,9 @@ class viFrame;
 class IMU
 {
 public:
+    typedef std::shared_ptr<viFrame> pViFrame;
+
+public:
     enum IntegalType {
         PRE_INTEGRATION,
         OKVIS_INTEGRATION
@@ -28,8 +31,8 @@ public:
                     IMUMeasure::jacobian_t* jacobian);
 
     int repropagation();
-    int error(const viFrame& frame_i, const viFrame& frame_j, IMUMeasure::Error_t &err/* out */, void *info = NULL);
-    int Jacobian(const error_t& err, const viFrame& frame_i, IMUMeasure::jacobian_t& jacobian_i, const viFrame& frame_j, IMUMeasure::jacobian_t& jacobian_j);
+    int error(const pViFrame& frame_i, const pViFrame& frame_j, IMUMeasure::Error_t &err/* out */, void *info = NULL);
+    int Jacobian(const IMUMeasure::Error_t& err, const pViFrame& frame_i, IMUMeasure::jacobian_t& jacobian_i, const pViFrame& frame_j, IMUMeasure::jacobian_t& jacobian_j, void *info = NULL);
 
 private:
     std::shared_ptr<IMUImpl> impl;

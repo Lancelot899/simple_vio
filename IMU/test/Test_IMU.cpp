@@ -16,7 +16,7 @@ typedef IMUMeasure::covariance_t    covariance_t;
 typedef IMUMeasure::jacobian_t      jacobian_t;
 typedef IMUMeasure::Error_t         Error_t;
 typedef Eigen::Vector3d             speed_t;
-typedef Eigen::Matrix<double, 9, 1> bias_t;
+typedef Eigen::Matrix<double, 6, 1> bias_t;
 
 #endif // IMUTYPE_DEF_
 
@@ -90,6 +90,7 @@ TEST(imuPropagation, IMU) {
 #endif // for python data test
 
     ///< test okvis integration
-    IMU imu(IMU::IntegalType::OKVIS_INTEGRATION);
+    IMU imu();
+
 
 }

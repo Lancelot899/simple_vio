@@ -1,6 +1,8 @@
 #include "IMUImpl.h"
 #include "DataStructure/viFrame.h"
 
+typedef IMU::pViFrame pViFrame;
+
 IMUImpl::IMUImpl()
 {
 }

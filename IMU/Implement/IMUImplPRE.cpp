@@ -2,6 +2,11 @@
 #include "DataStructure/IMUMeasure.h"
 #include "util/util.h"
 #include "DataStructure/viFrame.h"
+#include "DataStructure/imuFactor.h"
+#include "DataStructure/cvFrame.h"
+#include "sophus/so3.hpp"
+
+typedef IMU::pViFrame pViFrame;
 
 IMUImplPRE::IMUImplPRE()
 {
@@ -163,7 +168,6 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             jacobian->block<3, 3>(6, 0)  -= matR_ij * Sophus::SO3d::hat(VecAcc[i]) * dR_dbg * VecDt[i];
             jacobian->block<3, 3>(12, 0) -= 1.5 * matR_ij * Sophus::SO3d::hat(VecAcc[i]) * dR_dbg * VecDt[i] * VecDt[i];
         }
-
     }
 
     T_WS = Sophus::SE3d(D_rotation, D_pos);
@@ -172,16 +176,95 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     return i;
 }
 
-int IMUImplPRE::error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info)
-{
-    if(info == NULL)
+int IMUImplPRE::error(const pViFrame &frame_i, const pViFrame &frame_j, Error_t &err, void *info) {
+    assert(err.rows() == 9 && err.cols() == 1);
+
+    if(info == NULL) {
+        printf("factor don't arrive\n");
         return -1;
+    }
+
+    imuFactor*   factor = static_cast<imuFactor*>(info);
+    if(!factor->checkConnect(frame_i, frame_j)) {
+        printf("connection not matched!\n");
+        return -2;
+    }
+
+    const bias_t dBias  = frame_j->getSpeedAndBias().block<6, 1>(3, 0) - frame_i->getSpeedAndBias().block<6, 1>(3, 0);
+    const Sophus::SE3d &poseFac = factor->getPoseFac();
+    const imuFactor::speed_t& speedFac = factor->getSpeedFac();
+    const imuFactor::FacJBias_t& JBias = factor->getJBias();
+
+    err.block<3, 1>(0, 0) = Sophus::SO3d::log(poseFac.so3() *
+                                              Sophus::SO3d::exp(JBias.block<3, 3>(0, 0) * dBias.block<3, 1>(0, 0)) *
+                                              frame_i->getPose().so3().inverse() *
+                                              frame_j->getPose().so3());
+
+    const IMUMeasure::SpeedAndBias& spbs_j = frame_j->getSpeedAndBias();
+    const IMUMeasure::SpeedAndBias& spbs_i = frame_i->getSpeedAndBias();
+    const viFrame::ImuParam &imuParam = frame_i->getImuParam();
+
+    double dt = frame_j->getCVFrame()->getTimestamp() - frame_i->getCVFrame()->getTimestamp();
+
+    err.block<3, 1>(3, 0) = frame_i->getPose().so3().inverse().matrix()
+            * (spbs_j.block<3, 1>(0, 0) - spbs_i.block<3, 1>(0, 0) - Eigen::Vector3d(0, 0, imuParam->g) * dt)
+            - (speedFac + JBias.block<3, 3>(6, 0) * dBias.block<3, 1>(0, 0)
+            + JBias.block<3, 3>(3, 0) * dBias.block<3, 1>(3, 0));
+
+    err.block<3, 1>(6, 0) = frame_i->getPose().so3().inverse().matrix() *
+                            (frame_j->getPose().translation() - frame_i->getPose().translation()
+                            - frame_i->getSpeedAndBias().block<3, 1>(0, 0) * dt - 0.5 * Eigen::Vector3d(0, 0, imuParam->g) * dt * dt)
+                            - (poseFac.translation() + JBias.block<3, 3>(12, 0) * dBias.block<3, 1>(0, 0)
+                               + JBias.block<3, 3>(9, 0) * dBias.block<3, 1>(3, 0));
 
     return 0;
 }
 
-int IMUImplPRE::Jacobian(const error_t &err, const viFrame &frame_i, jacobian_t &jacobian_i, const viFrame &frame_j, jacobian_t &jacobian_j)
+int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t &jacobian_i, const pViFrame &frame_j, jacobian_t &jacobian_j, void *info)
 {
+    if(info == NULL)
+        return -1;
+
+    typedef Eigen::Matrix<double, 3, 3> Jacobian_t;
+
+    imuFactor * factor = static_cast<imuFactor*>(info);
+    const double                 dt         = frame_j->getTimeStamp() - frame_i->getTimeStamp();
+    const viFrame::ImuParam      &imuParam  = frame_i->getImuParam();
+    const imuFactor::FacJBias_t& JBias      = factor->getJBias();
+    const Jacobian_t&            dRdb_g     = JBias.block<3, 3>(0, 0);
+    const Jacobian_t&            dvdb_a     = JBias.block<3, 3>(3, 0);
+    const Jacobian_t&            dvdb_g     = JBias.block<3, 3>(6, 0);
+    const Jacobian_t&            dpdb_a     = JBias.block<3, 3>(9, 0);
+    const Jacobian_t&            dpdb_g     = JBias.block<3, 3>(12, 0);
+    const Eigen::Vector3d&       speed_i    = frame_i->getSpeedAndBias().block<3, 1>(0, 0);
+    const Eigen::Vector3d&       speed_j    = frame_j->getSpeedAndBias().block<3, 1>(0, 0);
+    const bias_t                 dBias      = frame_j->getSpeedAndBias().block<6, 1>(3, 0) - frame_i->getSpeedAndBias().block<6, 1>(3, 0);
+    const Eigen::Matrix3d        Ri_inv     = frame_i->getPose().so3().inverse().matrix();
+    const Eigen::Matrix3d        Rj_inv     = frame_j->getPose().so3().inverse().matrix();
+    const Eigen::Matrix3d        Ri         = frame_i->getPose().so3().matrix();
+    const Eigen::Matrix3d        Rj         = frame_j->getPose().so3().matrix();
+    const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
+
+    jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err) * Rj_inv * Ri;
+    jacobian_j.block<3, 3>(0, 0) = rightJacobian(err);
+    jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err) * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
+    jacobian_j.block<3, 3>(3, 0) = Jacobian_t::Zero();
+
+    jacobian_i.block<3, 3>(6, 0) = Sophus::SO3d::hat(Ri_inv * (speed_j - speed_i - g * dt));
+    jacobian_j.block<3, 3>(6, 0) = Jacobian_t::Zero();
+    jacobian_i.block<3, 3>(9, 0) = -Ri_inv;
+    jacobian_j.block<3, 3>(9, 0) = Ri_inv;
+    jacobian_i.block<3, 3>(12, 0) = -dvdb_g;
+    jacobian_j.block<3, 3>(12, 0) = dvdb_a;
+
+    jacobian_i.block<3, 3>(15, 0) = Sophus::SO3d::hat(Ri_inv * (frame_j->getPose().translation() - frame_i->getPose().translation() - speed_i * dt - 0.5 * g * dt *dt));
+    jacobian_j.block<3, 3>(15, 0) = Jacobian_t::Zero();
+    jacobian_i.block<3, 3>(18, 0) = -Ri_inv * dt;
+    jacobian_j.block<3, 3>(18, 0) = Jacobian_t::Zero();
+    jacobian_i.block<3, 3>(21, 0) = Jacobian_t::Identity();
+    jacobian_j.block<3, 3>(21, 0) = Ri_inv * Rj;
+    jacobian_i.block<3, 3>(24, 0) = -dpdb_g;
+    jacobian_j.block<3, 3>(24, 0) = -dpdb_a;
 
     return 0;
 }

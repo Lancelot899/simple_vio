@@ -4,6 +4,8 @@
 #include "util/util.h"
 #include "DataStructure/viFrame.h"
 
+typedef IMU::pViFrame pViFrame;
+
 int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               const ImuParamenters &imuParams,
                               Transformation &T_WS,
@@ -13,7 +15,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               covariance_t *covariance,
                               jacobian_t *jacobian) {
     double time = t_start;
-    double end = t_end;
+    double end  = t_end;
 
     assert(imuMeasurements.front().timeStamp<=time);
     if (!(imuMeasurements.back().timeStamp >= end))
@@ -200,7 +202,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
 }
 
-int IMUImplOKVIS::error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info)
+int IMUImplOKVIS::error(const pViFrame &frame_i, const pViFrame &frame_j, Error_t &err, void *info)
 {
     return 0;
 }
@@ -210,10 +212,8 @@ int IMUImplOKVIS::repropagation()
 
 }
 
-int IMUImplOKVIS::Jacobian(const error_t &err, const viFrame &frame_i, jacobian_t &jacobian_i, const viFrame &frame_j, jacobian_t &jacobian_j)
+int IMUImplOKVIS::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t &jacobian_i, const pViFrame &frame_j, jacobian_t &jacobian_j, void *info)
 {
     return 0;
 }
-
-
 

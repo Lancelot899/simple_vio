@@ -3,8 +3,17 @@
 
 #include "IMUImpl.h"
 
+class imuFactor;
+
 class IMUImplPRE : public IMUImpl
 {
+public:
+    struct PreInfo {
+        std::shared_ptr<imuFactor> imufactor;
+        bias_t                     dBias;
+    };
+
+
 public:
     IMUImplPRE();
     int propagation(const ImuMeasureDeque & imuMeasurements,
@@ -16,8 +25,13 @@ public:
                     covariance_t* covariance,
                     jacobian_t* jacobian);
 
-    int error(const viFrame &frame_i, const viFrame &frame_j, Error_t &err, void *info);
-    int Jacobian(const error_t& err, const viFrame& frame_i, jacobian_t& jacobian_i, const viFrame& frame_j, jacobian_t& jacobian_j);
+    int error(const IMU::pViFrame &frame_i, const IMU::pViFrame &frame_j, Error_t &err, void *info);
+
+    /**
+     * @brief Jacobian
+     * @param jacobian_t: drdphi drdb, dvdphi dvdv dvdb, dpdphi dpdv dpdp dpdb, for bias i->b_g, j->b_a
+     */
+    int Jacobian(const Error_t& err, const IMU::pViFrame& frame_i, jacobian_t& jacobian_i, const IMU::pViFrame& frame_j, jacobian_t& jacobian_j, void *info);
 };
 
 #endif // IMUIMPLPRE_H
