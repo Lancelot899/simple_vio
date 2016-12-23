@@ -34,5 +34,36 @@ inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> 
 
 Eigen::Matrix3d rightJacobian(const Eigen::Vector3d & PhiVec);
 
+inline double norm_max(const Eigen::VectorXd & v)
+{
+    double max = -1;
+    for (int i=0; i<v.size(); i++)
+    {
+        double abs = fabs(v[i]);
+        if(abs>max){
+            max = abs;
+        }
+    }
+    return max;
+}
+
+inline Eigen::Vector2d project2d(const Eigen::Vector3d& v) {
+    return v.head<2>()/v[2];
+}
+
+inline Eigen::Vector3d unproject2d(const Eigen::Vector2d& v) {
+    return Eigen::Vector3d(v[0], v[1], 1.0);
+}
+
+inline Eigen::Vector3d project3d(const Eigen::Vector4d& v) {
+    return v.head<3>()/v[3];
+}
+
+inline Eigen::Vector4d unproject3d(const Eigen::Vector3d& v) {
+    return Eigen::Vector4d(v[0], v[1], v[2], 1.0);
+}
+
+
+
 
 #endif // UTIL_H

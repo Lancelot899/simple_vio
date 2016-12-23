@@ -40,11 +40,11 @@ void Point::addFrameRef(std::shared_ptr<Feature> &ftr) {
     ++n_obs_;
 }
 
-Feature* Point::findFrameRef(std::shared_ptr<cvFrame>& frame) {
+std::shared_ptr<Feature> Point::findFrameRef(std::shared_ptr<cvFrame>& frame) {
     for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it)
         if((*it)->frame == frame)
             return *it;
-    return NULL;    // no keyframe found
+    return std::shared_ptr<Feature>();    // no keyframe found
 }
 
 bool Point::deleteFrameRef(std::shared_ptr<cvFrame>& frame) {
@@ -61,18 +61,18 @@ void Point::initNormal() {
     assert(!obs_.empty());
     const std::shared_ptr<Feature>& ftr = obs_.back();
     assert(ftr->frame != NULL);
-    normal_ = ftr->frame->T_f_w_.rotation_matrix().transpose()*(-ftr->f);
-    normal_information_ = DiagonalMatrix<double,3,3>(pow(20 / (pos_-ftr->frame->pos()).norm(),2), 1.0, 1.0);
+    normal_ = ftr->frame->getPose().so3().inverse().matrix() * (-ftr->f);
+    normal_information_ = DiagonalMatrix<double,3,3>(pow(20 / (pos_ - ftr->frame->pos()).norm(), 2), 1.0, 1.0);
     normal_set_ = true;
 }
 
-bool Point::getCloseViewObs(const Vector3d& framepos, Feature*& ftr) const {
+bool Point::getCloseViewObs(const Vector3d& framepos, std::shared_ptr<Feature> &ftr) const {
     // TODO: get frame with same point of view AND same pyramid level!
     Vector3d obs_dir(framepos - pos_); obs_dir.normalize();
     auto min_it=obs_.begin();
     double min_cos_angle = 0;
     for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it) {
-        Vector3d dir((*it)->frame->pos() - pos_); dir.normalize();
+        Vector3d dir((*it)->frame->getPose().translation() - pos_); dir.normalize();
         double cos_angle = obs_dir.dot(dir);
         if(cos_angle > min_cos_angle) {
             min_cos_angle = cos_angle;
@@ -100,8 +100,8 @@ void Point::optimize(const size_t n_iter) {
         // compute residuals
         for(auto it=obs_.begin(); it!=obs_.end(); ++it) {
             Matrix23d J;
-            const Vector3d p_in_f((*it)->frame->T_f_w_ * pos_);
-            Point::jacobian_xyz2uv(p_in_f, (*it)->frame->T_f_w_.rotation_matrix(), J);
+            const Vector3d p_in_f((*it)->frame->getPose() * pos_);
+            Point::jacobian_xyz2uv(p_in_f, (*it)->frame->getPose().so3().matrix(), J);
             const Vector2d e(project2d((*it)->f) - project2d(p_in_f));
 
             if((*it)->type == Feature::EDGELET) {

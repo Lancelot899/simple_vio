@@ -51,10 +51,10 @@ public:
     void initNormal();
 
     /// Check whether mappoint has reference to a frame.
-    Feature* findFrameRef(std::shared_ptr<cvFrame>& frame);
+    std::shared_ptr<Feature> findFrameRef(std::shared_ptr<cvFrame>& frame);
 
     /// Get Frame with similar viewpoint.
-    bool getCloseViewObs(const Eigen::Vector3d& pos, Feature*& obs) const;
+    bool getCloseViewObs(const Eigen::Vector3d& pos, std::shared_ptr<Feature>& obs) const;
 
     /// Get number of observations.
     inline size_t nRefs() const { return obs_.size(); }

@@ -33,6 +33,7 @@ class cvFrame : boost::noncopyable {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
 public:
+    typedef Eigen::Vector3d             position_t;
     typedef cvMeasure::cam_t            cam_t;
     typedef cvMeasure::features_t       features_t;
     typedef cvMeasure::Img_t            Img_t;
@@ -42,53 +43,19 @@ public:
     cvFrame(std::shared_ptr<AbstractCamera>& cam);
     ~cvFrame();
 
-    int getID() {
-        return cvData.id;
-    }
-
-    double getTimestamp() {
-        return cvData.timeStamp;
-    }
-
-    int getSensorID() {
-        return cvData.sensorId;
-    }
-
-    const cam_t getCam() {
-        return cam_;
-    }
-
-    const cov_t& getCovariance() {
-        return Cov_;
-    }
-
-    const pose_t& getPose() {
-        return pose_;
-    }
-
-    void setPose(pose_t &pose) {
-        pose_ = pose;
-    }
-
-    void setCovariance(cov_t& Cov) {
-        Cov_ = Cov;
-    }
-
-    bool isKeyframe() {
-        return is_keyframe_ == true;
-    }
-
-    void setKey() {
-        is_keyframe_ = true;
-    }
-
-    void cancelKeyframe() {
-        is_keyframe_ = false;
-    }
-
-    int getPublishTimestamp() {
-        return last_published_ts_;
-    }
+    int getID();
+    double getTimestamp();
+    int getSensorID();
+    const cam_t getCam();
+    const cov_t& getCovariance();
+    const pose_t& getPose();
+    void setPose(pose_t &pose);
+    void setCovariance(cov_t& Cov);
+    bool isKeyframe();
+    void setKey();
+    void cancelKeyframe();
+    int getPublishTimestamp();
+    const position_t& pos();
 
 public:
     static int         frame_counter_;         //!< Counts the number of created frames. Used to set the unique id.
