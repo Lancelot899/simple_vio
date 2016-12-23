@@ -2,6 +2,8 @@
 #define UTIL_H
 
 #include <Eigen/Dense>
+#include <opencv2/opencv.hpp>
+
 
 extern const double EPS;
 extern const double PI;
@@ -33,6 +35,7 @@ inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> 
 }
 
 Eigen::Matrix3d rightJacobian(const Eigen::Vector3d & PhiVec);
+float shiTomasiScore(const cv::Mat& img, int u, int v);
 
 inline double norm_max(const Eigen::VectorXd & v)
 {
@@ -62,8 +65,6 @@ inline Eigen::Vector3d project3d(const Eigen::Vector4d& v) {
 inline Eigen::Vector4d unproject3d(const Eigen::Vector3d& v) {
     return Eigen::Vector4d(v[0], v[1], v[2], 1.0);
 }
-
-
 
 
 #endif // UTIL_H
