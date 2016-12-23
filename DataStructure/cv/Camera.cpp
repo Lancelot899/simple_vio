@@ -25,14 +25,13 @@ PinholeCamera::~PinholeCamera() {}
 
 Vector3d PinholeCamera::cam2world(const double& u, const double& v) const {
     Vector3d xyz;
-    if(!distortion_)
-    {
+    if(!distortion_) {
         xyz[0] = (u - cx_)/fx_;
         xyz[1] = (v - cy_)/fy_;
         xyz[2] = 1.0;
     }
-    else
-    {
+
+    else {
         cv::Point2f uv(u,v), px;
         const cv::Mat src_pt(1, 1, CV_32FC2, &uv.x);
         cv::Mat dst_pt(1, 1, CV_32FC2, &px.x);

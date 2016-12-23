@@ -48,10 +48,8 @@ Feature* Point::findFrameRef(std::shared_ptr<cvFrame>& frame) {
 }
 
 bool Point::deleteFrameRef(std::shared_ptr<cvFrame>& frame) {
-    for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it)
-    {
-        if((*it)->frame == frame)
-        {
+    for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it) {
+        if((*it)->frame == frame) {
             obs_.erase(it);
             return true;
         }
@@ -73,12 +71,10 @@ bool Point::getCloseViewObs(const Vector3d& framepos, Feature*& ftr) const {
     Vector3d obs_dir(framepos - pos_); obs_dir.normalize();
     auto min_it=obs_.begin();
     double min_cos_angle = 0;
-    for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it)
-    {
+    for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it) {
         Vector3d dir((*it)->frame->pos() - pos_); dir.normalize();
         double cos_angle = obs_dir.dot(dir);
-        if(cos_angle > min_cos_angle)
-        {
+        if(cos_angle > min_cos_angle) {
             min_cos_angle = cos_angle;
             min_it = it;
         }
@@ -102,22 +98,20 @@ void Point::optimize(const size_t n_iter) {
         double new_chi2 = 0.0;
 
         // compute residuals
-        for(auto it=obs_.begin(); it!=obs_.end(); ++it)
-        {
+        for(auto it=obs_.begin(); it!=obs_.end(); ++it) {
             Matrix23d J;
             const Vector3d p_in_f((*it)->frame->T_f_w_ * pos_);
             Point::jacobian_xyz2uv(p_in_f, (*it)->frame->T_f_w_.rotation_matrix(), J);
             const Vector2d e(project2d((*it)->f) - project2d(p_in_f));
 
-            if((*it)->type == Feature::EDGELET)
-            {
+            if((*it)->type == Feature::EDGELET) {
                 float err_edge = (*it)->grad.transpose() * e;
                 new_chi2 += err_edge * err_edge;
                 A.noalias() += J.transpose()*(*it)->grad * (*it)->grad.transpose() * J;
                 b.noalias() -= J.transpose() *(*it)->grad * err_edge;
             }
-            else
-            {
+
+            else {
                 new_chi2 += e.squaredNorm();
                 A.noalias() += J.transpose() * J;
                 b.noalias() -= J.transpose() * e;
@@ -129,8 +123,7 @@ void Point::optimize(const size_t n_iter) {
         const Vector3d dp(A.ldlt().solve(b));
 
         // check if error increased
-        if((i > 0 && new_chi2 > chi2) || (bool) std::isnan((double)dp[0]))
-        {
+        if((i > 0 && new_chi2 > chi2) || (bool) std::isnan((double)dp[0])) {
             pos_ = old_point; // roll-back
             break;
         }

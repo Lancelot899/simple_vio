@@ -15,12 +15,12 @@ public:
     virtual Eigen::Vector3d cam2world(const double& x, const double& y) const = 0;
 
     /// Project from pixels to world coordiantes. Returns a bearing vector of unit length.
-    virtual Eigen::Vector3d cam2world(const Vector2d& px) const = 0;
+    virtual Eigen::Vector3d cam2world(const Eigen::Vector2d& px) const = 0;
 
-    virtual Eigen::Vector2d world2cam(const Vector3d& xyz_c) const = 0;
+    virtual Eigen::Vector2d world2cam(const Eigen::Vector3d& xyz_c) const = 0;
 
     /// projects unit plane coordinates to camera coordinates
-    virtual Eigen::Vector2d world2cam(const Vector2d& uv) const = 0;
+    virtual Eigen::Vector2d world2cam(const Eigen::Vector2d& uv) const = 0;
 
     virtual double errorMultiplier2() const = 0;
 
@@ -30,14 +30,14 @@ public:
 
     inline int height() const { return height_; }
 
-    inline bool isInFrame(const Vector2i & obs, int boundary=0) const {
+    inline bool isInFrame(const Eigen::Vector2i & obs, int boundary=0) const {
         if(obs[0]>=boundary && obs[0]<width()-boundary
                 && obs[1]>=boundary && obs[1]<height()-boundary)
             return true;
         return false;
     }
 
-    inline bool isInFrame(const Vector2i &obs, int boundary, int level) const {
+    inline bool isInFrame(const Eigen::Vector2i &obs, int boundary, int level) const {
         if(obs[0] >= boundary && obs[0] < width()/(1<<level)-boundary
                 && obs[1] >= boundary && obs[1] <height()/(1<<level)-boundary)
             return true;
@@ -62,14 +62,14 @@ public:
 
     virtual Eigen::Vector3d cam2world(const double& x, const double& y) const;
 
-    virtual Eigen::Vector3d cam2world(const Vector2d& px) const;
+    virtual Eigen::Vector3d cam2world(const Eigen::Vector2d& px) const;
 
-    virtual Eigen::Vector2d world2cam(const Vector3d& xyz_c) const;
+    virtual Eigen::Vector2d world2cam(const Eigen::Vector3d& xyz_c) const;
 
-    virtual Eigen::Vector2d world2cam(const Vector2d& uv) const;
+    virtual Eigen::Vector2d world2cam(const Eigen::Vector2d& uv) const;
 
     const Eigen::Vector2d focal_length() const {
-        return Vector2d(fx_, fy_);
+        return Eigen::Vector2d(fx_, fy_);
     }
 
     virtual double errorMultiplier2() const {
