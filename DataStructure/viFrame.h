@@ -14,7 +14,7 @@ public:
 
     typedef std::shared_ptr<imuFactor>        linked_t;
     typedef std::shared_ptr<viFrame>          imuConnection_t;
-    typedef std::shared_ptr<ImuParameters>   ImuParam;
+    typedef std::shared_ptr<ImuParameters>    ImuParam;
     typedef Sophus::SE3d                      pose_t;
 
 public:
