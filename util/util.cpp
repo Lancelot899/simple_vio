@@ -18,3 +18,4 @@ Eigen::Matrix3d rightJacobian(const Eigen::Vector3d &PhiVec) {
     }
     return retMat;
 }
+

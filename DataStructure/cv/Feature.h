@@ -5,8 +5,9 @@
 #include <Eigen/Dense>
 #include <memory>
 
+#include "cvFrame.h"
+
 class Point;
-class cvFrame;
 
 struct Feature
 {
@@ -29,7 +30,7 @@ struct Feature
         type(EDGELET),
         frame(_frame),
         px(_px),
-        f(frame->cam_->cam2world(px)),
+        f(frame->getCam()->cam2world(px)),
         level(_level),
         grad(_grad)
     {}
@@ -38,7 +39,7 @@ struct Feature
         type(CORNER),
         frame(_frame),
         px(_px),
-        f(frame->cam_->cam2world(px)),
+        f(frame->getCam()->cam2world(px)),
         level(_level),
         grad(1.0,0.0)
     {}
@@ -52,7 +53,8 @@ struct Feature
         grad(1.0,0.0)
     {}
 
-    Feature(std::shared_ptr<cvFrame>& _frame, std::shared_ptr<Point>& _point, const Eigen::Vector2d& _px, const Eigen::Vector3d& _f, int _level) :
+    Feature(std::shared_ptr<cvFrame>& _frame, std::shared_ptr<Point>& _point,
+            const Eigen::Vector2d& _px, const Eigen::Vector3d& _f, int _level) :
         type(CORNER),
         frame(_frame),
         px(_px),
