@@ -32,7 +32,7 @@ const viFrame::pose_t &viFrame::getPose() {
     return cvframe->getPose();
 }
 
-const std::shared_ptr<cvFrame> &viFrame::getCVFrame() {
+const cvframePtr_t &viFrame::getCVFrame() {
     return cvframe;
 }
 

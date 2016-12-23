@@ -40,14 +40,14 @@ void Point::addFrameRef(std::shared_ptr<Feature> &ftr) {
     ++n_obs_;
 }
 
-std::shared_ptr<Feature> Point::findFrameRef(std::shared_ptr<cvFrame>& frame) {
+std::shared_ptr<Feature> Point::findFrameRef(cvframePtr_t& frame) {
     for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it)
         if((*it)->frame == frame)
             return *it;
     return std::shared_ptr<Feature>();    // no keyframe found
 }
 
-bool Point::deleteFrameRef(std::shared_ptr<cvFrame>& frame) {
+bool Point::deleteFrameRef(cvframePtr_t& frame) {
     for(auto it=obs_.begin(), ite=obs_.end(); it!=ite; ++it) {
         if((*it)->frame == frame) {
             obs_.erase(it);
