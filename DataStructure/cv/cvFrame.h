@@ -47,7 +47,7 @@ public:
     ~cvFrame();
 
     int getID();
-    double getTimestamp();
+    const okvis::Time& getTimestamp();
     int getSensorID();
     const cam_t getCam();
     const cov_t& getCovariance();

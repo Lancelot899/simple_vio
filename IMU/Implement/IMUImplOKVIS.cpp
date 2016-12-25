@@ -10,15 +10,15 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
                               const ImuParameters &imuParams,
                               Transformation &T_WS,
                               SpeedAndBias &speedAndBiases,
-                              double &t_start,
-                              double &t_end,
+                              okvis::Time &t_start,
+                              okvis::Time &t_end,
                               covariance_t *covariance,
                               jacobian_t *jacobian) {
-    double time = t_start;
-    double end  = t_end;
+    okvis::Time& time = t_start;
+    okvis::Time& end  = t_end;
 
-    assert(imuMeasurements.front().timeStamp<=time);
-    if (!(imuMeasurements.back().timeStamp >= end))
+    assert(imuMeasurements.front()->timeStamp<=time);
+    if (!(imuMeasurements.back()->timeStamp >= end))
         return -1;
 
     Eigen::Vector3d r_0 = T_WS.translation();
@@ -39,27 +39,27 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
     Eigen::Matrix<double,15,15> P_delta = Eigen::Matrix<double,15,15>::Zero();
 
-    double Delta_t = 0;
+    double Delta_t(0);
     bool hasStarted = false;
     int i = 0;
 
     for(auto it = imuMeasurements.begin(); it != imuMeasurements.end(); ++it) {
-        Eigen::Vector3d omega_S_0 = it->measurement.gyroscopes;
-        Eigen::Vector3d acc_S_0 = it->measurement.acceleration;
-        Eigen::Vector3d omega_S_1 = (it + 1)->measurement.gyroscopes;
-        Eigen::Vector3d acc_S_1 = (it + 1)->measurement.acceleration;
+        Eigen::Vector3d omega_S_0 = (*it)->measurement.gyroscopes;
+        Eigen::Vector3d acc_S_0 = (*it)->measurement.acceleration;
+        Eigen::Vector3d omega_S_1 = (*(it + 1))->measurement.gyroscopes;
+        Eigen::Vector3d acc_S_1 = (*(it + 1))->measurement.acceleration;
 
-        double nexttime;
+        okvis::Time nexttime;
         if ((it + 1) == imuMeasurements.end()) {
             nexttime = t_end;
         } else
-            nexttime = (it + 1)->timeStamp;
-        double dt = nexttime - time;
+            nexttime = (*(it + 1))->timeStamp;
+        double dt = (nexttime - time).toSec();
 
         if (end < nexttime) {
-            double interval = nexttime - it->timeStamp;
+            double interval = (nexttime - (*it)->timeStamp).toSec();
             nexttime = t_end;
-            dt = nexttime - time;
+            dt = (nexttime - time).toSec();
             const double r = dt / interval;
             omega_S_1 = ((1.0 - r) * omega_S_0 + r * omega_S_1).eval();
             acc_S_1 = ((1.0 - r) * acc_S_0 + r * acc_S_1).eval();
@@ -72,7 +72,7 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
 
         if (!hasStarted) {
             hasStarted = true;
-            const double r = dt / (nexttime - it->timeStamp);
+            const double r = dt / (nexttime - (*it)->timeStamp).toSec();
             omega_S_0 = (r * omega_S_0 + (1.0 - r) * omega_S_1).eval();
             acc_S_0 = (r * acc_S_0 + (1.0 - r) * acc_S_1).eval();
         }

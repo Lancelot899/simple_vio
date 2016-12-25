@@ -3,8 +3,8 @@
 #include <fstream>
 
 #include "Feature_Detector.h"
-#include "Feature.h"
-#include "util.h"
+#include "DataStructure/cv/Feature.h"
+#include "Util/util.h"
 
 namespace feature_detection {
 
@@ -110,13 +110,17 @@ void FastDetector::detect(
 }
 
 
-//EdgeDetector::EdgeDetector(
-//    const int img_width,
-//    const int img_height,
-//    const int cell_size,
-//    const int n_pyr_levels) :
-//        AbstractDetector(img_width, img_height, cell_size, n_pyr_levels)
-//{}
+EdgeDetector::EdgeDetector(
+    const int img_width,
+    const int img_height,
+    const int cell_size,
+    const int n_pyr_levels) :
+    AbstractDetector(img_width, img_height, cell_size, n_pyr_levels)
+{}
+
+void EdgeDetector::detect(cvframePtr_t frame, const AbstractDetector::ImgPyr_t &img_pyr, const double detection_threshold, AbstractDetector::features_t &fts) {
+
+}
 
 class Pt
 {

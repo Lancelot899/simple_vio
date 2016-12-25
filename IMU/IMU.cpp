@@ -35,8 +35,8 @@ int IMU::propagation(const ImuMeasureDeque &imuMeasurements,
                      const ImuParameters &imuParams,
                      Transformation &T_WS,
                      SpeedAndBias &speedAndBiases,
-                     double &t_start,
-                     double &t_end,
+                     okvis::Time &t_start,
+                     okvis::Time &t_end,
                      covariance_t *covariance,
                      jacobian_t *jacobian)
 {

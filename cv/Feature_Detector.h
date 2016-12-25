@@ -2,7 +2,7 @@
 #define FEATURE_DETECTOR_H
 
 #include <vector>
-#include "cvFrame.h"
+#include "DataStructure/cv/cvFrame.h"
 
 /// Implementation of various feature detectors.
 namespace feature_detection {
@@ -69,24 +69,23 @@ protected:
 typedef std::shared_ptr<AbstractDetector> DetectorPtr;
 
 /// Edgelete detector
-//class EdgeDetector : public AbstractDetector {
-//public:
-//  EdgeDetector(
-//      const int img_width,
-//      const int img_height,
-//      const int cell_size,
-//      const int n_pyr_levels);
+class EdgeDetector : public AbstractDetector {
+public:
+  EdgeDetector(
+      const int img_width,
+      const int img_height,
+      const int cell_size,
+      const int n_pyr_levels);
 
-//  virtual ~EdgeDetector() {}
+  virtual ~EdgeDetector() {}
 
-//  virtual void detect(
-//      cvframePtr_t frame,
-//      const ImgPyr_t& img_pyr,
-//      const double detection_threshold,
-//      features_t& fts);
-//};
+  virtual void detect(
+      cvframePtr_t frame,
+      const ImgPyr_t& img_pyr,
+      const double detection_threshold,
+      features_t& fts);
+};
 
-//
 /// FAST detector by Edward Rosten.
 class FastDetector : public AbstractDetector
 {

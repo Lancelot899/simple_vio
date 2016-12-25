@@ -40,7 +40,7 @@ const IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias() {
     return spbs;
 }
 
-double viFrame::getTimeStamp() {
+const okvis::Time& viFrame::getTimeStamp() {
     return cvframe->getTimestamp();
 }
 
