@@ -1,7 +1,7 @@
-#include "cv/Point.h"
-#include "util.h"
-#include "cv/cvFrame.h"
-#include "cv/Feature.h"
+#include "DataStructure/cv/Point.h"
+#include "Util/util.h"
+#include "DataStructure/cv/cvFrame.h"
+#include "DataStructure/cv/Feature.h"
 
 using namespace Eigen;
 

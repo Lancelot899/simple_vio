@@ -31,7 +31,7 @@ public:
         return imuParam;
     }
 
-    double getTimeStamp();
+    const okvis::Time &getTimeStamp();
 
 private:
     int                      id;

@@ -25,8 +25,8 @@ public:
                     const ImuParameters & imuParams,
                     IMUMeasure::Transformation& T_WS,
                     IMUMeasure::SpeedAndBias & speedAndBiases,
-                    double & t_start,
-                    double & t_end,
+                    okvis::Time &t_start,
+                    okvis::Time &t_end,
                     IMUMeasure::covariance_t* covariance,
                     IMUMeasure::jacobian_t* jacobian);
 

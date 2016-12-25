@@ -2,6 +2,7 @@
 #define IMUMEASURE_H
 
 #include <deque>
+#include <memory>
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
@@ -16,12 +17,12 @@ struct IMUData {
     Eigen::Quaternion<double> orientation;
     Eigen::Vector3d           geomagnetism;
     double                    atmospheric_pressure;
-    double                    time;
+    okvis::Time               timeStamp;
 };
 
 struct IMUMeasure : public MeasurementBase<IMUData> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    IMUMeasure(int sensorId, double timeStamp, Eigen::Vector3d acceleration, Eigen::Vector3d gyroscopes,
+    IMUMeasure(int sensorId, const okvis::Time& timeStamp, const Eigen::Vector3d& acceleration, const Eigen::Vector3d& gyroscopes,
                Eigen::Vector3d geomagnetism = Eigen::Vector3d(), Eigen::Quaternion<double> orientation = Eigen::Quaternion<double>()) {
         this->sensorId = sensorId;
         this->timeStamp = timeStamp;
@@ -29,15 +30,23 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
         this->measurement.gyroscopes = gyroscopes;
         this->measurement.geomagnetism = geomagnetism;
         this->measurement.orientation = orientation;
-        this->measurement.time = timeStamp;
+        this->measurement.timeStamp = timeStamp;
     }
 
-    typedef std::deque<IMUMeasure, Eigen::aligned_allocator<IMUMeasure>> ImuMeasureDeque;
+    typedef std::shared_ptr<IMUMeasure>                                  IMUMeasure_Ptr;
     typedef Sophus::SE3d                                                 Transformation;
     typedef Eigen::Matrix<double, 9, 1>                                  SpeedAndBias;    ///< speed, b_g, b_a
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        covariance_t;
     typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>        jacobian_t;
     typedef Eigen::Matrix<double, Eigen::Dynamic, 1>                     Error_t;
+
+    class ImuMeasureDeque : public std::deque<std::shared_ptr<IMUMeasure>> {
+    public:
+        bool addImuMeasurement(int sensorID,
+                               const okvis::Time & stamp,
+                               const Eigen::Vector3d & alpha,
+                               const Eigen::Vector3d & omega);
+    };
 };
 
 

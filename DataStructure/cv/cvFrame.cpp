@@ -12,7 +12,7 @@ int cvFrame::getID() {
     return cvData.id;
 }
 
-double cvFrame::getTimestamp() {
+const okvis::Time &cvFrame::getTimestamp() {
     return cvData.timeStamp;
 }
 

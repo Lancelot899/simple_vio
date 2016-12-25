@@ -10,8 +10,12 @@
 class IMUIO : public IOBase<IMUMeasure>
 {
 public:
-    IMUIO();
-    std::shared_ptr<IMUMeasure> pop();
+    IMUIO(std::string &file);
+    std::shared_ptr<IMUMeasure> pop(okvis::Time& start, okvis::Time& end);
+
+private:
+    int                             number_of_lines;
+    IMUMeasure::ImuMeasureDeque     imuMeasureDeque;
 };
 
 #endif // IMUIO_H
