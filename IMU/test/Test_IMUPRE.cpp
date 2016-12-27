@@ -20,7 +20,7 @@ typedef Eigen::Matrix<double, 6, 1> bias_t;
 #endif // IMUTYPE_DEF_
 
 
-TEST(test_ImuPre, IMU) {
+TEST(test_ImuPRE, IMU_PRE) {
 
 
 }
