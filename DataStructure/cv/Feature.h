@@ -19,7 +19,7 @@ struct Feature
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     FeatureType type;                 //!< Type can be corner or edgelet.
-    cvframePtr_t frame;   //!< Pointer to frame in which the feature was detected.
+    cvframePtr_t frame;               //!< Pointer to frame in which the feature was detected.
     Eigen::Vector2d px;               //!< Coordinates in pixels on pyramid level 0.
     Eigen::Vector3d f;                //!< Unit-bearing vector of the feature.
     int level;                        //!< Image pyramid level where feature was extracted.

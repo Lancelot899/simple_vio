@@ -8,3 +8,8 @@ build-*
 vio.pro
 vio
 testData
+*-build
+.idea
+*debug
+debug*
+debug
