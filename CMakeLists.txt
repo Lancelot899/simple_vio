@@ -3,33 +3,86 @@ project(simple_vio)
 
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++0x")
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ENDIF()
 
-include_directories("/usr/local/eigen3")
 
-FIND_PACKAGE(OpenCV REQUIRED)
-FIND_PACKAGE(Sophus REQUIRED)
+INCLUDE(ExternalProject)
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+#glog
+EXECUTE_PROCESS(COMMAND sudo apt-get install libgoogle-glog-dev)
+FIND_PACKAGE(GLOG)
+INCLUDE_DIRECTORIES(BEFORE ${GLOG_INCLUDE_DIRS})
+
+#suitesparse
+EXECUTE_PROCESS(COMMAND sudo apt-get install libsuitesparse-dev)
+FIND_PACKAGE(SuiteSparse)
+
+#eigen3
+EXECUTE_PROCESS(COMMAND sudo apt-get install libeigen3-dev)
+FIND_PACKAGE(Eigen)
+
+#fast
 FIND_PACKAGE(fast REQUIRED)
+if(NOT fast_FOUND)
+    ExternalProject_Add(fast
+            GIT_REPOSITORY https://github.com/Lancelot899/fast.git
+            UPDATE_COMMAND ""
+            PATCH_COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/fast/build
+            SOURCE_DIR  ${CMAKE_CURRENT_BINARY_DIR}/fast
+            BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/fast/build
+            CMAKE_ARGS
+                -BUILD_TEST:BOOL=FALSE
+            BUILD_COMMAND make -j4
+            INSTALL_COMMAND ""
+            )
+    SET(fast_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/fast/include)
+    SET(fast_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/fast/build/libfast.so)
+endif()
+
+#ceres
+FIND_PACKAGE(Ceres)
+if(NOT CERES_FOUND)
+    ExternalProject_Add(ceres-solver
+            GIT_REPOSITORY https://github.com/ceres-solver/ceres-solver.git
+            UPDATE_COMMAND ""
+            PATCH_COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
+            SOURCE_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver
+            BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
+            CMAKE_ARGS
+                -DBUILD_EXAMPLES:BOOL=OFF
+                -DBUILD_TESTING:BOOL=OFF
+            BUILD_COMMAND make -j4
+            INSTALL_COMMAND ""
+            )
+    SET(CERES_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/include)
+    SET(CERES_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/lib/libceres.a)
+endif()
+
+FIND_PACKAGE(OpenCV REQUIRED QUIET)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS thread system regex)
-find_package(Sophus REQUIRED)
-include_directories(${Sophus_INCLUDE_DIRS})
+
 
 INCLUDE_DIRECTORIES(
-        include
+        .
+        ./ThirdParty
         ${OpenCV_INCLUDE_DIRS}
         ${Sophus_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
         ${fast_INCLUDE_DIRS}
+        ${EIGEN_INCLUDE_DIRS}
+        ${CERES_INCLUDE_DIRS}
 )
 
 LIST(APPEND LINK_LIBS
         ${OpenCV_LIBS}
-        ${Sophus_LIBRARIES}
         ${Boost_LIBRARIES}
         ${fast_LIBRARIES}
+        ${GLOG_LIBRARIES}
+        ${CERES_LIBRARIES}
         )
 
 set(SOURCE_FILES
@@ -83,11 +136,5 @@ set(SOURCE_FILES
         main.cpp)
 
 
-
 add_executable(simple_vio ${SOURCE_FILES})
-
 TARGET_LINK_LIBRARIES(simple_vio ${LINK_LIBS})
-target_link_libraries(simple_vio ${Sophus_LIBRARIES})
-target_link_libraries(simple_vio gtest)
-target_link_libraries(simple_vio ceres.a)
-
