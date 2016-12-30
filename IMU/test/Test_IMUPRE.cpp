@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include <gtest/gtest.h>
+#include <opencv2/ts.hpp>
 
 #include "DataStructure/imu/IMUMeasure.h"
-#include "IMU/IMU.h"
+
 
 #ifndef IMUTYPE_DEF_
 #define IMUTYPE_DEF_

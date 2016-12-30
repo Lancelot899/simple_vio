@@ -1,15 +1,5 @@
-*.pro
-*.pro.*
 *pro*
-build
 build*
-build-*
-*.o
-vio.pro
-vio
 testData
-*-build
 .idea
 *debug
-debug*
-debug
