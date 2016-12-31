@@ -6,7 +6,6 @@
 #include <sophus/se3.hpp>
 #include <opencv2/opencv.hpp>
 
-
 #include <boost/noncopyable.hpp>
 
 #include "util/setting.h"

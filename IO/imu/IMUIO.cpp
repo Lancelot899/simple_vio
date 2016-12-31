@@ -37,10 +37,10 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
     memset(imuParamBuffer, 0, 1024);
 
     imuParam_file.read(imuParamBuffer, 1024);
-    boost::regex imuIDReg("^[A-Za-z]+\d+");
+    boost::regex imuIDReg("^[A-Za-z]+[0-9]+");
     boost::cmatch IDMat;
     if(!boost::regex_match(imuParamBuffer, IDMat, imuIDReg)) {
-        std::cerr << "on imu ID in imu param !" << std::endl;
+        std::cerr << "no imu ID in imu param !" << std::endl;
         exit(-1);
     }
 

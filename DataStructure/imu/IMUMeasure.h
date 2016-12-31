@@ -52,6 +52,18 @@ struct IMUMeasure : public MeasurementBase<IMUData> {
 
 struct ImuParameters {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+public:
+    ImuParameters()   {}
+    ImuParameters(IMUMeasure::Transformation T_BS_,double a_max_,double g_max_,
+                  double sigma_g_c_, double sigma_bg_, double sigma_a_c_,
+                  double sigma_ba_,  double sigma_gw_c_, double sigma_aw_c_,
+                  double tau_, double g_, Eigen::Vector3d a0_, int rate_):
+        T_BS(T_BS_),a_max(a_max_),g_max(g_max_),sigma_g_c(sigma_g_c_),sigma_bg(sigma_bg_),
+        sigma_a_c(sigma_a_c_),sigma_ba(sigma_ba_),sigma_gw_c(sigma_gw_c_),
+        sigma_aw_c(sigma_aw_c_),tau(tau_),g(g_),a0(a0_),rate(rate_)
+    {}
+
     IMUMeasure::Transformation T_BS; ///< Transformation from Body frame to IMU (sensor frame S).
     double a_max;  ///< Accelerometer saturation. [m/s^2]
     double g_max;  ///< Gyroscope saturation. [rad/s]
