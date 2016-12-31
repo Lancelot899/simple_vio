@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <boost/noncopyable.hpp>
 
-#include "Util/util.h"
+#include "util/util.h"
 
 class Feature;
 class cvFrame;

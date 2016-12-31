@@ -1,7 +1,44 @@
 #include "cvFrame.h"
 
-cvFrame::cvFrame(std::shared_ptr<AbstractCamera> &cam) {
+cvFrame::cvFrame(std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cam_ = cam;
+    cvData.measurement.pic = pic;
+    int rows = pic.rows;
+    int cols = pic.cols;
+
+    for(int i = 0; i < IMG_LEVEL; ++i) {
+        if(i != 0) {
+            rows /= 2;
+            cols /= 2;
+        }
+
+        cvData.measurement.width[i]  = rows;
+        cvData.measurement.height[i] = cols;
+        cvData.measurement.imgPyr[i].assign(cvData.measurement.width[i] * cvData.measurement.height[i], Eigen::Vector3d::Zero());
+
+        if(i == 0) {
+            for(int p = 0; p < rows; p++) {
+                for(int q = 0; q < cols; q++) {
+                    cvData.measurement.imgPyr[i][q * rows + p][0] = double(pic.at<u_char>(p, q));
+                }
+            }
+        }
+
+        else {
+            for(int p = 0; p < rows; p++) {
+                for(int q = 0; q < cols; q++)
+                    cvData.measurement.imgPyr[i][q * rows + p][0]
+                            = 0.25 * (cvData.measurement.imgPyr[i - 1][p * 2 + (q * 2) * rows * 2][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * 2 + (q * 2 + 1) * rows * 2][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * 2 + 1 + (q * 2 + 1) * rows * 2][0]
+                                       + cvData.measurement.imgPyr[i - 1][p * 2 + 1 + (q * 2) * rows * 2][0]);
+            }
+        }
+    }
+
+
+
+
 }
 
 cvFrame::~cvFrame() {
