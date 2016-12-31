@@ -118,7 +118,12 @@ EdgeDetector::EdgeDetector(
     AbstractDetector(img_width, img_height, cell_size, n_pyr_levels)
 {}
 
-void EdgeDetector::detect(cvframePtr_t frame, const AbstractDetector::ImgPyr_t &img_pyr, const double detection_threshold, AbstractDetector::features_t &fts) {
+void EdgeDetector::detect(cvframePtr_t frame,
+                          const AbstractDetector::ImgPyr_t &img_pyr,
+                          const double detection_threshold,
+                          AbstractDetector::features_t &fts) {
+
+
 
 }
 
