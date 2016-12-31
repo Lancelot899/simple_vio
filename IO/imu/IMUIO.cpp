@@ -7,6 +7,23 @@
 
 #include "IMUIO.h"
 
+
+void inline readData(char *buffer, char *name, double *val) {
+    char *p = buffer;
+    p = strstr(p, name);
+
+    assert(p != NULL);
+    *val = -0.1;
+    p += strlen(name);
+    char *p1 = p;
+    while((*p1 >= '0' && *p1 <= '9') || (*p1 == 'e') || (*p1 == '-') || (*p1 == '+')) p1++;
+    char c = *p1;
+    *p1 = 0;
+    sscanf(p, "%lf", val);
+    *p1 = c;
+}
+
+
 IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) {
     assert(!imufile.empty() && !imuParamfile.empty());
 
@@ -41,7 +58,9 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
     int T_BSCnt = 0;
 
     char *p1 = p;
+    char c = 0;
     while(*p1 != ']') p1++;
+    c = *p1;
     *p1 = '\0';
     char *spt = strtok(p, ",");
     while(spt != NULL) {
@@ -59,22 +78,32 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
         spt = strtok(NULL, ",");
     }
 
+    *p1 = c;
+
     int rate_hz = -1;
-    p = p1 + 1;
+    p = imuParamBuffer;
     p = strstr(p, "rate_hz: ");
-    if(p != NULL) {
-        p += strlen("rate_hz: ");
-        p1 = p;
-        while(*p1 >= '0' && *p1 <= '9') p1++;
-        char cp1 = *p1;
-        *p1 = '\0';
-        sscanf(p, "%d", rate_hz);
-    }
-    else
-        p = p1 + 1;
+    assert(p != NULL);
+    p += strlen("rate_hz: ");
+    p1 = p;
+    while (*p1 >= '0' && *p1 <= '9') p1++;
+    c = *p1;
+    *p1 = '\0';
+    sscanf(p, "%d", &rate_hz);
+    *p1 = c;
 
 
-    ///! <other
+    double gyroscope_noise_density = -0.1;
+    readData(imuParamBuffer, "gyroscope_noise_density: ", &gyroscope_noise_density);
+
+    double gyroscope_random_walk = -0.1;
+    readData(imuParamBuffer, "gyroscope_random_walk: ", &gyroscope_random_walk);
+
+    double accelerometer_noise_density = -0.1;
+    readData(imuParamBuffer, "accelerometer_noise_density: ", &accelerometer_noise_density);
+
+    double accelerometer_random_walk = -0.1;
+    readData(imuParamBuffer, "accelerometer_random_walk: ", &accelerometer_random_walk);
 
 
     std::ifstream imu_file(imufile);
@@ -82,9 +111,6 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
         std::cerr << "imu file error!" << std::endl;
         exit(-1);
     }
-
-
-
 
     do {
         std::string line;

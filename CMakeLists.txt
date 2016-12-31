@@ -73,6 +73,7 @@ INCLUDE_DIRECTORIES(
         ${Sophus_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
         ${fast_INCLUDE_DIRS}
+        ${GLOG_INCLUDE_DIRS}
         ${EIGEN_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
 )
