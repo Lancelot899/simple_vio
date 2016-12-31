@@ -1,5 +1,5 @@
 #include "DataStructure/cv/Point.h"
-#include "Util/util.h"
+#include "util/util.h"
 #include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/cv/Feature.h"
 
