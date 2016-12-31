@@ -8,7 +8,7 @@
 #include "IMUIO.h"
 
 
-void inline readData(char *buffer, char *name, double *val) {
+void inline readData(char *buffer, const char *name, double *val) {
     char *p = buffer;
     p = strstr(p, name);
 
@@ -16,17 +16,16 @@ void inline readData(char *buffer, char *name, double *val) {
     *val = -0.1;
     p += strlen(name);
     char *p1 = p;
-    while((*p1 >= '0' && *p1 <= '9') || (*p1 == 'e') || (*p1 == '-') || (*p1 == '+')) p1++;
+    while((*p1 >= '0' && *p1 <= '9') || (*p1 == '.') || (*p1 == 'e') || (*p1 == '-') || (*p1 == '+')) p1++;
     char c = *p1;
     *p1 = 0;
-    sscanf(p, "%lf", val);
+    sscanf(p, "%le", val);
     *p1 = c;
 }
 
 
 IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) {
     assert(!imufile.empty() && !imuParamfile.empty());
-
     std::ifstream imuParam_file(imuParamfile);
     if(!imuParam_file.good()) {
         std::cerr << "imuParam file error!" << std::endl;
@@ -37,15 +36,42 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
     memset(imuParamBuffer, 0, 1024);
 
     imuParam_file.read(imuParamBuffer, 1024);
-    boost::regex imuIDReg("^[A-Za-z]+\d+");
-    boost::cmatch IDMat;
-    if(!boost::regex_match(imuParamBuffer, IDMat, imuIDReg)) {
-        std::cerr << "on imu ID in imu param !" << std::endl;
-        exit(-1);
-    }
+    assert(imuParamBuffer[0] != 0);
+//    boost::regex imuIDReg("^[A-Za-z]+[0-9]+");
+//    boost::cmatch IDMat;
+//    if(!boost::regex_match(imuParamBuffer, IDMat, imuIDReg)) {
+//        std::cerr << "no imu ID in imu param !" << std::endl;
+//        exit(-1);
+//    }
+//
+//    const std::string imuID = IDMat[0].str();
 
-    const std::string imuID = IDMat[0].str();
-    char *p = strstr(imuParamBuffer, "T_BS");
+    char c = 0;
+    int rate_hz = -1;
+    char *p = imuParamBuffer;
+    p = strstr(p, "rate_hz: ");
+    assert(p != NULL);
+    p += strlen("rate_hz: ");
+    char * p1 = p;
+    while (*p1 >= '0' && *p1 <= '9') p1++;
+    c = *p1;
+    *p1 = '\0';
+    sscanf(p, "%d", &rate_hz);
+    *p1 = c;
+
+    double gyroscope_noise_density = -0.1;
+    readData(imuParamBuffer, "gyroscope_noise_density: ", &gyroscope_noise_density);
+
+    double gyroscope_random_walk = -0.1;
+    readData(imuParamBuffer, "gyroscope_random_walk: ", &gyroscope_random_walk);
+
+    double accelerometer_noise_density = -0.1;
+    readData(imuParamBuffer, "accelerometer_noise_density: ", &accelerometer_noise_density);
+
+    double accelerometer_random_walk = -0.1;
+    readData(imuParamBuffer, "accelerometer_random_walk: ", &accelerometer_random_walk);
+
+    p = strstr(imuParamBuffer, "T_BS");
     if(p == NULL) {
         std::cerr << "on T_BS in imu param !\n";
         exit(-1);
@@ -57,8 +83,8 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
     memset(T_BS, 0, sizeof(double) * 16);
     int T_BSCnt = 0;
 
-    char *p1 = p;
-    char c = 0;
+    p1 = p;
+
     while(*p1 != ']') p1++;
     c = *p1;
     *p1 = '\0';
@@ -80,31 +106,23 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
 
     *p1 = c;
 
-    int rate_hz = -1;
-    p = imuParamBuffer;
-    p = strstr(p, "rate_hz: ");
-    assert(p != NULL);
-    p += strlen("rate_hz: ");
-    p1 = p;
-    while (*p1 >= '0' && *p1 <= '9') p1++;
-    c = *p1;
-    *p1 = '\0';
-    sscanf(p, "%d", &rate_hz);
-    *p1 = c;
+    imuParam = std::make_shared<ImuParameters>();
+    imuParam->rate = rate_hz;
+    imuParam->sigma_bg  = gyroscope_random_walk;
+    imuParam->sigma_ba  = accelerometer_random_walk;
+    imuParam->sigma_a_c = accelerometer_noise_density;
+    imuParam->sigma_g_c = gyroscope_noise_density;
 
+    Eigen::Matrix4d mTbs;
+    for(int i = 0; i < 4; ++i) {
+        for(int j = 0; j < 4; ++j) {
+            mTbs(i, j) = T_BS[j * 4 + i];
+        }
+    }
 
-    double gyroscope_noise_density = -0.1;
-    readData(imuParamBuffer, "gyroscope_noise_density: ", &gyroscope_noise_density);
+    Sophus::SE3d seTbs(mTbs);
 
-    double gyroscope_random_walk = -0.1;
-    readData(imuParamBuffer, "gyroscope_random_walk: ", &gyroscope_random_walk);
-
-    double accelerometer_noise_density = -0.1;
-    readData(imuParamBuffer, "accelerometer_noise_density: ", &accelerometer_noise_density);
-
-    double accelerometer_random_walk = -0.1;
-    readData(imuParamBuffer, "accelerometer_random_walk: ", &accelerometer_random_walk);
-
+    imuParam->T_BS = seTbs;
 
     std::ifstream imu_file(imufile);
     if(!imu_file.good()) {
@@ -112,12 +130,17 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
         exit(-1);
     }
 
+    int i = -1;
     do {
+        i++;
         std::string line;
         if(!std::getline(imu_file, line)) {
             std::cout << "imu file is read over!" << std::endl;
             break;
         }
+
+        if(i == 0)
+            continue;
 
         std::stringstream stream(line);
         std::string s;
@@ -127,16 +150,23 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
         Eigen::Vector3d gyr;
         for (int j = 0; j < 3; ++j) {
             std::getline(stream, s, ',');
-            gyr[j] = std::stof(s);
+            sscanf(s.c_str(), "%lf", &gyr[j]);
+            //gyr[j] = std::stod(s);
         }
+
 
         Eigen::Vector3d acc;
         for (int j = 0; j < 3; ++j) {
             std::getline(stream, s, ',');
-            acc[j] = std::stof(s);
+            sscanf(s.c_str(), "%lf", &acc[j]);
+            //acc[j] = std::stod(s);
         }
 
-        okvis::Time t_imu(std::stoi(seconds), std::stoi(nanoseconds));
+        int sec = 0;
+        int nsec = 0;
+        sscanf(seconds.c_str(), "%d", &sec);
+        sscanf(nanoseconds.c_str(), "%d", &nsec);
+        okvis::Time t_imu(sec, nsec);
         imuMeasureDeque.addImuMeasurement(0, t_imu, acc, gyr);
     } while(true);
 
@@ -165,7 +195,8 @@ IMUIO::pData_t IMUIO::pop() {
     if(imuMeasureDeque.empty())
         return pData_t();
 
-    pData_t & data = imuMeasureDeque.front();
+    pData_t data;
+    data = std::move(imuMeasureDeque.front());
     imuMeasureDeque.pop_front();
     return data;
 }
