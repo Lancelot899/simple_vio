@@ -84,11 +84,15 @@ public:
       const ImgPyr_t& img_pyr,
       const double detection_threshold,
       features_t& fts);
+
+
+private:
+
+
 };
 
 /// FAST detector by Edward Rosten.
-class FastDetector : public AbstractDetector
-{
+class FastDetector : public AbstractDetector {
 public:
   FastDetector(
       const int img_width,
@@ -103,6 +107,22 @@ public:
       const ImgPyr_t& img_pyr,
       const double detection_threshold,
       features_t& fts);
+
+protected:
+    struct fast_xy {
+        short x, y;
+        fast_xy(short x_, short y_) : x(x_), y(y_) {}
+    };
+
+    void fast_corner_detect_10(const cvData::Img_t& img, int imgWidth, int imgHeight,
+                               int img_stride, double barrier, std::vector<fast_xy>& corners);
+
+    void fast_corner_score_10(const cvData::Img_t& img, const int img_stride,
+                              const std::vector<fast_xy>& corners, const int threshold, std::vector<int>& scores);
+
+    void fast_nonmax_3x3(const std::vector<fast_xy>& corners,
+                         const std::vector<int>& scores,
+                         std::vector<int>& nonmax_corners);
 };
 
 } // namespace feature_detection
