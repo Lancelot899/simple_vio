@@ -36,6 +36,7 @@ IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) 
     memset(imuParamBuffer, 0, 1024);
 
     imuParam_file.read(imuParamBuffer, 1024);
+
     assert(imuParamBuffer[0] != 0);
 //    boost::regex imuIDReg("^[A-Za-z]+[0-9]+");
 //    boost::cmatch IDMat;
