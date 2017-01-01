@@ -14,7 +14,7 @@ LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 #glog
 EXECUTE_PROCESS(COMMAND sudo apt-get install libgoogle-glog-dev)
-FIND_PACKAGE(GLOG)
+FIND_PACKAGE(Glog REQUIRED QUIET)
 INCLUDE_DIRECTORIES(BEFORE ${GLOG_INCLUDE_DIRS})
 
 #suitesparse
@@ -44,23 +44,23 @@ if(NOT fast_FOUND)
 endif()
 
 #ceres
-FIND_PACKAGE(Ceres)
-if(NOT CERES_FOUND)
-    ExternalProject_Add(ceres-solver
-            GIT_REPOSITORY https://github.com/ceres-solver/ceres-solver.git
-            UPDATE_COMMAND ""
-            PATCH_COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
-            SOURCE_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver
-            BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
-            CMAKE_ARGS
-                -DBUILD_EXAMPLES:BOOL=OFF
-                -DBUILD_TESTING:BOOL=OFF
-            BUILD_COMMAND make -j4
-            INSTALL_COMMAND ""
-            )
-    SET(CERES_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/include)
-    SET(CERES_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/lib/libceres.a)
-endif()
+FIND_PACKAGE(Ceres REQUIRED QUIET)
+#if(NOT CERES_FOUND)
+#    ExternalProject_Add(ceres-solver
+#            GIT_REPOSITORY https://github.com/ceres-solver/ceres-solver.git
+#            UPDATE_COMMAND ""
+#            PATCH_COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
+#            SOURCE_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver
+#            BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build
+#            CMAKE_ARGS
+#                -DBUILD_EXAMPLES:BOOL=OFF
+#                -DBUILD_TESTING:BOOL=OFF
+#            BUILD_COMMAND make -j4
+#            INSTALL_COMMAND ""
+#            )
+#    SET(CERES_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/include)
+#    SET(CERES_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/lib/libceres.a)
+#endif()
 
 FIND_PACKAGE(OpenCV REQUIRED QUIET)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS thread system regex)
@@ -115,6 +115,9 @@ set(SOURCE_FILES
         IO/imu/test/test_IMUIO.cpp
         IO/imu/IMUIO.cpp
         IO/imu/IMUIO.h
+        IO/camera/test/cameratest.cpp
+        IO/camera/CameraIO.cpp
+        IO/camera/CameraIO.h
         IO/IOBase.h
         ThirdParty/okvis_time/include/implementation/Duration.hpp
         ThirdParty/okvis_time/include/implementation/Time.hpp
