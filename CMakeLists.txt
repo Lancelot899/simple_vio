@@ -25,23 +25,6 @@ FIND_PACKAGE(SuiteSparse)
 EXECUTE_PROCESS(COMMAND sudo apt-get install libeigen3-dev)
 FIND_PACKAGE(Eigen)
 
-#fast
-FIND_PACKAGE(fast REQUIRED)
-if(NOT fast_FOUND)
-    ExternalProject_Add(fast
-            GIT_REPOSITORY https://github.com/Lancelot899/fast.git
-            UPDATE_COMMAND ""
-            PATCH_COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/fast/build
-            SOURCE_DIR  ${CMAKE_CURRENT_BINARY_DIR}/fast
-            BINARY_DIR  ${CMAKE_CURRENT_BINARY_DIR}/fast/build
-            CMAKE_ARGS
-                -BUILD_TEST:BOOL=FALSE
-            BUILD_COMMAND make -j4
-            INSTALL_COMMAND ""
-            )
-    SET(fast_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/fast/include)
-    SET(fast_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/fast/build/libfast.so)
-endif()
 
 #ceres
 FIND_PACKAGE(Ceres)
@@ -72,7 +55,6 @@ INCLUDE_DIRECTORIES(
         ${OpenCV_INCLUDE_DIRS}
         ${Sophus_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
-        ${fast_INCLUDE_DIRS}
         ${GLOG_INCLUDE_DIRS}
         ${EIGEN_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
@@ -81,7 +63,6 @@ INCLUDE_DIRECTORIES(
 LIST(APPEND LINK_LIBS
         ${OpenCV_LIBS}
         ${Boost_LIBRARIES}
-        ${fast_LIBRARIES}
         ${GLOG_LIBRARIES}
         ${CERES_LIBRARIES}
         )

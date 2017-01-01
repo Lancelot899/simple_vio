@@ -1,4 +1,3 @@
-#include <fast/fast.h>
 #include <opencv2/opencv.hpp>
 #include <fstream>
 
@@ -55,8 +54,3186 @@ FastDetector::FastDetector(
     const int img_height,
     const int cell_size,
     const int n_pyr_levels) :
-        AbstractDetector(img_width, img_height, cell_size, n_pyr_levels)
-{}
+        AbstractDetector(img_width, img_height, cell_size, n_pyr_levels) {}
+
+
+
+static inline bool test_gt_set(int a, int b, int& min_diff)
+{
+    if(a > b)
+    {
+        if(a-b < min_diff)
+            min_diff = a-b;
+
+        return 1;
+    }
+    return 0;
+}
+
+
+void FastDetector::fast_corner_detect_10(const cvData::Img_t &img_,
+                                         int img_width, int img_height, int img_stride,
+                                         double barrier, std::vector<fast_xy> &corners) {
+    int y, cb, c_b;
+    cvData::Img_t::const_iterator img = img_.begin();
+    cvData::Img_t::const_iterator line_max, line_min;
+    cvData::Img_t::const_iterator cache_0;
+
+    int pixel[16] = {
+            0 + img_stride * 3,
+            1 + img_stride * 3,
+            2 + img_stride * 2,
+            3 + img_stride * 1,
+            3 + img_stride * 0,
+            3 + img_stride * -1,
+            2 + img_stride * -2,
+            1 + img_stride * -3,
+            0 + img_stride * -3,
+            -1 + img_stride * -3,
+            -2 + img_stride * -2,
+            -3 + img_stride * -1,
+            -3 + img_stride * 0,
+            -3 + img_stride * 1,
+            -2 + img_stride * 2,
+            -1 + img_stride * 3,
+    };
+
+    for(y = 3 ; y < img_height - 3; y++)
+    {
+        cache_0 = img + y*img_stride + 3;
+        line_min = cache_0 - 3;
+        line_max = img + y*img_stride + img_width - 3;
+        // cache_0 = &i[y][3];
+        // line_min = cache_0 - 3;
+        // line_max = &i[y][i.size().x - 3];
+
+
+        for(; cache_0 < line_max;cache_0++)
+        {
+            cb = (*cache_0)(0) + barrier;
+            c_b= (*cache_0)(0) - barrier;
+
+            if((*(cache_0 + pixel[0]))(0) > cb)
+                if((*(cache_0 + pixel[8]))(0) > cb)
+                    if((*(cache_0 + pixel[3]))(0) > cb)
+                        if((*(cache_0 + pixel[5]))(0) > cb)
+                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                if((*(cache_0 + pixel[6]))(0) > cb)
+                                    if((*(cache_0 + 3))(0) > cb)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                    if((*(cache_0 + pixel[10]))(0) > cb)
+                                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + 3))(0) < c_b)
+                                        if((*(cache_0 + pixel[10]))(0) > cb)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                                        goto success;
+                                                                    else
+                                                                        continue;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[6]))(0) < c_b)
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                                        if((*(cache_0 + 3))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[10]))(0) > cb)
+                                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                                            if(((*(cache_0 + pixel[10])))(0) > cb)
+                                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + -3))(0) > cb)
+                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[10]))(0) > cb)
+                                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    if((*(cache_0 + pixel[10]))(0) > cb)
+                                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[2]))(0) < c_b)
+                                if((*(cache_0 + -3))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                        if((*(cache_0 + pixel[10]))(0) > cb)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        if((*(cache_0 + 3))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[6]))(0) > cb)
+                                                    if(((*(cache_0 + 3)))(0) > cb)
+                                                        goto success;
+                                                    else if((*(cache_0 + 3))(0) < c_b)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[14]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[5]))(0) < c_b)
+                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                                        if((*(cache_0 + pixel[2]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                                        if((*(cache_0 + 3))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                        if((*(cache_0 + pixel[10]))(0) > cb)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[10]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[2]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + 3))(0) > cb)
+                                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + pixel[3]))(0) < c_b)
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + -3))(0) > cb)
+                        if((*(cache_0 + pixel[10]))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[14]))(0) < c_b)
+                                if((*(cache_0 + 3))(0) > cb)
+                                    if((*(cache_0 + pixel[5]))(0) > cb)
+                                        if((*(cache_0 + pixel[6]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + 3))(0) > cb)
+                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else if((*(cache_0 + pixel[8]))(0) < c_b)
+                    if((*(cache_0 + pixel[11]))(0) > cb)
+                        if((*(cache_0 + pixel[2]))(0) > cb)
+                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[3]))(0) > cb)
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[10]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + 3))(0) > cb)
+                                                    if((*(cache_0 + pixel[5]))(0) > cb)
+                                                        if((*(cache_0 + pixel[6]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[2]))(0) < c_b)
+                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                    if((*(cache_0 + 3))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + pixel[11]))(0) < c_b)
+                        if((*(cache_0 + pixel[6]))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                        if((*(cache_0 + pixel[2]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[6]))(0) < c_b)
+                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        if((*(cache_0 + -3))(0) > cb)
+                                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                                if((*(cache_0 + pixel[14]))(0) > cb)
+                                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                        goto success;
+                                                                    else
+                                                                        continue;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                            if((*(cache_0 + -3))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                                            if((*(cache_0 + 3))(0) > cb)
+                                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                        goto success;
+                                                                    else
+                                                                        continue;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[14]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                    if((*(cache_0 + -3))(0) > cb)
+                                        if((*(cache_0 + pixel[2]))(0) < c_b)
+                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                if((*(cache_0 + 3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + -3))(0) < c_b)
+                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[2]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    if((*(cache_0 + 3))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + -3))(0) > cb)
+                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[3]))(0) > cb)
+                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                        if((*(cache_0 + 3))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + pixel[3]))(0) > cb)
+                        if((*(cache_0 + pixel[5]))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                                if((*(cache_0 + 3))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[6]))(0) > cb)
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[2]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                                if((*(cache_0 + 3))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + pixel[3]))(0) < c_b)
+                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + pixel[2]))(0) < c_b)
+                                    if((*(cache_0 + 3))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                if((*(cache_0 + pixel[3]))(0) > cb)
+                    if((*(cache_0 + pixel[14]))(0) > cb)
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                if((*(cache_0 + 3))(0) > cb)
+                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[6]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + 3))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                        if((*(cache_0 + pixel[10]))(0) > cb)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + -3))(0) < c_b)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                    if((*(cache_0 + pixel[2]))(0) > cb)
+                                        if((*(cache_0 + 3))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + pixel[6]))(0) > cb)
+                            if((*(cache_0 + pixel[2]))(0) > cb)
+                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else if((*(cache_0 + pixel[3]))(0) < c_b)
+                    if((*(cache_0 + pixel[2]))(0) > cb)
+                        if((*(cache_0 + pixel[9]))(0) > cb)
+                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                        if((*(cache_0 + -3))(0) > cb)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[14]))(0) > cb)
+                                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                if((*(cache_0 + pixel[9]))(0) > cb)
+                    if((*(cache_0 + pixel[2]))(0) > cb)
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                    continue;
+            else if((*(cache_0 + pixel[0]))(0) < c_b)
+                if((*(cache_0 + pixel[8]))(0) > cb)
+                    if((*(cache_0 + pixel[2]))(0) > cb)
+                        if((*(cache_0 + pixel[10]))(0) > cb)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                        if((*(cache_0 + pixel[5]))(0) > cb)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + 3))(0) > cb)
+                                                    if((*(cache_0 + pixel[3]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + pixel[2]))(0) < c_b)
+                        if((*(cache_0 + pixel[13]))(0) > cb)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + 3))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[6]))(0) < c_b)
+                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[13]))(0) < c_b)
+                            if((*(cache_0 + pixel[3]))(0) > cb)
+                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                        if((*(cache_0 + 3))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[6]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        if((*(cache_0 + pixel[11]))(0) > cb)
+                                                            if((*(cache_0 + -3))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[10]))(0) < c_b)
+                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[3]))(0) < c_b)
+                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) > cb)
+                                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                        if((*(cache_0 + -3))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) < c_b)
+                                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) < c_b)
+                                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                            if((*(cache_0 + pixel[10]))(0) > cb)
+                                                if((*(cache_0 + 3))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) < c_b)
+                                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                            if((*(cache_0 + -3))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + pixel[7]))(0) > cb)
+                            if((*(cache_0 + pixel[3]))(0) > cb)
+                                if((*(cache_0 + pixel[10]))(0) > cb)
+                                    if((*(cache_0 + 3))(0) > cb)
+                                        if((*(cache_0 + pixel[5]))(0) > cb)
+                                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                                        if((*(cache_0 + -3))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[7]))(0) < c_b)
+                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                    if((*(cache_0 + 3))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + -3))(0) > cb)
+                        if((*(cache_0 + pixel[6]))(0) > cb)
+                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                    if((*(cache_0 + pixel[10]))(0) > cb)
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + 3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + 3))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else if((*(cache_0 + pixel[8]))(0) < c_b)
+                    if((*(cache_0 + 3))(0) > cb)
+                        if((*(cache_0 + -3))(0) < c_b)
+                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                        if((*(cache_0 + pixel[13]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        if((*(cache_0 + pixel[2]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[2]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                        if((*(cache_0 + pixel[6]))(0) < c_b)
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + 3))(0) < c_b)
+                        if((*(cache_0 + pixel[2]))(0) > cb)
+                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + -3))(0) < c_b)
+                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                            if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[2]))(0) < c_b)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + -3))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + pixel[6]))(0) < c_b)
+                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[3]))(0) < c_b)
+                                    if((*(cache_0 + pixel[5]))(0) > cb)
+                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                            if((*(cache_0 + -3))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                                        goto success;
+                                                                    else
+                                                                        continue;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) > cb)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[13]))(0) < c_b)
+                                            if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + -3))(0) < c_b)
+                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[1]))(0) > cb)
+                                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                                        goto success;
+                                                                    else
+                                                                        continue;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                                    goto success;
+                                                                else
+                                                                    continue;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + -3))(0) < c_b)
+                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                        if((*(cache_0 + pixel[13]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) > cb)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[3]))(0) > cb)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + -3))(0) < c_b)
+                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + -3))(0) < c_b)
+                        if((*(cache_0 + pixel[10]))(0) < c_b)
+                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[2]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                if((*(cache_0 + pixel[2]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                if((*(cache_0 + pixel[2]))(0) < c_b)
+                    if((*(cache_0 + -3))(0) > cb)
+                        if((*(cache_0 + pixel[6]))(0) < c_b)
+                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[7]))(0) < c_b)
+                                    if((*(cache_0 + 3))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + 3))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + -3))(0) < c_b)
+                        if((*(cache_0 + pixel[3]))(0) > cb)
+                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                        if((*(cache_0 + pixel[13]))(0) < c_b)
+                                            if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[3]))(0) < c_b)
+                            if((*(cache_0 + pixel[14]))(0) < c_b)
+                                if((*(cache_0 + 3))(0) > cb)
+                                    if((*(cache_0 + pixel[10]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + 3))(0) < c_b)
+                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[6]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[10]))(0) < c_b)
+                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                            if((*(cache_0 + pixel[10]))(0) < c_b)
+                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + pixel[6]))(0) < c_b)
+                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                            if((*(cache_0 + 3))(0) < c_b)
+                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                            if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                    continue;
+            else
+            if((*(cache_0 + pixel[8]))(0) > cb)
+                if((*(cache_0 + pixel[10]))(0) > cb)
+                    if((*(cache_0 + 3))(0) > cb)
+                        if((*(cache_0 + pixel[2]))(0) > cb)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                                    goto success;
+                                                else if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + -3))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        if((*(cache_0 + pixel[14]))(0) > cb)
+                                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                                goto success;
+                                                            else
+                                                                continue;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[15]))(0) > cb)
+                                                if((*(cache_0 + pixel[14]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        if((*(cache_0 + pixel[13]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[9]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else if((*(cache_0 + pixel[2]))(0) < c_b)
+                            if((*(cache_0 + pixel[11]))(0) > cb)
+                                if((*(cache_0 + -3))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                        if((*(cache_0 + pixel[6]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    if((*(cache_0 + pixel[5]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[3]))(0) > cb)
+                                                    if((*(cache_0 + pixel[5]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                        if((*(cache_0 + -3))(0) > cb)
+                            if((*(cache_0 + pixel[6]))(0) > cb)
+                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    goto success;
+                                                else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                                    if((*(cache_0 + pixel[14]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) > cb)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    if((*(cache_0 + pixel[9]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[3]))(0) > cb)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + 3))(0) < c_b)
+                        if((*(cache_0 + pixel[6]))(0) > cb)
+                            if((*(cache_0 + pixel[14]))(0) > cb)
+                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                    if((*(cache_0 + pixel[7]))(0) > cb)
+                                        if((*(cache_0 + pixel[15]))(0) > cb)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                        if((*(cache_0 + pixel[5]))(0) > cb)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                    if((*(cache_0 + -3))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + pixel[14]))(0) > cb)
+                        if((*(cache_0 + pixel[6]))(0) > cb)
+                            if((*(cache_0 + -3))(0) > cb)
+                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                            if((*(cache_0 + pixel[7]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                    if((*(cache_0 + pixel[15]))(0) > cb)
+                                        if((*(cache_0 + pixel[7]))(0) > cb)
+                                            if((*(cache_0 + pixel[9]))(0) > cb)
+                                                if((*(cache_0 + pixel[11]))(0) > cb)
+                                                    if((*(cache_0 + pixel[13]))(0) > cb)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[15]))(0) > cb)
+                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                        if((*(cache_0 + pixel[9]))(0) > cb)
+                                            if((*(cache_0 + pixel[13]))(0) > cb)
+                                                if((*(cache_0 + pixel[7]))(0) > cb)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                    continue;
+            else if((*(cache_0 + pixel[8]))(0) < c_b)
+                if((*(cache_0 + pixel[10]))(0) < c_b)
+                    if((*(cache_0 + 3))(0) > cb)
+                        if((*(cache_0 + pixel[14]))(0) < c_b)
+                            if((*(cache_0 + pixel[6]))(0) < c_b)
+                                if((*(cache_0 + -3))(0) < c_b)
+                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                            if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else if((*(cache_0 + 3))(0) < c_b)
+                        if((*(cache_0 + pixel[6]))(0) < c_b)
+                            if((*(cache_0 + -3))(0) > cb)
+                                if((*(cache_0 + pixel[2]))(0) < c_b)
+                                    if((*(cache_0 + pixel[1]))(0) > cb)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[11]))(0) < c_b)
+                                        if((*(cache_0 + pixel[3]))(0) < c_b)
+                                            if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else if((*(cache_0 + -3))(0) < c_b)
+                                if((*(cache_0 + pixel[7]))(0) < c_b)
+                                    if((*(cache_0 + pixel[11]))(0) > cb)
+                                        if((*(cache_0 + pixel[1]))(0) < c_b)
+                                            if((*(cache_0 + pixel[2]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else if((*(cache_0 + pixel[11]))(0) < c_b)
+                                        if((*(cache_0 + pixel[9]))(0) < c_b)
+                                            if((*(cache_0 + pixel[5]))(0) > cb)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                        if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                            goto success;
+                                                        else
+                                                            continue;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                            if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                if((*(cache_0 + pixel[14]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                    if((*(cache_0 + pixel[1]))(0) < c_b)
+                                        if((*(cache_0 + pixel[2]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + pixel[3]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                            if((*(cache_0 + pixel[2]))(0) < c_b)
+                                if((*(cache_0 + pixel[1]))(0) < c_b)
+                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + pixel[5]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                    if((*(cache_0 + pixel[3]))(0) < c_b)
+                                        if((*(cache_0 + pixel[5]))(0) < c_b)
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                    if((*(cache_0 + pixel[14]))(0) < c_b)
+                        if((*(cache_0 + pixel[6]))(0) < c_b)
+                            if((*(cache_0 + -3))(0) < c_b)
+                                if((*(cache_0 + pixel[5]))(0) > cb)
+                                    if((*(cache_0 + pixel[9]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                if((*(cache_0 + pixel[13]))(0) < c_b)
+                                                    if((*(cache_0 + pixel[15]))(0) < c_b)
+                                                        goto success;
+                                                    else
+                                                        continue;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else if((*(cache_0 + pixel[5]))(0) < c_b)
+                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[11]))(0) < c_b)
+                                            if((*(cache_0 + pixel[7]))(0) < c_b)
+                                                if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                if((*(cache_0 + pixel[15]))(0) < c_b)
+                                    if((*(cache_0 + pixel[13]))(0) < c_b)
+                                        if((*(cache_0 + pixel[7]))(0) < c_b)
+                                            if((*(cache_0 + pixel[9]))(0) < c_b)
+                                                if((*(cache_0 + pixel[11]))(0) < c_b)
+                                                    goto success;
+                                                else
+                                                    continue;
+                                            else
+                                                continue;
+                                        else
+                                            continue;
+                                    else
+                                        continue;
+                                else
+                                    continue;
+                            else
+                                continue;
+                        else
+                            continue;
+                    else
+                        continue;
+                else
+                    continue;
+            else
+                continue;
+
+            success:
+            corners.push_back(fast_xy(static_cast<short>(cache_0-line_min),
+                                      static_cast<short>(y)));
+        }
+    }
+}
+
 
 void FastDetector::detect(
     cvframePtr_t frame,
@@ -64,32 +3241,23 @@ void FastDetector::detect(
     const double detection_threshold,
     features_t& fts)
 {
-  Corners corners(grid_n_cols_*grid_n_rows_, Corner(0,0,detection_threshold,0,0.0f));
+  Corners corners(grid_n_cols_ * grid_n_rows_, Corner(0,0,detection_threshold,0,0.0f));
   //Corners corners(grid_n_cols_*grid_n_rows_, Corner(0,0,0,0,0.0f));
   for(int L=0; L<n_pyr_levels_; ++L)
   {
     const int scale = (1<<L);
-    vector<fast::fast_xy> fast_corners;
-#if __SSE2__
-      fast::fast_corner_detect_10_sse2(
-          (fast::fast_byte*) img_pyr[L].data, img_pyr[L].cols,
-          img_pyr[L].rows, img_pyr[L].cols, 8, fast_corners);   // 20
-#elif HAVE_FAST_NEON
-      fast::fast_corner_detect_9_neon(
-          (fast::fast_byte*) img_pyr[L].data, img_pyr[L].cols,
-          img_pyr[L].rows, img_pyr[L].cols, 8, fast_corners);
-#else
-      fast::fast_corner_detect_10(
-          (fast::fast_byte*) img_pyr[L].data, img_pyr[L].cols,
-          img_pyr[L].rows, img_pyr[L].cols, 8, fast_corners);
-#endif
+    vector<fast_xy> fast_corners;
+
+      fast_corner_detect_10(img_pyr[L], frame->getWidth(L),
+          frame->getHeight(L), frame->getWidth(L), 8.0, fast_corners);
+
     vector<int> scores, nm_corners;
-    fast::fast_corner_score_10((fast::fast_byte*) img_pyr[L].data, img_pyr[L].cols, fast_corners,8, scores);// 20
-    fast::fast_nonmax_3x3(fast_corners, scores, nm_corners);
+    fast_corner_score_10(img_pyr[L], frame->getWidth(L), fast_corners, 8, scores);// 20
+    fast_nonmax_3x3(fast_corners, scores, nm_corners);
 
     for(auto it=nm_corners.begin(), ite=nm_corners.end(); it!=ite; ++it)
     {
-      fast::fast_xy& xy = fast_corners.at(*it);
+      fast_xy& xy = fast_corners.at(*it);
       const int k = static_cast<int>((xy.y*scale)/cell_size_)*grid_n_cols_
                   + static_cast<int>((xy.x*scale)/cell_size_);
       if(grid_occupancy_[k])
