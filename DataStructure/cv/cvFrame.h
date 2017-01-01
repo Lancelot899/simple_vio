@@ -17,18 +17,36 @@ typedef Sophus::SE3d pose_t;
 class Feature;
 
 struct cvData {
-    std::array<cv::Mat, IMG_LEVEL>                img;                    //!< Image Pyramid.
-    std::list<std::shared_ptr<Feature>>           fts_;                   //!< List of features in the image.
-    std::vector<std::shared_ptr<Feature>>         key_pts_;               //!< Five features and associated 3D points which are used to detect if two frames have overlapping field of view.
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    typedef cv::Mat                                                  Pic_t;                  //! raw image
+    typedef std::vector<Eigen::Vector3d>                             Img_t;
+    typedef std::array<Img_t, IMG_LEVEL>                             ImgPyr_t;               //!< Image Pyramid.
+    typedef std::vector<double, Eigen::aligned_allocator<double>>    GradNorm_t;
+    typedef std::array<GradNorm_t, IMG_LEVEL>                        GradNormPyr_t;
+
+public:
+    int              width[IMG_LEVEL];
+    int              height[IMG_LEVEL];
+
+    Pic_t            pic;
+    ImgPyr_t         imgPyr;
+    GradNormPyr_t    gradNormPyr;
 };
 
 
 struct cvMeasure : public MeasurementBase<cvData> {
-    typedef std::array<cv::Mat, IMG_LEVEL>      ImgPyr_t;
-    typedef cv::Mat                             Img_t;
-    typedef std::list<std::shared_ptr<Feature>> features_t;
-    typedef std::shared_ptr<AbstractCamera>     cam_t;
+public:
+    typedef cvData::ImgPyr_t                        ImgPyr_t;
+    typedef cvData::Pic_t                           Pic_t;
+    typedef std::list<std::shared_ptr<Feature>>     features_t;     //!< List of features in the image.
+    typedef std::vector<std::shared_ptr<Feature>>   keyPoints_t;    //!< Five features and associated 3D points which are used to detect if two frames have overlapping field of view.
+    typedef std::shared_ptr<AbstractCamera>         cam_t;
+
+public:
     int id;
+    features_t       fts_;
+    keyPoints_t      key_pts_;
 };
 
 class cvFrame : boost::noncopyable {
@@ -38,11 +56,11 @@ public:
     typedef Eigen::Vector3d             position_t;
     typedef cvMeasure::cam_t            cam_t;
     typedef cvMeasure::features_t       features_t;
-    typedef cvMeasure::Img_t            Img_t;
+    typedef cvMeasure::Pic_t            Pic_t;
     typedef Eigen::Matrix<double, 6, 6> cov_t;
 
 public:
-    cvFrame(std::shared_ptr<AbstractCamera>& cam);
+    cvFrame(std::shared_ptr<AbstractCamera>& cam, Pic_t &pic);
     ~cvFrame();
 
     int getID();

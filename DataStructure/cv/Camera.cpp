@@ -13,8 +13,8 @@ PinholeCamera::PinholeCamera(double width, double height,
     undist_map2_(height_, width_, CV_16SC2),
     use_optimization_(false) {
     d_[0] = d0; d_[1] = d1; d_[2] = d2; d_[3] = d3; d_[4] = d4;
-    cvK_ = (cv::Mat_<float>(3, 3) << fx_, 0.0, cx_, 0.0, fy_, cy_, 0.0, 0.0, 1.0);
-    cvD_ = (cv::Mat_<float>(1, 5) << d_[0], d_[1], d_[2], d_[3], d_[4]);
+    cvK_ = (cv::Mat_<double>(3, 3) << fx_, 0.0, cx_, 0.0, fy_, cy_, 0.0, 0.0, 1.0);
+    cvD_ = (cv::Mat_<double>(1, 5) << d_[0], d_[1], d_[2], d_[3], d_[4]);
     cv::initUndistortRectifyMap(cvK_, cvD_, cv::Mat_<double>::eye(3,3), cvK_,
                                 cv::Size(width_, height_), CV_16SC2, undist_map1_, undist_map2_);
     K_ << fx_, 0.0, cx_, 0.0, fy_, cy_, 0.0, 0.0, 1.0;
@@ -32,7 +32,7 @@ Vector3d PinholeCamera::cam2world(const double& u, const double& v) const {
     }
 
     else {
-        cv::Point2f uv(u,v), px;
+        cv::Point2d uv(u,v), px;
         const cv::Mat src_pt(1, 1, CV_32FC2, &uv.x);
         cv::Mat dst_pt(1, 1, CV_32FC2, &px.x);
         cv::undistortPoints(src_pt, dst_pt, cvK_, cvD_);
