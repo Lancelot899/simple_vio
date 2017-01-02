@@ -58,8 +58,9 @@ FastDetector::FastDetector(
 
 
 
-static inline bool test_gt_set(int a, int b, int& min_diff)
+static inline bool test_gt_set(const cvData::Img_t::value_type& a_, double b, double& min_diff)
 {
+    double a = a_(0);
     if(a > b)
     {
         if(a-b < min_diff)
@@ -70,6 +71,16 @@ static inline bool test_gt_set(int a, int b, int& min_diff)
     return 0;
 }
 
+static inline bool test_gt_set(double a, const cvData::Img_t::value_type& b_, double& min_diff) {
+    double b = b_(0);
+    if(a > b){
+        if(a-b < min_diff)
+            min_diff = a-b;
+
+        return 1;
+    }
+    return 0;
+}
 
 void FastDetector::fast_corner_detect_10(const cvData::Img_t &img_,
                                          int img_width, int img_height, int img_stride,
@@ -3277,6 +3288,3251 @@ void FastDetector::detect(
   resetGrid();
 }
 
+inline double fast_corner_score(cvData::Img_t::const_iterator cache_0, const int offset[], double b) {
+    b += 1.0;
+
+    for(;;)
+    {
+        double cb = (*cache_0)(0) + b;
+        double c_b= (*cache_0)(0) - b;
+        double min_diff = double(INT_MAX);
+        if(test_gt_set(*(cache_0 + offset[0]), cb, min_diff))
+            if(test_gt_set(*(cache_0 + offset[8]), cb, min_diff))
+                if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                                    b += min_diff;
+                                                                else
+                                                                    break;
+                                                            else
+                                                                break;
+                                                        else
+                                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    b += min_diff;
+                                                else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else if(test_gt_set(c_b, *(cache_0 + offset[8]), min_diff))
+                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                    b += min_diff;
+                                                                else
+                                                                    break;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                    b += min_diff;
+                                                                else
+                                                                    break;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+                break;
+        else if(test_gt_set(c_b, *(cache_0 + offset[0]), min_diff))
+            if(test_gt_set(*(cache_0 + offset[8]), cb, min_diff))
+                if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else if(test_gt_set(c_b, *(cache_0 + offset[8]), min_diff))
+                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                                    b += min_diff;
+                                                                else
+                                                                    break;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                                    b += min_diff;
+                                                                else
+                                                                    break;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                                b += min_diff;
+                                                            else
+                                                                break;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+            if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+                break;
+        else
+        if(test_gt_set(*(cache_0 + offset[8]), cb, min_diff))
+            if(test_gt_set(*(cache_0 + offset[10]), cb, min_diff))
+                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[2]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                b += min_diff;
+                                            else if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                            b += min_diff;
+                                                        else
+                                                            break;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                    if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                b += min_diff;
+                                            else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(*(cache_0 + offset[3]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                    if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(*(cache_0 + offset[14]), cb, min_diff))
+                    if(test_gt_set(*(cache_0 + offset[6]), cb, min_diff))
+                        if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                                if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(*(cache_0 + offset[15]), cb, min_diff))
+                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                    if(test_gt_set(*(cache_0 + offset[9]), cb, min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[13]), cb, min_diff))
+                                            if(test_gt_set(*(cache_0 + offset[7]), cb, min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+                break;
+        else if(test_gt_set(c_b, *(cache_0 + offset[8]), min_diff))
+            if(test_gt_set(c_b, *(cache_0 + offset[10]), min_diff))
+                if(test_gt_set(*(cache_0 + offset[4]), cb, min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else if(test_gt_set(c_b, *(cache_0 + offset[4]), min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                        if(test_gt_set(*(cache_0 + offset[12]), cb, min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[1]), cb, min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                if(test_gt_set(*(cache_0 + offset[11]), cb, min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                        if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                    if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                        b += min_diff;
+                                                    else
+                                                        break;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                b += min_diff;
+                                            else
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                        if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                        if(test_gt_set(c_b, *(cache_0 + offset[2]), min_diff))
+                            if(test_gt_set(c_b, *(cache_0 + offset[1]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[3]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                if(test_gt_set(c_b, *(cache_0 + offset[14]), min_diff))
+                    if(test_gt_set(c_b, *(cache_0 + offset[6]), min_diff))
+                        if(test_gt_set(c_b, *(cache_0 + offset[12]), min_diff))
+                            if(test_gt_set(*(cache_0 + offset[5]), cb, min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                                if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                                    b += min_diff;
+                                                else
+                                                    break;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else if(test_gt_set(c_b, *(cache_0 + offset[5]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                            if(test_gt_set(c_b, *(cache_0 + offset[15]), min_diff))
+                                if(test_gt_set(c_b, *(cache_0 + offset[13]), min_diff))
+                                    if(test_gt_set(c_b, *(cache_0 + offset[7]), min_diff))
+                                        if(test_gt_set(c_b, *(cache_0 + offset[9]), min_diff))
+                                            if(test_gt_set(c_b, *(cache_0 + offset[11]), min_diff))
+                                                b += min_diff;
+                                            else
+                                                break;
+                                        else
+                                            break;
+                                    else
+                                        break;
+                                else
+                                    break;
+                            else
+                                break;
+                        else
+                            break;
+                    else
+                        break;
+                else
+                    break;
+            else
+                break;
+        else
+            break;
+
+    }
+
+    return b-1;
+}
+
+void FastDetector::fast_corner_score_10(cvData::Img_t::const_iterator& img, const int img_stride,
+                                        const std::vector<fast_xy> &corners, const double threshold,
+                                        std::vector<int> &scores){
+    scores.resize(corners.size());
+    int pixel[16] = {
+            0 + img_stride * 3,
+            1 + img_stride * 3,
+            2 + img_stride * 2,
+            3 + img_stride * 1,
+            3 + img_stride * 0,
+            3 + img_stride * -1,
+            2 + img_stride * -2,
+            1 + img_stride * -3,
+            0 + img_stride * -3,
+            -1 + img_stride * -3,
+            -2 + img_stride * -2,
+            -3 + img_stride * -1,
+            -3 + img_stride * 0,
+            -3 + img_stride * 1,
+            -2 + img_stride * 2,
+            -1 + img_stride * 3,
+    };
+    for(unsigned int n=0; n < corners.size(); n++)
+        scores[n] = (int)fast_corner_score(img + corners[n].y*img_stride + corners[n].x, pixel, threshold);
+}
+
+void FastDetector::fast_nonmax_3x3(const std::vector<fast_xy> &corners, const std::vector<int> &scores,
+                                   std::vector<int> &nonmax_corners){
+    nonmax_corners.clear();
+    nonmax_corners.reserve(corners.size());
+
+    if(corners.size() < 1)
+        return;
+
+
+    // Find where each row begins
+    // (the corners are output in raster scan order). A beginning of -1 signifies
+    // that there are no corners on that row.
+    int last_row = corners.back().y;
+    vector<int> row_start(last_row + 1, -1);
+
+    int prev_row = -1;
+    for(unsigned int i=0; i< corners.size(); i++)
+        if(corners[i].y != prev_row)
+        {
+            row_start[corners[i].y] = i;
+            prev_row = corners[i].y;
+        }
+
+
+    //Point above points (roughly) to the pixel above the one of interest, if there
+    //is a feature there.
+    int point_above = 0;
+    int point_below = 0;
+
+    const int sz = (int)corners.size();
+
+    for(int i=0; i < sz; i++)
+    {
+        int score = scores[i];
+        fast_xy pos = corners[i];
+
+        //Check left
+        if(i > 0)
+            //if(corners[i-1] == pos-ImageRef(1,0) && (scores[i-1] >= score))
+            if(corners[i-1].x == pos.x-1 && corners[i-1].y == pos.y && scores[i-1] >= score)
+                continue;
+
+        //Check right
+        if(i < (sz - 1))
+            //if(corners[i+1] == pos+ImageRef(1,0) &&  (scores[i+1] >= score))
+            if(corners[i+1].x == pos.x+1 && corners[i+1].y == pos.y && scores[i+1] >= score)
+                continue;
+
+        //Check above (if there is a valid row above)
+        if(pos.y != 0 && row_start[pos.y - 1] != -1)
+        {
+            //Make sure that current point_above is one
+            //row above.
+            if(corners[point_above].y < pos.y - 1)
+                point_above = row_start[pos.y-1];
+
+            //Make point_above point to the first of the pixels above the current point,
+            //if it exists.
+            for(; corners[point_above].y < pos.y && corners[point_above].x < pos.x - 1; point_above++)
+            {}
+
+
+            for(int i=point_above; corners[i].y < pos.y && corners[i].x <= pos.x + 1; i++)
+            {
+                int x = corners[i].x;
+                if( (x == pos.x - 1 || x ==pos.x || x == pos.x+1) && (scores[i] >= score))
+                    goto cont;
+            }
+
+        }
+
+        if(pos.y != last_row && row_start[pos.y + 1] != -1 && point_below < sz) //Nothing below
+        {
+            if(corners[point_below].y < pos.y + 1)
+                point_below = row_start[pos.y+1];
+
+            for(; point_below < sz && corners[point_below].y == pos.y+1 && corners[point_below].x < pos.x - 1; point_below++)
+            {}
+
+            for(int i=point_below; i < sz && corners[i].y == pos.y+1 && corners[i].x <= pos.x + 1; i++)
+            {
+                int x = corners[i].x;
+                if( (x == pos.x - 1 || x ==pos.x || x == pos.x+1) && (scores[i] >= score))
+                    goto cont;
+            }
+        }
+
+        nonmax_corners.push_back(i);
+
+        cont:
+        ;
+    }
+}
 
 EdgeDetector::EdgeDetector(
     const int img_width,
@@ -3329,5 +6585,3 @@ public:
 };
 
 } // namespace feature_detection
-
-
