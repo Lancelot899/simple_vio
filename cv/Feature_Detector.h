@@ -117,7 +117,7 @@ protected:
     void fast_corner_detect_10(const cvData::Img_t& img, int imgWidth, int imgHeight,
                                int img_stride, double barrier, std::vector<fast_xy>& corners);
 
-    void fast_corner_score_10(cvData::Img_t::const_iterator& img, const int img_stride,
+    void fast_corner_score_10(cvData::Img_t::const_iterator img, const int img_stride,
                               const std::vector<fast_xy>& corners, const double threshold, std::vector<int>& scores);
 
     void fast_nonmax_3x3(const std::vector<fast_xy>& corners,

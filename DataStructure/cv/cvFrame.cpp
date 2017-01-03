@@ -1,5 +1,8 @@
 #include "cvFrame.h"
 
+const cvMeasure& cvFrame::getMeasure() {
+    return cvData;
+}
 
 const cvFrame::Pic_t& cvFrame::getPicture() {
     return cvData.measurement.pic;
@@ -40,7 +43,7 @@ bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     return true;
 }
 
-cvFrame::cvFrame(std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
+cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cam_ = cam;
     cvData.measurement.pic = pic;
     int rows = pic.rows;
@@ -123,7 +126,7 @@ int cvFrame::getSensorID() {
     return cvData.sensorId;
 }
 
-const cvFrame::cam_t cvFrame::getCam() {
+const cvFrame::cam_t& cvFrame::getCam() {
     return cam_;
 }
 

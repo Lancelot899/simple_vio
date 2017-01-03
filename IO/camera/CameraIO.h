@@ -10,12 +10,13 @@
 #include "../IOBase.h"
 #include "../../DataStructure/cv/cvFrame.h"
 
-class CameraIO : public IOBase<cvMeasure>
-{
-    typedef std::shared_ptr<VIOCamera>        pCamereParam;
-    typedef std::map<double,cv::Mat>          CameraData;
+class CameraIO : public IOBase<cvMeasure> {
+public:
+    typedef std::shared_ptr<AbstractCamera>        pCamereParam;
+    typedef std::map<double, cv::Mat>              CameraData;
 public:
     CameraIO(std::string imageFile, std::string cameraParamfile);
+    const pCamereParam& getCamera();
 
 /*
     pose_t          getTBS(void) {return  camParam->getTBS();}
@@ -23,7 +24,7 @@ public:
     std::string     getCameraMode(void) {return  camParam->getCameraMode();}
     std::string     getDistorMode(void) {return  camParam->getDistorMode();}
 */
-public:
+private:
     pCamereParam        camParam;
     CameraData          camData;
 };
