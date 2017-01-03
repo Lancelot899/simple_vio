@@ -93,10 +93,10 @@ set(SOURCE_FILES
         IMU/test/Test_IMUPRE.cpp
         IMU/IMU.cpp
         IMU/IMU.h
-        IO/imu/test/test_IMUIO.cpp
+        IO/imu/test/Test_IMUIO.cpp
         IO/imu/IMUIO.cpp
         IO/imu/IMUIO.h
-        IO/camera/test/cameratest.cpp
+        IO/camera/test/Test_CameraIO.cpp
         IO/camera/CameraIO.cpp
         IO/camera/CameraIO.h
         IO/IOBase.h
@@ -118,7 +118,7 @@ set(SOURCE_FILES
         util/setting.h
         util/util.cpp
         util/util.h
-        main.cpp)
+        main.cpp cv/test/Test_fast.cpp)
 
 
 add_executable(simple_vio ${SOURCE_FILES})
