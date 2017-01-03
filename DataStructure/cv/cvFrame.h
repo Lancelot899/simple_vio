@@ -63,13 +63,13 @@ public:
     typedef Eigen::Vector2d             grad_t;
 
 public:
-    cvFrame(std::shared_ptr<AbstractCamera>& cam, Pic_t &pic);
+    cvFrame(const std::shared_ptr<AbstractCamera>& cam, Pic_t &pic);
     ~cvFrame();
 
     int getID();
     const okvis::Time& getTimestamp();
     int getSensorID();
-    const cam_t getCam();
+    const cam_t& getCam();
     const cov_t& getCovariance();
     const pose_t& getPose();
     void setPose(pose_t &pose);
@@ -85,6 +85,7 @@ public:
     double getGradNorm(int u, int v, int level = 0);
     int getWidth(int level = 0);
     int getHeight(int level = 0);
+    const cvMeasure& getMeasure();
 
 public:
     static int         frame_counter_;         //!< Counts the number of created frames. Used to set the unique id.

@@ -2,6 +2,11 @@
 #include <fstream>
 #include <iomanip>
 
+
+const CameraIO::pCamereParam& CameraIO::getCamera(){
+    return camParam;
+}
+
 CameraIO::CameraIO(std::string imageFile, std::string cameraParamfile)
 {
     assert(!imageFile.empty() && !cameraParamfile.empty());

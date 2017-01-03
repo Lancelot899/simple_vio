@@ -3263,7 +3263,7 @@ void FastDetector::detect(
           frame->getHeight(L), frame->getWidth(L), 8.0, fast_corners);
 
     vector<int> scores, nm_corners;
-    fast_corner_score_10(img_pyr[L], frame->getWidth(L), fast_corners, 8, scores);// 20
+    fast_corner_score_10(img_pyr[L].begin(), frame->getWidth(L), fast_corners, 8, scores);// 20
     fast_nonmax_3x3(fast_corners, scores, nm_corners);
 
     for(auto it=nm_corners.begin(), ite=nm_corners.end(); it!=ite; ++it)
@@ -3273,7 +3273,7 @@ void FastDetector::detect(
                   + static_cast<int>((xy.x*scale)/cell_size_);
       if(grid_occupancy_[k])
         continue;
-      const float score = shiTomasiScore(img_pyr[L], xy.x, xy.y);
+      const double score = shiTomasiScore(img_pyr[L], frame->getWidth(L), frame->getHeight(L), xy.x, xy.y);
       if(score > corners.at(k).score)
         corners.at(k) = Corner(xy.x*scale, xy.y*scale, score, L, 0.0f);
     }
@@ -6414,7 +6414,7 @@ inline double fast_corner_score(cvData::Img_t::const_iterator cache_0, const int
     return b-1;
 }
 
-void FastDetector::fast_corner_score_10(cvData::Img_t::const_iterator& img, const int img_stride,
+void FastDetector::fast_corner_score_10(cvData::Img_t::const_iterator img, const int img_stride,
                                         const std::vector<fast_xy> &corners, const double threshold,
                                         std::vector<int> &scores){
     scores.resize(corners.size());

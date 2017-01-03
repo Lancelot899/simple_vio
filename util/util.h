@@ -36,6 +36,7 @@ inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> 
 
 Eigen::Matrix3d rightJacobian(const Eigen::Vector3d & PhiVec);
 float shiTomasiScore(const cv::Mat& img, int u, int v);
+double shiTomasiScore(const std::vector<Eigen::Matrix<double, 3, 1>>& img, int width, int height, int u, int v);
 
 inline double norm_max(const Eigen::VectorXd & v)
 {
