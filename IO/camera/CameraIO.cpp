@@ -10,6 +10,27 @@ const CameraIO::pCamereParam& CameraIO::getCamera(){
 CameraIO::CameraIO(std::string imageFile, std::string cameraParamfile)
 {
     assert(!imageFile.empty() && !cameraParamfile.empty());
+    /// first part:
+    parseParamFile(cameraParamfile);
+
+    /// Second part:
+    getDataSet(imageFile);
+}
+
+
+CameraIO::CameraIO(int device, std::string cameraParamfile)
+{
+    assert(!cameraParamfile.empty());
+    /// first part:
+    parseParamFile(cameraParamfile);
+
+    /// Second part:
+//    getDataSet(imageFile);
+}
+
+
+int CameraIO::parseParamFile(const std::string &cameraParamfile){
+
     std::ifstream camParam_file(cameraParamfile.c_str());
     if(!camParam_file.good()) {
         std::cerr << "camParam_file file error!" << std::endl;
@@ -123,11 +144,65 @@ CameraIO::CameraIO(std::string imageFile, std::string cameraParamfile)
         distortion_coefficients[i] = atof(valueDistor0);
     }
 
-
-    /// construct VIOCamera
+    /// construct VIOCamera paramet
     camParam = std::make_shared<VIOCamera>(width,height,intrinsics[0],intrinsics[1],intrinsics[2],intrinsics[3],
                                            distortion_coefficients[0],distortion_coefficients[1],distortion_coefficients[2],
                                            distortion_coefficients[3],0,T_BS,rate,Camera_mode,Distortion_mode);
+    return 0;
+}
 
+int CameraIO::getDataSet(const std::string &imageFile)
+{
+    camData.clear();
+    double timestamp = 0.0;
+    std::string fileName;
+    std::string totalLine;
+    std::ifstream camData_file(imageFile.c_str());
+    if(!camData_file.good()) {
+        std::cerr << "camParam_file file error!" << std::endl;
+        exit(-1);
+    }
+
+    getline(camData_file,totalLine);
+    while (!camData_file.eof()){
+        if(totalLine[0]=='#') {
+            getline(camData_file,totalLine);
+            continue;
+        }
+
+        std::size_t currentPos = -1;
+        currentPos = totalLine.find(",",0);
+        if(currentPos==std::string::npos){
+            std::cout<<"No , !!!\n\n\n";
+            return -1;
+        }
+
+        timestamp = atoll(totalLine.substr(0,currentPos).c_str());
+        fileName = totalLine.substr(currentPos+1,totalLine.size());
+
+        camData.push_back(std::make_pair(timestamp,fileName));
+        getline(camData_file,totalLine);
+    }
+
+    return 0;
+}
+
+
+std::string CameraIO::getNextFrame(double &timestamp){
+    if(camData.size()>0){
+        std::pair<double, std::string> data = camData.front();
+        camData.pop_front();
+        timestamp = data.first;
+        return data.second;
+    }
+    else{
+        printf("data finished!\n");
+        return std::string("");
+    }
+
+}
+
+int CameraIO::getNextFrame(int device){
+    return 0;
 }
 

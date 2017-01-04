@@ -7,6 +7,7 @@ class IMUImplPRE : public IMUImpl
 {
 public:
     IMUImplPRE();
+    ///< factor jacobian_t: dRdb_g, dvdb_a dvdb_g dpdb_a dpdb_g
     int propagation(const ImuMeasureDeque & imuMeasurements,
                     const ImuParameters & imuParams,
                     Transformation& T_WS,
