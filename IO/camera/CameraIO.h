@@ -1,6 +1,7 @@
 #ifndef CAMERAIO_H
 #define CAMERAIO_H
-#include <map>
+#include <deque>
+#include <utility>
 #include <memory>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
@@ -13,9 +14,20 @@
 class CameraIO : public IOBase<cvMeasure> {
 public:
     typedef std::shared_ptr<AbstractCamera>        pCamereParam;
-    typedef std::map<double, cv::Mat>              CameraData;
+    typedef std::deque<std::pair<double, std::string> >        CameraData;
 public:
     CameraIO(std::string imageFile, std::string cameraParamfile);
+    CameraIO(int device, std::string cameraParamfile);
+
+    ///  for device
+    /// \param device
+    /// \return
+    int getNextFrame(int device);
+    ///  for dataset
+    /// \param timestamp
+    /// \return
+    std::string getNextFrame(double &timestamp);
+
     const pCamereParam& getCamera();
 
 /*
@@ -25,6 +37,9 @@ public:
     std::string     getDistorMode(void) {return  camParam->getDistorMode();}
 */
 private:
+    int parseParamFile(const std::string &cameraParamfile);
+    int getDataSet(const std::string &imageFile);
+
     pCamereParam        camParam;
     CameraData          camData;
 };
