@@ -245,10 +245,6 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
 
 
-    /**
-    * @brief Jacobian
-    * @param jacobian_t: drdphi drdb, dvdphi dvdv dvdb, dpdphi dpdv dpdp dpdb, for bias i->b_g, j->b_a
-    */
     jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err) * Rj_inv * Ri;
     jacobian_j.block<3, 3>(0, 0) = rightJacobian(err);
     jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err) * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
