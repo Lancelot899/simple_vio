@@ -39,7 +39,7 @@ bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     if(u >= rows || v >= cols)
         return false;
 
-    out =  cvData.measurement.imgPyr[level][v * rows + u].segment<2>(1, 0);
+    out =  cvData.measurement.imgPyr[level][v * rows + u].segment<2>(1);
     return true;
 }
 
