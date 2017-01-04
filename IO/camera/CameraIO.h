@@ -20,12 +20,8 @@ public:
     CameraIO(int device, std::string cameraParamfile);
 
     ///  for device
-    /// \param device
-    /// \return
     int getNextFrame(int device);
     ///  for dataset
-    /// \param timestamp
-    /// \return
     std::string getNextFrame(double &timestamp);
 
     const pCamereParam& getCamera();
