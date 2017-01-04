@@ -4,10 +4,9 @@
 
 #include <memory>
 #include <opencv2/ts.hpp>
-#include <IO/camera/CameraIO.h>
+
+#include "IO/camera/CameraIO.h"
 #include "cv/Feature_Detector.h"
-#include "DataStructure/cv/cvFrame.h"
-#include "DataStructure/cv/Camera.h"
 
 TEST(fast_detector, fast_detector) {
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
