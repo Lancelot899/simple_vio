@@ -68,12 +68,16 @@ LIST(APPEND LINK_LIBS
         ${Boost_LIBRARIES}
         ${GLOG_LIBRARIES}
         ${CERES_LIBRARIES}
-        ${G2O_LIBRARIES}
+        )
+
+LIST(APPEND LINK_LIBS
+        ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CHOLMOD} ${G2O_SOLVER_CSPARSE} ${G2O_SOLVER_DENSE}
+        ${G2O_SOLVER_PCG} ${G2O_TYPES_SBA} ${G2O_TYPES_SLAM3D} cholmod cxsparse
         )
 
 set(SOURCE_FILES
-        cv/Feature_Detector.cpp
-        cv/Feature_Detector.h
+        cv/AbstractDetector.cpp
+        cv/AbstractDetector.h
         DataStructure/cv/Camera.cpp
         DataStructure/cv/Camera.h
         DataStructure/cv/cvFrame.cpp
@@ -122,7 +126,7 @@ set(SOURCE_FILES
         util/setting.h
         util/util.cpp
         util/util.h
-        main.cpp cv/test/Test_fast.cpp DataStructure/GraphFactor/imuG2OType.h DataStructure/GraphFactor/imuG2OType.cpp)
+        main.cpp cv/test/Test_fast.cpp DataStructure/GraphFactor/imuG2OType.h DataStructure/GraphFactor/imuG2OType.cpp cv/FastDetector.cpp cv/FastDetector.h cv/EdgeDetector.cpp cv/EdgeDetector.h)
 
 
 add_executable(simple_vio ${SOURCE_FILES})
