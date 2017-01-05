@@ -8,8 +8,7 @@
 class cvFrame;
 class imuFactor;
 
-class viFrame
-{
+class viFrame {
 public:
 
     typedef std::shared_ptr<imuFactor>        linked_t;
