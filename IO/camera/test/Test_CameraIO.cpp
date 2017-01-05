@@ -7,6 +7,7 @@ TEST(TestCamIO, CAMERA_IO) {
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
 
+#if 0
     printf("Finished class Construct,then begin test TBS!\n");
     /// T_BS & Rate_hz :
     Eigen::Matrix<double, 4, 4>     se3d;
@@ -18,7 +19,7 @@ TEST(TestCamIO, CAMERA_IO) {
 
 //    GTEST_ASSERT_EQ(camTest.camParam->getTBS().matrix(),se3d);
 
-#if 0
+
     std::cout<<"diff = \n"<<camTest.getCamera()->getTBS().matrix()-se3d<<"\n";
     GTEST_ASSERT_EQ(camTest.camParam->getRate(),20);
     /// Mode:
@@ -34,5 +35,13 @@ TEST(TestCamIO, CAMERA_IO) {
     GTEST_ASSERT_EQ(camTest.camParam->d0(),-0.28368365); GTEST_ASSERT_EQ(camTest.camParam->d1(),0.07451284);
     GTEST_ASSERT_EQ(camTest.camParam->d2(),-0.00010473);GTEST_ASSERT_EQ(camTest.camParam->d3(),-3.55590700e-05);
 
+    double timestamp;
+    for (int i = 0; i < 10; ++i) {
+        std::string fileName = camTest.getNextFrame(timestamp);
+        std::cout<<"["<<i<<"]: "<<std::fixed<<timestamp<<" <===> "<<fileName<<"\n";
+    }
+
 #endif
+
+
 }

@@ -27,9 +27,9 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
 
 
     std::vector<double> VecDt;
-    std::vector<Sophus::SO3d, Eigen::aligned_allocator<IMUMeasure>>    VecRotation;
-    std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<IMUMeasure>> VecRightJac;
-    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<IMUMeasure>> VecAcc;
+    std::vector<Sophus::SO3d, Eigen::aligned_allocator<Sophus::SO3d>>        VecRotation;
+    std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d>>  VecRightJac;
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>  VecAcc;
 
     const Eigen::Vector3d gbias = speedAndBiases.segment<3>(3);
     const Eigen::Vector3d abias = speedAndBiases.segment<3>(6);
@@ -151,7 +151,7 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     if(jacobian) {
         assert(jacobian->rows() == 15 && jacobian->cols() == 3);
         jacobian->setZero();
-        Sophus::SO3d R_ij = VecRotation[VecRotation.size()];
+        Sophus::SO3d R_ij = VecRotation[VecRotation.size()-1];
         Eigen::Matrix<double, 3, 3> matR_ij = R_ij.matrix();
         //VecRotation.pop_back();
         for(auto it = VecRotation.begin(); it != VecRotation.end(); ++it)
@@ -160,7 +160,7 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
         for(unsigned i = 0; i < VecRightJac.size(); ++i) {
             jacobian->block<3, 3>(0, 0) -= VecRotation[i].inverse().matrix() * VecRightJac[i] * VecDt[i];
             jacobian->block<3, 3>(3, 0) -= matR_ij * VecDt[i];
-            jacobian->block<3, 3>(9, 0) -= 1.5 * matR_ij * VecDt[i];
+            jacobian->block<3, 3>(9, 0) -= 1.5 * matR_ij * VecDt[i] * VecDt[i];
         }
 
         const Eigen::Matrix<double, 3, 3> &dR_dbg = jacobian->block<3, 3>(0, 0);
@@ -243,6 +243,7 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     const Eigen::Matrix3d        Ri         = frame_i->getPose().so3().matrix();
     const Eigen::Matrix3d        Rj         = frame_j->getPose().so3().matrix();
     const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
+
 
     jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err) * Rj_inv * Ri;
     jacobian_j.block<3, 3>(0, 0) = rightJacobian(err);

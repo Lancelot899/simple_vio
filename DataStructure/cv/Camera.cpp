@@ -100,12 +100,10 @@ Vector3d VIOCamera::cam2world(const Vector2d &px) const
 
 Vector2d VIOCamera::world2cam(const Vector3d &xyz_c) const
 {
-//    return PinholeCamera::cam2world(T_BS.inverse()*xyz_c);
-    return PinholeCamera::world2cam(xyz_c);
+    return PinholeCamera::world2cam(T_BS.inverse()*xyz_c);
 }
 
 Vector2d VIOCamera::world2cam(const Vector2d &uv) const
 {
-//    return PinholeCamera::world2cam(T_BS.inverse()*Vector3d(uv[0],uv[1],1));
-    return PinholeCamera::world2cam(uv);
+    return PinholeCamera::world2cam(T_BS.inverse()*Vector3d(uv[0],uv[1],1));
 }
