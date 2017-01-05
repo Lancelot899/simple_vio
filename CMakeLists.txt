@@ -25,6 +25,8 @@ FIND_PACKAGE(SuiteSparse)
 EXECUTE_PROCESS(COMMAND sudo apt-get install libeigen3-dev)
 FIND_PACKAGE(Eigen)
 
+#g2o
+FIND_PACKAGE(G2O REQUIRED QUIET)
 
 #ceres
 FIND_PACKAGE(Ceres REQUIRED QUIET)
@@ -58,6 +60,7 @@ INCLUDE_DIRECTORIES(
         ${GLOG_INCLUDE_DIRS}
         ${EIGEN_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
+        ${G2O_INCLUDE_DIRS}
 )
 
 LIST(APPEND LINK_LIBS
@@ -65,6 +68,7 @@ LIST(APPEND LINK_LIBS
         ${Boost_LIBRARIES}
         ${GLOG_LIBRARIES}
         ${CERES_LIBRARIES}
+        ${G2O_LIBRARIES}
         )
 
 set(SOURCE_FILES
@@ -118,7 +122,7 @@ set(SOURCE_FILES
         util/setting.h
         util/util.cpp
         util/util.h
-        main.cpp cv/test/Test_fast.cpp)
+        main.cpp cv/test/Test_fast.cpp DataStructure/GraphFactor/imuG2OType.h DataStructure/GraphFactor/imuG2OType.cpp)
 
 
 add_executable(simple_vio ${SOURCE_FILES})
