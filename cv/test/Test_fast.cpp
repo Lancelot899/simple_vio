@@ -3,7 +3,7 @@
 //
 
 #include <memory>
-#include <opencv2/ts.hpp>
+#include <opencv2/ts/ts.hpp>
 
 #include "IO/camera/CameraIO.h"
 #include "cv/Feature_Detector.h"

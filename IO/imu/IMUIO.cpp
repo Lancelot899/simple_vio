@@ -24,7 +24,7 @@ void inline readData(char *buffer, const char *name, double *val) {
 }
 
 
-IMUIO::IMUIO(std::__cxx11::string &imufile, std::__cxx11::string &imuParamfile) {
+IMUIO::IMUIO(std::string &imufile, std::string &imuParamfile) {
     assert(!imufile.empty() && !imuParamfile.empty());
     std::ifstream imuParam_file(imuParamfile);
     if(!imuParam_file.good()) {
