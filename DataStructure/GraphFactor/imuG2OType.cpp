@@ -7,7 +7,7 @@
 #include "DataStructure/imu/imuFactor.h"
 #include "IMU/IMU.h"
 #include "util/util.h"
-
+#include "DataStructure/cv/Camera.h"
 
 bool viPREVertex::read(std::istream &is) {return true;}
 bool viPREVertex::write(std::ostream &os) const {return true;}
@@ -47,12 +47,15 @@ bool viPREEdge::write(std::ostream& os) const {
     return true;
 }
 
-bool viPREEdge::setMeasurementData(const std::shared_ptr<imuFactor> &imufactor, double dt, std::shared_ptr<ImuParameters>& imuParam, const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> *covariance) {
+bool viPREEdge::setMeasurementData(const std::shared_ptr<imuFactor> &imufactor,
+                                   double dt, std::shared_ptr<ImuParameters>& imuParam,
+                                   const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> *covariance) {
     if(imufactor.get() == nullptr)
         return false;
     _measurement.rotation    = imufactor->getPoseFac().so3();
     _measurement.translation = imufactor->getPoseFac().translation();
     _measurement.dSpeed      = imufactor->getSpeedFac();
+
     if(covariance == nullptr)
         _information = Eigen::Matrix<double, 9, 9>::Identity();
     else {
@@ -146,4 +149,18 @@ bool viCamEdge::setMeasurementData(const camEdgeData &pixel, std::shared_ptr<Abs
 
     return true;
 
+}
+void viCamEdge::computeError()
+{
+    const viVertexData &v1 = (static_cast<viPREVertex*>(_vertices[0]))->estimate();
+    const g2o::Vector3D &v2 = (static_cast<g2o::VertexPointXYZ*>(_vertices[1]))->estimate();
+    g2o::Vector3D camPoint = v1.orient * v2 + v1.pos;
+
+    _error[0] = _measurement.u - cam->fx()*camPoint[0]/camPoint[2] - cam->cx();
+    _error[1] = _measurement.v - cam->fy()*camPoint[1]/camPoint[2] - cam->cy();
+}
+void viCamEdge::linearizeOplus()
+{
+    const viVertexData &v1 = (static_cast<viPREVertex*>(_vertices[0]))->estimate();
+    const g2o::Vector3D &v2 = (static_cast<g2o::VertexPointXYZ*>(_vertices[1]))->estimate();
 }
