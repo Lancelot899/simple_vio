@@ -45,6 +45,11 @@ public:
         return false;
     }
 
+    virtual double fx() const { return 0.0; }
+    virtual double fy() const { return 0.0; }
+    virtual double cx() const { return 0.0; }
+    virtual double cy() const { return 0.0; }
+
 protected:
     int width_;   // TODO cannot be const because of omni-camera model
     int height_;

@@ -41,10 +41,10 @@ public:
 
     inline const Eigen::Matrix3d& K() const { return K_; }
     inline const Eigen::Matrix3d& K_inv() const { return K_inv_; }
-    inline double fx() const { return fx_; }
-    inline double fy() const { return fy_; }
-    inline double cx() const { return cx_; }
-    inline double cy() const { return cy_; }
+    virtual double fx() const { return fx_; }
+    virtual double fy() const { return fy_; }
+    virtual double cx() const { return cx_; }
+    virtual double cy() const { return cy_; }
     inline double d0() const { return d_[0]; }
     inline double d1() const { return d_[1]; }
     inline double d2() const { return d_[2]; }
