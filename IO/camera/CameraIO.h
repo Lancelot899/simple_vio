@@ -13,7 +13,7 @@
 
 class CameraIO : public IOBase<cvMeasure> {
 public:
-    typedef std::shared_ptr<AbstractCamera>        pCamereParam;
+    typedef std::shared_ptr<AbstractCamera>                    pCamereParam;
     typedef std::deque<std::pair<double, std::string> >        CameraData;
 public:
     CameraIO(std::string imageFile, std::string cameraParamfile);
