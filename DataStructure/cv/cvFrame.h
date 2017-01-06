@@ -10,7 +10,7 @@
 
 #include "util/setting.h"
 #include "DataStructure/Measurements.h"
-#include "Camera.h"
+#include "DataStructure/cv/Camera/VIOPinholeCamera.h"
 
 typedef Sophus::SE3d pose_t;
 
@@ -97,6 +97,7 @@ private:
     cam_t              cam_;                   //!< Camera model.
     bool               is_keyframe_;           //!< Was this frames selected as keyframe?
     int                last_published_ts_;     //!< Timestamp of last publishing.
+    std::vector<bool>  occupy;
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;

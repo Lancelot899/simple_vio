@@ -7,7 +7,7 @@
 #include "DataStructure/imu/imuFactor.h"
 #include "IMU/IMU.h"
 #include "util/util.h"
-#include "DataStructure/cv/Camera.h"
+#include "DataStructure/cv/Camera/VIOPinholeCamera.h"
 
 bool viPREVertex::read(std::istream &is) {return true;}
 bool viPREVertex::write(std::ostream &os) const {return true;}

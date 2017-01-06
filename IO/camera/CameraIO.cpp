@@ -144,8 +144,8 @@ int CameraIO::parseParamFile(const std::string &cameraParamfile){
         distortion_coefficients[i] = atof(valueDistor0);
     }
 
-    /// construct VIOCamera paramet
-    camParam = std::make_shared<VIOCamera>(width,height,intrinsics[0],intrinsics[1],intrinsics[2],intrinsics[3],
+    /// construct VIOPinholeCamera param
+    camParam = std::make_shared<VIOPinholeCamera>(width,height,intrinsics[0],intrinsics[1],intrinsics[2],intrinsics[3],
                                            distortion_coefficients[0],distortion_coefficients[1],distortion_coefficients[2],
                                            distortion_coefficients[3],0,T_BS,rate,Camera_mode,Distortion_mode);
     return 0;

@@ -27,13 +27,11 @@ namespace feature_detection {
             grid_occupancy_(grid_n_cols_*grid_n_rows_, false)
     {}
 
-    void AbstractDetector::resetGrid()
-    {
+    void AbstractDetector::resetGrid() {
         std::fill(grid_occupancy_.begin(), grid_occupancy_.end(), false);
     }
 
-    void AbstractDetector::setExistingFeatures(const features_t& fts)
-    {
+    void AbstractDetector::setExistingFeatures(const features_t& fts) {
         std::for_each(fts.begin(), fts.end(), [&](std::shared_ptr<Feature> i) {
             grid_occupancy_.at(
                     static_cast<int>(i->px[1]/cell_size_)*grid_n_cols_
@@ -41,8 +39,7 @@ namespace feature_detection {
         });
     }
 
-    void AbstractDetector::setGridOccpuancy(const Vector2d& px)
-    {
+    void AbstractDetector::setGridOccpuancy(const Vector2d& px) {
         grid_occupancy_.at(
                 static_cast<int>(px[1]/cell_size_)*grid_n_cols_
                 + static_cast<int>(px[0]/cell_size_)) = true;

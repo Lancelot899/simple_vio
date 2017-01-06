@@ -48,7 +48,7 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cvData.measurement.pic = pic;
     int rows = pic.rows;
     int cols = pic.cols;
-
+    occupy.assign(rows * cols, false);
     for(int i = 0; i < IMG_LEVEL; ++i) {
         if(i != 0) {
             rows /= 2;
