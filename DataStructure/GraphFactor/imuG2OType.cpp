@@ -173,7 +173,10 @@ void viCamEdge::linearizeOplus()
 
     _jacobianOplusXi.block<2,9>(0,6) = Eigen::Matrix<double,2,9>::Zero();
 
+    Eigen::Matrix<double,2,3> KInvd;
+    KInvd <<cam->fx()/camPoint[2], 0,                     cam->cx()/camPoint[2],
+            0,                     cam->fy()/camPoint[2], cam->cy()/camPoint[2];
 
-
+    _jacobianOplusXi.block<2,3>(0,0) = KInvd*v1.orient.matrix();
 
 }
