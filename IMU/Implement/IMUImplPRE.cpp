@@ -122,10 +122,10 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             A.setZero();
 
             if(i != 0) {
-                A.block<3, 3>(0, 0) = dR.inverse().matrix();
-                A.block<3, 3>(3, 0) = -dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(0, 0) = dR.inverse().matrix();                                          //(59)
+                A.block<3, 3>(3, 0) = -dt * D_rMat * Sophus::SO3d::hat(acc_S_true);                   //(60)
                 A.block<3, 3>(3, 3) = Eigen::Matrix<double, 3, 3>::Identity();
-                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rMat * Sophus::SO3d::hat(acc_S_true);        //(61)
                 A.block<3, 3>(6, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
                 A.block<3, 3>(6, 6) = Eigen::Matrix<double, 3, 3>::Identity();
             }
@@ -136,7 +136,7 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             Cov_eta.setZero();
             Cov_eta.block<3, 3>(0, 0) = dt * sigma_g_c * Eigen::Matrix<double, 3, 3>::Identity();
             Cov_eta.block<3, 3>(3, 3) = dt * sigma_a_c * Eigen::Matrix<double, 3, 3>::Identity();
-            *covariance = A * *covariance * A.transpose() + B * Cov_eta * B.transpose();
+            *covariance = A * *covariance * A.transpose() + B * Cov_eta * B.transpose();              //(63)
         }
 
         time = nexttime;
@@ -245,9 +245,9 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
 
 
-    jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err) * Rj_inv * Ri;
-    jacobian_j.block<3, 3>(0, 0) = rightJacobian(err);
-    jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err) * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
+    jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err).inverse() * Rj_inv * Ri;
+    jacobian_j.block<3, 3>(0, 0) = rightJacobian(err).inverse();
+    jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err).inverse() * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
     jacobian_j.block<3, 3>(3, 0) = Jacobian_t::Zero();
 
     jacobian_i.block<3, 3>(6, 0) = Sophus::SO3d::hat(Ri_inv * (speed_j - speed_i - g * dt));
@@ -255,13 +255,13 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     jacobian_i.block<3, 3>(9, 0) = -Ri_inv;
     jacobian_j.block<3, 3>(9, 0) = Ri_inv;
     jacobian_i.block<3, 3>(12, 0) = -dvdb_g;
-    jacobian_j.block<3, 3>(12, 0) = dvdb_a;
+    jacobian_j.block<3, 3>(12, 0) = -dvdb_a;
 
     jacobian_i.block<3, 3>(15, 0) = Sophus::SO3d::hat(Ri_inv * (frame_j->getPose().translation() - frame_i->getPose().translation() - speed_i * dt - 0.5 * g * dt *dt));
     jacobian_j.block<3, 3>(15, 0) = Jacobian_t::Zero();
     jacobian_i.block<3, 3>(18, 0) = -Ri_inv * dt;
     jacobian_j.block<3, 3>(18, 0) = Jacobian_t::Zero();
-    jacobian_i.block<3, 3>(21, 0) = Jacobian_t::Identity();
+    jacobian_i.block<3, 3>(21, 0) = -Jacobian_t::Identity();
     jacobian_j.block<3, 3>(21, 0) = Ri_inv * Rj;
     jacobian_i.block<3, 3>(24, 0) = -dpdb_g;
     jacobian_j.block<3, 3>(24, 0) = -dpdb_a;
