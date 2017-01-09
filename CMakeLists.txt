@@ -76,10 +76,9 @@ LIST(APPEND LINK_LIBS
         )
 
 set(SOURCE_FILES
-        cv/AbstractDetector.cpp
-        cv/AbstractDetector.h
-        DataStructure/cv/Camera.cpp
-        DataStructure/cv/Camera.h
+        cv/FeatureDetector/AbstractDetector.cpp
+        cv/FeatureDetector/AbstractDetector.h
+        DataStructure/cv/Camera/AbstractCamera.h
         DataStructure/cv/cvFrame.cpp
         DataStructure/cv/cvFrame.h
         DataStructure/cv/Feature.h
@@ -126,7 +125,18 @@ set(SOURCE_FILES
         util/setting.h
         util/util.cpp
         util/util.h
-        main.cpp cv/test/Test_fast.cpp DataStructure/GraphFactor/imuG2OType.h DataStructure/GraphFactor/imuG2OType.cpp cv/FastDetector.cpp cv/FastDetector.h cv/EdgeDetector.cpp cv/EdgeDetector.h)
+        main.cpp
+        cv/FeatureDetector/test/Test_fast.cpp
+        DataStructure/GraphFactor/imuG2OType.h
+        DataStructure/GraphFactor/imuG2OType.cpp
+        cv/FeatureDetector/FastDetector.cpp
+        cv/FeatureDetector/FastDetector.h
+        cv/FeatureDetector/EdgeDetector.cpp
+        cv/FeatureDetector/EdgeDetector.h
+        DataStructure/cv/Camera/PinholeCamera.cpp
+        DataStructure/cv/Camera/PinholeCamera.h
+        DataStructure/cv/Camera/VIOPinholeCamera.cpp
+        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h)
 
 
 add_executable(simple_vio ${SOURCE_FILES})

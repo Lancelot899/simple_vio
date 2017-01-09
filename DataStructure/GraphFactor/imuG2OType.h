@@ -105,6 +105,9 @@ public:
                             std::shared_ptr<AbstractCamera>& cam,
                             const Eigen::Matrix2d *covariance = nullptr);
 
+    void linearizeOplus();
+    virtual void computeError();
+
 private:
     std::shared_ptr<AbstractCamera> cam;
 };
