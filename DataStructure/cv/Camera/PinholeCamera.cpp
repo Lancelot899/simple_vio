@@ -45,7 +45,7 @@ Vector3d PinholeCamera::cam2world(const double& u, const double& v) const {
         xyz[1] = px.y;
         xyz[2] = 1.0;
     }
-    return xyz.normalized();
+    return xyz;
 }
 
 Vector3d PinholeCamera::cam2world (const Vector2d& uv) const {
