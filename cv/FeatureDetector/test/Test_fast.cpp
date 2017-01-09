@@ -9,6 +9,8 @@
 #include "DataStructure/cv/Feature.h"
 #include "cv/FeatureDetector/FastDetector.h"
 
+#define SHOW_FAST
+
 TEST(fast_detector, fast_detector) {
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
