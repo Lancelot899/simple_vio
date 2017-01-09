@@ -122,10 +122,10 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             A.setZero();
 
             if(i != 0) {
-                A.block<3, 3>(0, 0) = dR.inverse().matrix();
-                A.block<3, 3>(3, 0) = -dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(0, 0) = dR.inverse().matrix();                                          //(59)
+                A.block<3, 3>(3, 0) = -dt * D_rMat * Sophus::SO3d::hat(acc_S_true);                   //(60)
                 A.block<3, 3>(3, 3) = Eigen::Matrix<double, 3, 3>::Identity();
-                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rMat * Sophus::SO3d::hat(acc_S_true);
+                A.block<3, 3>(6, 0) = -0.5 * dt * dt * D_rMat * Sophus::SO3d::hat(acc_S_true);        //(61)
                 A.block<3, 3>(6, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
                 A.block<3, 3>(6, 6) = Eigen::Matrix<double, 3, 3>::Identity();
             }
@@ -136,7 +136,7 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
             Cov_eta.setZero();
             Cov_eta.block<3, 3>(0, 0) = dt * sigma_g_c * Eigen::Matrix<double, 3, 3>::Identity();
             Cov_eta.block<3, 3>(3, 3) = dt * sigma_a_c * Eigen::Matrix<double, 3, 3>::Identity();
-            *covariance = A * *covariance * A.transpose() + B * Cov_eta * B.transpose();
+            *covariance = A * *covariance * A.transpose() + B * Cov_eta * B.transpose();              //(63)
         }
 
         time = nexttime;

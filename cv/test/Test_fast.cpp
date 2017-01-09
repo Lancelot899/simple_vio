@@ -7,6 +7,10 @@
 
 #include "IO/camera/CameraIO.h"
 #include "cv/FastDetector.h"
+#include "DataStructure/cv/Feature.h
+"
+
+#define SHOW_FAST
 
 TEST(fast_detector, fast_detector) {
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
