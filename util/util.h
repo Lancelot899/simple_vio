@@ -26,6 +26,25 @@ inline Eigen::Matrix<Scalar_T, 3, 3> crossMx(Scalar_T x, Scalar_T y, Scalar_T z)
     return C;
 }
 
+
+inline Eigen::Vector3d
+interpolate(std::vector<Eigen::Vector3d>::const_iterator& img, double u, double v, int cols)
+{
+    int x = int(floor(u));
+    int y = int(floor(v));
+    double subpix_x = u-x;
+    double subpix_y = v-y;
+
+    double w00 = (1.0f-subpix_x)*(1.0f-subpix_y);
+    double w01 = (1.0f-subpix_x)*subpix_y;
+    double w10 = subpix_x*(1.0f-subpix_y);
+    double w11 = 1.0f - w00 - w01 - w10;
+
+    std::vector<Eigen::Vector3d>::const_iterator ptr;
+    ptr = img + y * cols + x;
+    return w00 * (*ptr) + w01 * (*(ptr + cols)) + w10 * (*(ptr + 1)) + w11 * (*(ptr + cols + 1));
+}
+
 template<typename Derived_T>
 inline Eigen::Matrix<typename Eigen::internal::traits<Derived_T>::Scalar, 3, 3> crossMx(
         Eigen::MatrixBase<Derived_T> const & v) {
