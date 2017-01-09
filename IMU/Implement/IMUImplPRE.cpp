@@ -245,9 +245,9 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
 
 
-    jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err) * Rj_inv * Ri;
-    jacobian_j.block<3, 3>(0, 0) = rightJacobian(err);
-    jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err) * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
+    jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err).inverse() * Rj_inv * Ri;
+    jacobian_j.block<3, 3>(0, 0) = rightJacobian(err).inverse();
+    jacobian_i.block<3, 3>(3, 0) = -rightJacobian(err).inverse() * Sophus::SO3d::exp(err).matrix() * rightJacobian(dRdb_g * dBias.block<3, 1>(0, 0)) * dRdb_g;
     jacobian_j.block<3, 3>(3, 0) = Jacobian_t::Zero();
 
     jacobian_i.block<3, 3>(6, 0) = Sophus::SO3d::hat(Ri_inv * (speed_j - speed_i - g * dt));
@@ -255,13 +255,13 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     jacobian_i.block<3, 3>(9, 0) = -Ri_inv;
     jacobian_j.block<3, 3>(9, 0) = Ri_inv;
     jacobian_i.block<3, 3>(12, 0) = -dvdb_g;
-    jacobian_j.block<3, 3>(12, 0) = dvdb_a;
+    jacobian_j.block<3, 3>(12, 0) = -dvdb_a;
 
     jacobian_i.block<3, 3>(15, 0) = Sophus::SO3d::hat(Ri_inv * (frame_j->getPose().translation() - frame_i->getPose().translation() - speed_i * dt - 0.5 * g * dt *dt));
     jacobian_j.block<3, 3>(15, 0) = Jacobian_t::Zero();
     jacobian_i.block<3, 3>(18, 0) = -Ri_inv * dt;
     jacobian_j.block<3, 3>(18, 0) = Jacobian_t::Zero();
-    jacobian_i.block<3, 3>(21, 0) = Jacobian_t::Identity();
+    jacobian_i.block<3, 3>(21, 0) = -Jacobian_t::Identity();
     jacobian_j.block<3, 3>(21, 0) = Ri_inv * Rj;
     jacobian_i.block<3, 3>(24, 0) = -dpdb_g;
     jacobian_j.block<3, 3>(24, 0) = -dpdb_a;
