@@ -136,15 +136,17 @@ public:
             const int halfpatch_size,
             int rows,
             int cols,
-            double* patch);
+            Eigen::Vector3d* patch);
 
     static bool align1D(std::vector<Eigen::Vector3d>::const_iterator& img_ref,
-                    const Eigen::Vector2d &dir,
-                    double *ref_patch_with_border,
-                    double *ref_patch,
-                    const int n_iter,
-                    Eigen::Vector2d &cur_px_estimate,
-                    double &h_inv);
+                        int rows,
+                        int cols,
+                        const Eigen::Vector2d &dir,
+                        Eigen::Vector3d *ref_patch_with_border,
+                        Eigen::Vector3d *ref_patch,
+                        const int n_iter,
+                        Eigen::Vector2d &cur_px_estimate,
+                        double &h_inv);
 
 public:
     Options options_;
@@ -161,8 +163,8 @@ public:
 
 
 private:
-    double patch_[patch_size_*patch_size_];
-    double patch_with_border_[(patch_size_+2)*(patch_size_+2)];
+    Eigen::Vector3d patch_[patch_size_*patch_size_];
+    Eigen::Vector3d patch_with_border_[(patch_size_+2)*(patch_size_+2)];
     Eigen::Matrix2d A_cur_ref_;
     Eigen::Vector2d epi_dir_;
     double epi_length_;
