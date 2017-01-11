@@ -68,14 +68,17 @@ LIST(APPEND LINK_LIBS
         ${Boost_LIBRARIES}
         ${GLOG_LIBRARIES}
         ${CERES_LIBRARIES}
-        ${G2O_LIBRARIES}
+        )
+
+LIST(APPEND LINK_LIBS
+        ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CHOLMOD} ${G2O_SOLVER_CSPARSE} ${G2O_SOLVER_DENSE}
+        ${G2O_SOLVER_PCG} ${G2O_TYPES_SBA} ${G2O_TYPES_SLAM3D} cholmod cxsparse
         )
 
 set(SOURCE_FILES
-        cv/Feature_Detector.cpp
-        cv/Feature_Detector.h
-        DataStructure/cv/Camera.cpp
-        DataStructure/cv/Camera.h
+        cv/FeatureDetector/AbstractDetector.cpp
+        cv/FeatureDetector/AbstractDetector.h
+        DataStructure/cv/Camera/AbstractCamera.h
         DataStructure/cv/cvFrame.cpp
         DataStructure/cv/cvFrame.h
         DataStructure/cv/Feature.h
@@ -122,7 +125,18 @@ set(SOURCE_FILES
         util/setting.h
         util/util.cpp
         util/util.h
-        main.cpp cv/test/Test_fast.cpp DataStructure/GraphFactor/imuG2OType.h DataStructure/GraphFactor/imuG2OType.cpp)
+        main.cpp
+        cv/FeatureDetector/test/Test_fast.cpp
+        DataStructure/GraphFactor/imuG2OType.h
+        DataStructure/GraphFactor/imuG2OType.cpp
+        cv/FeatureDetector/FastDetector.cpp
+        cv/FeatureDetector/FastDetector.h
+        cv/FeatureDetector/EdgeDetector.cpp
+        cv/FeatureDetector/EdgeDetector.h
+        DataStructure/cv/Camera/PinholeCamera.cpp
+        DataStructure/cv/Camera/PinholeCamera.h
+        DataStructure/cv/Camera/VIOPinholeCamera.cpp
+        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h)
 
 
 add_executable(simple_vio ${SOURCE_FILES})

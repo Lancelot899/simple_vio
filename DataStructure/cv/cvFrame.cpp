@@ -48,7 +48,7 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cvData.measurement.pic = pic;
     int rows = pic.rows;
     int cols = pic.cols;
-
+    occupy.assign(rows * cols, false);
     for(int i = 0; i < IMG_LEVEL; ++i) {
         if(i != 0) {
             rows /= 2;
@@ -90,7 +90,7 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
 
                 cvData.measurement.gradNormPyr[i][q * rows + p]
                         = std::sqrt(cvData.measurement.imgPyr[i][q * rows + p][1] * cvData.measurement.imgPyr[i][q * rows + p][1]
-                                     + cvData.measurement.imgPyr[i][q * rows + p][2] * cvData.measurement.imgPyr[i][q * rows + p][2]);
+                                  + cvData.measurement.imgPyr[i][q * rows + p][2] * cvData.measurement.imgPyr[i][q * rows + p][2]);
 
             }
         }

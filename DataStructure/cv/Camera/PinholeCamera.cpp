@@ -1,17 +1,22 @@
-#include "Camera.h"
+//
+// Created by lancelot on 1/6/17.
+//
+
+#include "PinholeCamera.h"
 
 using namespace Eigen;
+
 
 PinholeCamera::PinholeCamera(double width, double height,
                              double fx, double fy,
                              double cx, double cy,
                              double d0, double d1, double d2, double d3, double d4) :
-    AbstractCamera(width, height),
-    fx_(fx), fy_(fy), cx_(cx), cy_(cy),
-    distortion_(fabs(d0) > 0.0000001),
-    undist_map1_(height_, width_, CV_16SC2),
-    undist_map2_(height_, width_, CV_16SC2),
-    use_optimization_(false) {
+        AbstractCamera(width, height),
+        fx_(fx), fy_(fy), cx_(cx), cy_(cy),
+        distortion_(fabs(d0) > 0.0000001),
+        undist_map1_(height_, width_, CV_16SC2),
+        undist_map2_(height_, width_, CV_16SC2),
+        use_optimization_(false) {
     d_[0] = d0; d_[1] = d1; d_[2] = d2; d_[3] = d3; d_[4] = d4;
     cvK_ = (cv::Mat_<double>(3, 3) << fx_, 0.0, cx_, 0.0, fy_, cy_, 0.0, 0.0, 1.0);
     cvD_ = (cv::Mat_<double>(1, 5) << d_[0], d_[1], d_[2], d_[3], d_[4]);
@@ -40,7 +45,7 @@ Vector3d PinholeCamera::cam2world(const double& u, const double& v) const {
         xyz[1] = px.y;
         xyz[2] = 1.0;
     }
-    return xyz.normalized();
+    return xyz;
 }
 
 Vector3d PinholeCamera::cam2world (const Vector2d& uv) const {
@@ -84,26 +89,4 @@ void PinholeCamera::undistortImage(const cv::Mat& raw, cv::Mat& rectified) {
         cv::remap(raw, rectified, undist_map1_, undist_map2_, CV_INTER_LINEAR);
     else
         rectified = raw.clone();
-}
-
-Vector3d VIOCamera::cam2world(const double &x, const double &y) const
-{
-    Vector3d tmp = PinholeCamera::cam2world(x,y);
-    return T_BS*tmp;
-}
-
-Vector3d VIOCamera::cam2world(const Vector2d &px) const
-{
-    Vector3d tmp = PinholeCamera::cam2world(px);
-    return T_BS*tmp;
-}
-
-Vector2d VIOCamera::world2cam(const Vector3d &xyz_c) const
-{
-    return PinholeCamera::world2cam(T_BS.inverse()*xyz_c);
-}
-
-Vector2d VIOCamera::world2cam(const Vector2d &uv) const
-{
-    return PinholeCamera::world2cam(T_BS.inverse()*Vector3d(uv[0],uv[1],1));
 }
