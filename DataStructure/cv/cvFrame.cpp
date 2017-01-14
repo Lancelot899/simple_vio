@@ -1,7 +1,28 @@
 #include "cvFrame.h"
 
+static int cellNumbel[5]=
+{
+    0, 1, 5, 21, 85
+};
+
+static int cellRowNumbel[5]=
+{
+    1, 2, 4, 8, 16
+};
+
+
 const cvMeasure& cvFrame::getMeasure() {
     return cvData;
+}
+
+bool cvFrame::checkCellOccupy(int u, int v, int level)
+{
+    return occupy[cellNumbel[level] + v*cellRowNumbel[level] + u];
+}
+
+bool cvFrame::setCellOccupy(int u, int v, int level, bool occupied)
+{
+    occupy[cellNumbel[level] + v*cellRowNumbel[level] + u] = occupied;
 }
 
 const cvFrame::Pic_t& cvFrame::getPicture() {
@@ -48,7 +69,10 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cvData.measurement.pic = pic;
     int rows = pic.rows;
     int cols = pic.cols;
-    occupy.assign(rows * cols, false);
+
+    // 341 = 1 + 4 + 16 + 64 + 256 !>> cell's numbel for each level
+    // for a point(u,v) in cell(on the l level): (u,v,l) , occupy[(4^l-1)/3 + v*2^l + u]
+    occupy.assign(341, false);
     for(int i = 0; i < IMG_LEVEL; ++i) {
         if(i != 0) {
             rows /= 2;
