@@ -35,7 +35,7 @@ int computeHistQuantil(int* hist, float below)
     int thresholdNum = hist[0]*below + 0.5f;
     for (int var = 0; var < 60; ++var) {
         thresholdNum -= hist[var];
-        if(th<0)  return i;
+        if(thresholdNum<0)  return var;
     }
     return 60;
 }
@@ -49,7 +49,7 @@ EdgeDetector::EdgeDetector(
 {
     randomPattern = new unsigned char[img_width * img_height];
     std::srand(314152926);
-    for (int i = 0; i < total; ++i) {
+    for (int i = 0; i < img_width*img_height; ++i) {
         randomPattern[i] = rand() & 0xFF;
     }
 
@@ -73,10 +73,10 @@ void EdgeDetector::detect(cvframePtr_t frame,
     float thresholdFactor = 1.0f;
     for (int u = 0; u < frame->getWidth(level) ; ++u) {
         for (int v = 0; v < frame->getHeight(level); ++v) {
-            if(frame->checkCellOccupy(u/thresholdStepU,v/thresholdStepV,level))
+            if(frame->checkCellOccupy(u>>5,v>>5,level))
             {
-                v += thresholdStepV;
-                u += thresholdStepU;
+                v += frame->getHeight(0)>>5;
+                u += frame->getWidth(0)>>5;
                 continue;
             }
 
@@ -92,17 +92,17 @@ void EdgeDetector::detect(cvframePtr_t frame,
                 if(frame->getGrad(u,v,out,0))
                     fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(u,v),out,0)));
             }
-            else if(frame->getGradNorm(u>>1+0.25f,v>>1+0.25f,1)>pixelTH1*thresholdFactor) {
-                int utmp = u>>1+0.25f;
-                int vtmp = v>>1+0.25f;
+            else if(frame->getGradNorm(int(u*0.5+0.25f),int(v*0.5+0.25f),1)>pixelTH1*thresholdFactor) {
+                int utmp = int(u*0.5+0.25f);
+                int vtmp = int(v*0.5+0.25f);
 
                 cvFrame::grad_t  out;
                 if(frame->getGrad(utmp,vtmp,out,1))
                 fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(utmp,vtmp),out,1)));
             }
-            else if (frame->getGradNorm(u>>2+0.125f,v>>2+0.125f,2)>pixelTH1*thresholdFactor) {
-                int utmp1 = u>>2+0.125f;
-                int vtmp1 = v>>2+0.125f;
+            else if (frame->getGradNorm(int(u*0.25+0.125f),int(v*0.25+0.125f),2)>pixelTH1*thresholdFactor) {
+                int utmp1 = int(u*0.25+0.125f);
+                int vtmp1 = int(v*0.25+0.125f);
 
                 cvFrame::grad_t  out1;
                 if(frame->getGrad(utmp1,vtmp1,out1,2))
@@ -134,7 +134,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
     for (int x = 0; x < h32; ++x)
         for (int y = 0; y < w32; ++y)
         {
-            float* hist0 = gradHist;
+            int* hist0 = gradHist;
             memset(hist0,0,sizeof(int)*50); //devide into 49 parts
 
             //for each cell
@@ -143,7 +143,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
                 int it = i+32*x ;
                 int jt = j+32*y ;
                 if(it>w-2 || jt>h-2 || it<1 || jt<1) continue;
-                int g = sqrt(frame->getGradNorm(it,ij,0));
+                int g = sqrt(frame->getGradNorm(it,jt,0));
                 if(g>48) g = 48;
                 hist0[g+1]++;
                 hist0[0]++;
