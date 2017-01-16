@@ -163,19 +163,23 @@ void viCamEdge::linearizeOplus()
 {
     const viVertexData &v1 = (static_cast<viPREVertex*>(_vertices[0]))->estimate();
     const g2o::Vector3D &v2 = (static_cast<g2o::VertexPointXYZ*>(_vertices[1]))->estimate();
-    g2o::Vector3D camPoint = v1.orient * v2; g2o::Vector3D camPoint0 = camPoint/camPoint[2];
+    g2o::Vector3D camPoint = v1.orient * v2 + v1.pos ;
+    g2o::Vector3D camPoint0 = camPoint/camPoint[2];
 
-    _jacobianOplusXi.block<2,3>(0,0) << -cam->cx()*camPoint0[1],                       cam->cx()*camPoint0[0]-cam->fx()*camPoint0[2],  cam->fx()*camPoint0[1],
-                                        cam->fy()*camPoint0[2]-cam->cy()*camPoint0[1], cam->cy()*camPoint0[0],                         -camPoint0[0]*cam->fy();
+    double depth_inv = 1.0/camPoint[2];
+    _jacobianOplusXi.block<2,3>(0,0) << cam->fx()*camPoint[0]*camPoint[1]*depth_inv*depth_inv,   -cam->fx()-cam->fx()*camPoint[0]*camPoint[0]*depth_inv*depth_inv,  cam->fx()*camPoint[1]*depth_inv,
+                                        cam->fy()+cam->fy()*camPoint[1]*camPoint[1]*depth_inv*depth_inv,  -cam->fy()*camPoint[0]*camPoint[1]*depth_inv*depth_inv,  -cam->fy()*camPoint[0]*depth_inv;
 
-    _jacobianOplusXi.block<2,3>(0,3) << cam->fx()/camPoint[2], 0.0,                   cam->cx()/camPoint[2],
-                                        0.0,                   cam->fy()/camPoint[2], cam->fy()/camPoint[2];
+    _jacobianOplusXi.block<2,3>(0,3) << -cam->fx()*depth_inv, 0.0,                   cam->fx()*camPoint[0]*depth_inv*depth_inv,
+                                        0.0,   -cam->fy()*depth_inv, cam->fy()*camPoint[1]*depth_inv*depth_inv;
 
     _jacobianOplusXi.block<2,9>(0,6) = Eigen::Matrix<double,2,9>::Zero();
 
+
+
     Eigen::Matrix<double,2,3> KInvd;
-    KInvd <<cam->fx()/camPoint[2], 0,                     cam->cx()/camPoint[2],
-            0,                     cam->fy()/camPoint[2], cam->cy()/camPoint[2];
+    KInvd <<-cam->fx()/camPoint[2], 0,                     cam->fx()*camPoint[0]/(camPoint[2]*camPoint[2]),
+            0,                     -cam->fy()/camPoint[2], cam->fy()*camPoint[1]/(camPoint[2]*camPoint[2]);
 
     _jacobianOplusXi.block<2,3>(0,0) = KInvd*v1.orient.matrix();
 
