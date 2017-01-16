@@ -17,7 +17,13 @@ namespace feature_detection {
                 const int cell_size,
                 const int n_pyr_levels);
 
-        virtual ~EdgeDetector() {}
+        virtual ~EdgeDetector()
+        {
+            delete[] randomPattern;
+            delete[] gradHist;
+            delete[] thresholdSmoothed;
+            delete[] threshold;
+        }
 
         virtual void detect(
                 cvframePtr_t frame,
@@ -25,10 +31,19 @@ namespace feature_detection {
                 const double detection_threshold,
                 features_t &fts);
 
+    private:
+        void makeHists(cvframePtr_t frame);
+        int sample(cvframePtr_t frame,float *rate);
 
     private:
+        int                  *gradHist;
+        float                *threshold;
+        float                *thresholdSmoothed;
+        unsigned char        *randomPattern;
+        int                  thresholdStepU, thresholdStepV;
 
-
+        cvframePtr_t         currentFrame;
+        features_t           edge;  //std::list<std::shared_ptr<Feature>>
     };
 
 }

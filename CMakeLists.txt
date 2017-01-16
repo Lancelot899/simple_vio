@@ -62,6 +62,7 @@ INCLUDE_DIRECTORIES(
         ${CERES_INCLUDE_DIRS}
         ${G2O_INCLUDE_DIRS}
 )
+include_directories("/usr/local/include/g2o/")
 
 LIST(APPEND LINK_LIBS
         ${OpenCV_LIBS}

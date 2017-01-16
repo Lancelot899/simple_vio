@@ -87,6 +87,7 @@ public:
     int getWidth(int level = 0);
     int getHeight(int level = 0);
     const cvMeasure& getMeasure();
+    bool checkCellOccupy(int u,int v,int level = 0);
 
 public:
     static int         frame_counter_;         //!< Counts the number of created frames. Used to set the unique id.
@@ -98,7 +99,9 @@ private:
     cam_t              cam_;                   //!< Camera model.
     bool               is_keyframe_;           //!< Was this frames selected as keyframe?
     int                last_published_ts_;     //!< Timestamp of last publishing.
-    std::vector<bool>  occupy;
+    std::vector<bool>  occupy;                 //!< whether cell is occupy by features
+
+    bool setCellOccupy(int u,int v,int level = 0, bool occupied = true);
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;
