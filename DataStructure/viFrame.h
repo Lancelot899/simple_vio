@@ -10,7 +10,9 @@ class imuFactor;
 
 class viFrame {
 public:
+    friend class Initialize;
 
+public:
     typedef std::shared_ptr<imuFactor>        linked_t;
     typedef std::shared_ptr<viFrame>          imuConnection_t;
     typedef std::shared_ptr<ImuParameters>    ImuParam;

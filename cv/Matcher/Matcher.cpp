@@ -53,89 +53,89 @@ bool Matcher::align1D(std::vector<Eigen::Vector3d>::const_iterator &cur_img,
 
     typedef std::vector<Eigen::Vector3d>::const_iterator imgIter_t;
 
-    const int halfpatch_size_ = 4;
-    const int patch_size = 8;
-    const int patch_area = 64;
-    bool converged = false;
-    Eigen::Vector3d ref_patch_dv[patch_area];
-    Eigen::Matrix2d H;
-    H.setZero();
-
-    const int ref_step = patch_size + 2;
-    Eigen::Vector3d *it_dv = ref_patch_dv;
-    for(int y = 0; y < patch_size; ++y) {
-        Eigen::Vector3d  *it = ref_patch_with_border + (y + 1) * ref_step + 1;
-        for(int x = 0; x < patch_size; ++x, ++it, ++it_dv) {
-            Eigen::Vector2d J;
-            J(0) = 0.5*(dir(0)*(it[1] - it[-1]) + dir(1)*(it[ref_step] - it[-ref_step]));
-            J(1) = 1.0;
-            *it_dv = J(0);
-            H += J * J.transpose();
-        }
-    }
-
-    h_inv = 1.0 / H(0, 0) * patch_size * patch_size;
-    Eigen::Matrix2d Hinv = H.inverse();
-    Eigen::Vector3d mean_diff(0.0, 0.0, 0.0);
-
-    double u = cur_px_estimate.x();
-    double v = cur_px_estimate.y();
-
-    const double min_update_squared = 0.03 * 0.03;
-    const int cur_step = cols;
-    double chi2 = 0.0;
-    Eigen::Vector2d update;
-    update.setZero();
-
-    for(int iter = 0; iter < n_iter; ++iter) {
-        int u_r(std::floor(u));
-        int v_r(std::floor(v));
-
-        if(u_r < halfpatch_size_ || v_r < halfpatch_size_ ||
-                u_r >= cols - halfpatch_size_ || v_r >= rows - halfpatch_size_)
-            break;
-
-        if(std::isnan(u) || std::isnan(v))
-            return false;
-
-        double subpix_x = u - u_r;
-        double subpix_y = v - v_r;
-        double wTL = (1.0 - subpix_x) * (1.0 - subpix_y);
-        double wTR = subpix_x * (1 - subpix_y);
-        double wBL = (1.0 - subpix_x) * subpix_y;
-        double wBR = subpix_x * subpix_x;
-
-        Eigen::Vector3d *it_ref = ref_patch;
-        Eigen::Vector3d *it_ref_dv = ref_patch_dv;
-        double new_chi2 = 0.0;
-
-        Eigen::Vector2d Jres;
-        Jres.setZero();
-        for(int y = 0; y < patch_size; ++y) {
-            imgIter_t it = cur_img + (v_r + y - halfpatch_size_) * cur_step + u_r - halfpatch_size_;
-            for(int x = 0; x < patch_size; ++x, ++it, ++it_ref, ++it_ref_dv) {
-                Eigen::Vector3d search_pixel = wTL * (*it) + wTR * (*(it + 1)) +
-                        wBL * (*(it + cur_step)) + wBR * (*(it + cur_step + 1));
-
-                Eigen::Vector3d res = search_pixel - *it_ref + mean_diff;
-
-            }
-        }
-
-        if(iter > 0 && new_chi2 > chi2) {
-            u -= update[0];
-            v -= update[1];
-            break;
-        }
-
-        chi2 = new_chi2;
-        update = Hinv * Jres;
-
-
-    }
-
-
-
+//    const int halfpatch_size_ = 4;
+//    const int patch_size = 8;
+//    const int patch_area = 64;
+//    bool converged = false;
+//    Eigen::Vector3d ref_patch_dv[patch_area];
+//    Eigen::Matrix2d H;
+//    H.setZero();
+//
+//    const int ref_step = patch_size + 2;
+//    Eigen::Vector3d *it_dv = ref_patch_dv;
+//    for(int y = 0; y < patch_size; ++y) {
+//        Eigen::Vector3d  *it = ref_patch_with_border + (y + 1) * ref_step + 1;
+//        for(int x = 0; x < patch_size; ++x, ++it, ++it_dv) {
+//            Eigen::Vector2d J;
+//            J(0) = 0.5*(dir(0)*(it[1] - it[-1]) + dir(1)*(it[ref_step] - it[-ref_step]));
+//            J(1) = 1.0;
+//            *it_dv = J(0);
+//            H += J * J.transpose();
+//        }
+//    }
+//
+//    h_inv = 1.0 / H(0, 0) * patch_size * patch_size;
+//    Eigen::Matrix2d Hinv = H.inverse();
+//    Eigen::Vector3d mean_diff(0.0, 0.0, 0.0);
+//
+//    double u = cur_px_estimate.x();
+//    double v = cur_px_estimate.y();
+//
+//    const double min_update_squared = 0.03 * 0.03;
+//    const int cur_step = cols;
+//    double chi2 = 0.0;
+//    Eigen::Vector2d update;
+//    update.setZero();
+//
+//    for(int iter = 0; iter < n_iter; ++iter) {
+//        int u_r(std::floor(u));
+//        int v_r(std::floor(v));
+//
+//        if(u_r < halfpatch_size_ || v_r < halfpatch_size_ ||
+//                u_r >= cols - halfpatch_size_ || v_r >= rows - halfpatch_size_)
+//            break;
+//
+//        if(std::isnan(u) || std::isnan(v))
+//            return false;
+//
+//        double subpix_x = u - u_r;
+//        double subpix_y = v - v_r;
+//        double wTL = (1.0 - subpix_x) * (1.0 - subpix_y);
+//        double wTR = subpix_x * (1 - subpix_y);
+//        double wBL = (1.0 - subpix_x) * subpix_y;
+//        double wBR = subpix_x * subpix_x;
+//
+//        Eigen::Vector3d *it_ref = ref_patch;
+//        Eigen::Vector3d *it_ref_dv = ref_patch_dv;
+//        double new_chi2 = 0.0;
+//
+//        Eigen::Vector2d Jres;
+//        Jres.setZero();
+//        for(int y = 0; y < patch_size; ++y) {
+//            imgIter_t it = cur_img + (v_r + y - halfpatch_size_) * cur_step + u_r - halfpatch_size_;
+//            for(int x = 0; x < patch_size; ++x, ++it, ++it_ref, ++it_ref_dv) {
+//                Eigen::Vector3d search_pixel = wTL * (*it) + wTR * (*(it + 1)) +
+//                        wBL * (*(it + cur_step)) + wBR * (*(it + cur_step + 1));
+//
+//                Eigen::Vector3d res = search_pixel - *it_ref + mean_diff;
+//
+//            }
+//        }
+//
+//        if(iter > 0 && new_chi2 > chi2) {
+//            u -= update[0];
+//            v -= update[1];
+//            break;
+//        }
+//
+//        chi2 = new_chi2;
+//        update = Hinv * Jres;
+//
+//
+//    }
+//
+//
+//
 
     return true;
 }

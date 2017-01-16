@@ -53,6 +53,7 @@ public:
 class cvFrame : boost::noncopyable {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     friend class AbstractDetector;
+    friend class Initialize;
 
 public:
     typedef Eigen::Vector3d             position_t;
