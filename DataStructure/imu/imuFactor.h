@@ -10,6 +10,9 @@ class viFrame;
 class imuFactor {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 public:
+    friend class InitialImpl;
+
+public:
     typedef std::shared_ptr<viFrame>          connection_t;
 
 public:
@@ -20,6 +23,7 @@ public:
 public:
     imuFactor();
     bool checkConnect(const connection_t &from, const connection_t &to);
+    void makeConncect(const connection_t &from, const connection_t &to);
     const IMUMeasure::Transformation& getPoseFac() {
         return deltaPose;
     }

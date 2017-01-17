@@ -10,12 +10,17 @@
 #include "DataStructure/viFrame.h"
 #include "IMU/IMU.h"
 
+class InitialImpl;
+
 class Initialize {
 public:
-    Initialize(IMU::IntegalType type = IMU::PRE_INTEGRATION);
-    bool init(std::shared_ptr<viFrame> &firstFrame, std::shared_ptr<viFrame>&frame,
-              IMUMeasure::ImuMeasureDeque &imuMeasures, ImuParameters& imuParam);
-    std::shared_ptr<IMU> imu_;
+    Initialize();
+    bool init(std::vector<std::shared_ptr<viFrame>>& VecFrames,
+              std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
+              ImuParameters& imuParam, int n_iter = 30);
+
+private:
+    std::shared_ptr<InitialImpl> impl_;
 };
 
 

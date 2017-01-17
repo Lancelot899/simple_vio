@@ -28,12 +28,10 @@ public:
     virtual Eigen::Vector2d world2cam(const Eigen::Vector3d& xyz_c) const;
     virtual Eigen::Vector2d world2cam(const Eigen::Vector2d& uv) const;
 
-/*
-    Sophus::SE3d    getTBS(void) {return  T_BS;}
-    int             getRate(void) {return m_Rate;}
-    std::string     getCameraMode(void) {return m_CamMode;}
-    std::string     getDistorMode(void) {return m_DistortionMode;}
-*/
+    const Sophus::SE3d&    getT_BS(void) {return  T_BS;}
+    int                    getRate(void) {return m_Rate;}
+    const std::string&     getCameraMode(void) {return m_CamMode;}
+    const std::string&     getDistorMode(void) {return m_DistortionMode;}
 
 protected:
     pose_t       T_BS;

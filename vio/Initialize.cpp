@@ -3,26 +3,18 @@
 //
 
 #include "Initialize.h"
-#include "DataStructure/cv/cvFrame.h"
+#include "Implement/InitialImpl.h"
 
-Initialize::Initialize(IMU::IntegalType type) {
-    imu_ = std::make_shared<IMU>(type);
+Initialize::Initialize() {
+    impl_ = std::make_shared<InitialImpl>();
 }
 
-bool Initialize::init(std::shared_ptr<viFrame> &firstFrame, std::shared_ptr<viFrame> &frame,
-                      IMUMeasure::ImuMeasureDeque &imuMeasures, ImuParameters& imuParam) {
-    firstFrame->cvframe->pose_ = Sophus::SE3d(Eigen::Quaternion<double>(1, 0, 0, 0), Eigen::Vector3d(0, 0, 0));
-    IMUMeasure::Transformation transformation;
-    IMUMeasure::SpeedAndBias spbs = IMUMeasure::SpeedAndBias::Zero();
-    imu_->propagation(imuMeasures, imuParam, transformation, spbs,
-                      firstFrame->cvframe->cvData.timeStamp, frame->cvframe->cvData.timeStamp, nullptr, nullptr);
+bool Initialize::init(std::vector<std::shared_ptr<viFrame>>& VecFrames,
+                      std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
+                      ImuParameters& imuParam, int n_iter) {
 
-    frame->cvframe->pose_ = transformation;
-    frame->spbs = spbs;
+    return impl_->init(VecFrames, VecImuFactor, imuParam, n_iter);
 
-
-
-    return true;
 }
 
 
