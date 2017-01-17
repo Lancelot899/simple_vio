@@ -116,6 +116,9 @@ public:
 
 
 public:
+    static Sophus::SE3d getTransformation(std::shared_ptr<cvFrame>& frame1, std::shared_ptr<cvFrame> frame2);
+
+
     static void getWarpMatrixAffine(
             const std::shared_ptr<AbstractCamera>& cam_ref,
             const std::shared_ptr<AbstractCamera>& cam_cur,
