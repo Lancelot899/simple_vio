@@ -1,6 +1,7 @@
 //
 // Created by lancelot on 1/5/17.
 //
+#include <alloca.h>
 
 #include "EdgeDetector.h"
 #include "DataStructure/cv/Feature.h"
@@ -47,15 +48,16 @@ EdgeDetector::EdgeDetector(
         const int n_pyr_levels) :
     AbstractDetector(img_width, img_height, cell_size, n_pyr_levels),currentFrame(0)
 {
-    randomPattern = new unsigned char[img_width * img_height];
+    std::allocator<char> alloc;
+    randomPattern = (char*)alloc.allocate(img_width*img_height);
     std::srand(314152926);
     for (int i = 0; i < img_width*img_height; ++i) {
         randomPattern[i] = rand() & 0xFF;
     }
 
-    gradHist = new int[100*(1+img_width/32)*(1+img_height/32)];
-    threshold = new float[(img_width/32)*(img_height/32)+100];
-    thresholdSmoothed = new float[(img_width/32)*(img_height/32)+100];
+    gradHist = (int*)alloc.allocate(100*(1+img_width/32)*(1+img_height/32)*sizeof(int));
+    threshold = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
+    thresholdSmoothed = (char*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
     edge.clear();
 }
 
@@ -127,15 +129,13 @@ void EdgeDetector::detect(cvframePtr_t frame,
 {
     if(currentFrame != frame) makeHists(frame);
 
+    float thresholdFactor = 1.0f;
     float dw1 = 0.75f, dw2 = dw1*dw1;
 
-    float thresholdFactor = 1.0f;
-    int vStep = frame->getHeight(0)>>5;
-    int uStep = frame->getWidth(0)>>5;
-
     int w  = frame->getWidth(0);
-
     int h  = frame->getHeight(0);
+    int vStep = h>>5;
+    int uStep = w>>5;
 
     int n3=0, n2=0, n4=0;
     int pot = 3;
@@ -195,7 +195,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
                             float ag1 = frame->getGradNorm((int)(xf*0.5f+0.25f),(int)(yf*0.5f+0.25f),1);
                             if(ag1 > pixelTH1*thresholdFactor)
                             {
-                                cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
+                                cvFrame::grad_t  ag0d;    frame->getGrad((int)(xf*0.5f+0.25f),(int)(yf*0.5f+0.25f),ag0d,1);
                                 float dirNorm = fabs((float)(ag0d.dot(dir3)));
 
                                 if(dirNorm > bestVal3)
@@ -206,7 +206,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
                             float ag2 = frame->getGradNorm((int)(xf*0.25f+0.125f), (int)(yf*0.25f+0.125f),2);
                             if(ag2 > pixelTH2*thresholdFactor)
                             {
-                                cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
+                                cvFrame::grad_t  ag0d;    frame->getGrad((int)(xf*0.25f+0.125f),(int)(yf*0.25f+0.125f),ag0d,2);
                                 float dirNorm = fabs((float)(ag0d.dot(dir4)));
 
                                 if(dirNorm > bestVal4)
@@ -227,8 +227,8 @@ void EdgeDetector::detect(cvframePtr_t frame,
                     if(bestIdx3>0)
                     {
                         cvFrame::grad_t  out;
-                        if(frame->getGrad(bestU1,bestV1,out,0))
-                            fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1,bestV1),out,0)));
+                        if(frame->getGrad(bestU1,bestV1,out,1))
+                            fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1,bestV1),out,1)));
                         bestVal4 = 1e10;
                         n3++;
                     }
@@ -237,8 +237,8 @@ void EdgeDetector::detect(cvframePtr_t frame,
                 if(bestIdx4>0)
                 {
                     cvFrame::grad_t  out;
-                    if(frame->getGrad(bestU2,bestV2,out,0))
-                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2,bestV2),out,0)));
+                    if(frame->getGrad(bestU2,bestV2,out,2))
+                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2,bestV2),out,2)));
                     n4++;
                 }
             }

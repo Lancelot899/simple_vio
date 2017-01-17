@@ -137,7 +137,7 @@ set(SOURCE_FILES
         DataStructure/cv/Camera/PinholeCamera.cpp
         DataStructure/cv/Camera/PinholeCamera.h
         DataStructure/cv/Camera/VIOPinholeCamera.cpp
-        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h)
+        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h cv/FeatureDetector/test/Test_edge.cpp)
 
 
 add_executable(simple_vio ${SOURCE_FILES})
