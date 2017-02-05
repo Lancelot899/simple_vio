@@ -19,8 +19,6 @@ namespace feature_detection {
             const int n_pyr_levels) :
             AbstractDetector(img_width, img_height, cell_size, n_pyr_levels) {}
 
-
-
     static inline bool test_gt_set(const cvData::Img_t::value_type& a_, double b, double& min_diff)
     {
         double a = a_(0);

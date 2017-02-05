@@ -10,7 +10,7 @@ class imuFactor;
 
 class viFrame {
 public:
-    friend class Initialize;
+    friend class InitialImpl;
 
 public:
     typedef std::shared_ptr<imuFactor>        linked_t;
@@ -25,7 +25,7 @@ public:
         return id;
     }
 
-    const pose_t& getPose();
+    pose_t getPose();
     const std::shared_ptr<cvFrame>& getCVFrame();
     const IMUMeasure::SpeedAndBias &getSpeedAndBias();
     const ImuParam& getImuParam() {

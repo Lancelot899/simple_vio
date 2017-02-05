@@ -15,7 +15,7 @@ public:
     InitialImpl();
     bool init(std::vector<std::shared_ptr<viFrame>>& VecFrames,
               std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
-              ImuParameters& imuParam, int n_iter);
+              std::shared_ptr<ImuParameters> &imuParam, int n_iter);
 
 private:
     std::shared_ptr<IMU> imu_;
