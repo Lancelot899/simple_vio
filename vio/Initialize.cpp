@@ -11,7 +11,7 @@ Initialize::Initialize() {
 
 bool Initialize::init(std::vector<std::shared_ptr<viFrame>>& VecFrames,
                       std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
-                      ImuParameters& imuParam, int n_iter) {
+                      std::shared_ptr<ImuParameters> &imuParam, int n_iter) {
 
     return impl_->init(VecFrames, VecImuFactor, imuParam, n_iter);
 
