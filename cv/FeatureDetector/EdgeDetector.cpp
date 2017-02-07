@@ -49,7 +49,7 @@ EdgeDetector::EdgeDetector(
     AbstractDetector(img_width, img_height, cell_size, n_pyr_levels),currentFrame(0)
 {
     std::allocator<char> alloc;
-    randomPattern = (char*)alloc.allocate(img_width*img_height);
+    randomPattern = (unsigned char*)alloc.allocate(img_width*img_height);
     std::srand(314152926);
     for (int i = 0; i < img_width*img_height; ++i) {
         randomPattern[i] = rand() & 0xFF;
@@ -57,7 +57,7 @@ EdgeDetector::EdgeDetector(
 
     gradHist = (int*)alloc.allocate(100*(1+img_width/32)*(1+img_height/32)*sizeof(int));
     threshold = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
-    thresholdSmoothed = (char*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
+    thresholdSmoothed = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
     edge.clear();
 }
 
