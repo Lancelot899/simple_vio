@@ -134,9 +134,6 @@ bool Matcher::align1D(std::vector<Eigen::Vector3d>::const_iterator &cur_img,
 
     }
 
-
-
-
     return true;
 }
 

@@ -28,8 +28,8 @@ viFrame::~viFrame()
 
 }
 
-const viFrame::pose_t &viFrame::getPose() {
-    return cvframe->getPose();
+viFrame::pose_t viFrame::getPose() {
+    return dynamic_cast<VIOPinholeCamera*>(cvframe->getCam().get())->getT_BS() * cvframe->getPose();
 }
 
 const cvframePtr_t &viFrame::getCVFrame() {
