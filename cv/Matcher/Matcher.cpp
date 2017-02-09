@@ -67,9 +67,9 @@ bool Matcher::align1D(std::vector<Eigen::Vector3d>::const_iterator &cur_img,
         Eigen::Vector3d  *it = ref_patch_with_border + (y + 1) * ref_step + 1;
         for(int x = 0; x < patch_size; ++x, ++it, ++it_dv) {
             Eigen::Vector2d J;
-            J(0) = 0.5*(dir(0)*(it[1] - it[-1]) + dir(1)*(it[ref_step] - it[-ref_step]));
+//            J(0) = 0.5*(dir(0)*(it[1] - it[-1]) + dir(1)*(it[ref_step] - it[-ref_step]));
             J(1) = 1.0;
-            *it_dv = J(0);
+//            *it_dv = J;
             H += J * J.transpose();
         }
     }
@@ -160,7 +160,7 @@ void Matcher::warpAffine(
         Eigen::Vector3d* patch) {
     const int patch_size = halfpatch_size * 2 ;
     const Matrix2d A_ref_cur = A_cur_ref.inverse();
-    if(isnan(A_ref_cur(0,0))) {
+    if(std::isnan(A_ref_cur(0,0))) {
         printf("Affine warp is NaN, probably camera has no translation\n"); // TODO
         return;
     }

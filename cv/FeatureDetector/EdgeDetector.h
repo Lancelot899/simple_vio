@@ -19,10 +19,23 @@ namespace feature_detection {
 
         virtual ~EdgeDetector()
         {
-            delete[] randomPattern;
-            delete[] gradHist;
-            delete[] thresholdSmoothed;
-            delete[] threshold;
+            if(randomPattern != nullptr){
+                delete[] randomPattern;
+                randomPattern = nullptr;
+            }
+            if(gradHist != nullptr){
+                delete[] gradHist;
+                gradHist = nullptr;
+            }
+            if(thresholdSmoothed != nullptr){
+                delete[] thresholdSmoothed;
+                thresholdSmoothed = nullptr;
+            }
+            if(threshold != nullptr){
+                delete[] threshold;
+                threshold = nullptr;
+            }
+            printf("file[%s],  lines: %d\n",__FILE__, __LINE__);
         }
 
         virtual void detect(
@@ -36,7 +49,7 @@ namespace feature_detection {
         int sample(cvframePtr_t frame,float *rate);
 
     private:
-        int                  *gradHist;   ///<! ToDo
+        int                  *gradHist;   ///<! Todo
         float                *threshold;
         float                *thresholdSmoothed;
         unsigned char        *randomPattern;

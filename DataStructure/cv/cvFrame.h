@@ -12,6 +12,16 @@
 #include "DataStructure/Measurements.h"
 #include "DataStructure/cv/Camera/VIOPinholeCamera.h"
 
+static const int cellNumbel[5]=
+{
+    0, 256, 320, 336, 340
+};
+
+static const int cellRowNumbel[5]=
+{
+    16, 8, 4, 2, 1,
+};
+
 typedef Sophus::SE3d pose_t;
 
 class Feature;
@@ -88,6 +98,7 @@ public:
     int getHeight(int level = 0);
     const cvMeasure& getMeasure();
     bool checkCellOccupy(int u,int v,int level = 0);
+//    bool checkCellOccupy(int index,int level = 0);
 
 public:
     static int         frame_counter_;         //!< Counts the number of created frames. Used to set the unique id.
