@@ -52,7 +52,7 @@ namespace feature_detection {
     private:
         int                  *gradHist;   ///<! Todo
         float                *threshold;
-        float                *thresholdSmoothed;
+        double               *thresholdSmoothed;
         unsigned char        *randomPattern;
         int                  thresholdStepU, thresholdStepV;
 

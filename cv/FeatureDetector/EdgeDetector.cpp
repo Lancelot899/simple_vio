@@ -13,7 +13,14 @@ using namespace std;
 using namespace Eigen;
 
 const static Vector2d directions[16] = {
-    Vector2d(0,    1.0000),
+    Vector2d(0.9808,    0.1951),
+    Vector2d(0.9239,   -0.3827),
+    Vector2d(0.7071,   -0.7071),
+    Vector2d(0.5556,    0.8315),
+    Vector2d(0.9808,   -0.1951),
+    Vector2d(1.0000,    0.0000),
+    Vector2d(0.1951,   -0.9808),
+    Vector2d(0,         1.0000),
     Vector2d(0.3827,    0.9239),
     Vector2d(0.1951,    0.9808),
     Vector2d(0.9239,    0.3827),
@@ -21,14 +28,8 @@ const static Vector2d directions[16] = {
     Vector2d(0.3827,   -0.9239),
     Vector2d(0.8315,    0.5556),
     Vector2d(0.8315,   -0.5556),
-    Vector2d(0.5556,   -0.8315),
-    Vector2d(0.9808,    0.1951),
-    Vector2d(0.9239,   -0.3827),
-    Vector2d(0.7071,   -0.7071),
-    Vector2d(0.5556,    0.8315),
-    Vector2d(0.9808,   -0.1951),
-    Vector2d(1.0000,    0.0000),
-    Vector2d(0.1951,   -0.9808)
+    Vector2d(0.5556,   -0.8315)
+
 };
 
 int computeHistQuantil(int* hist, float below)
@@ -57,7 +58,7 @@ EdgeDetector::EdgeDetector(
 
     gradHist = (int*)alloc.allocate(100*(1+img_width/32)*(1+img_height/32)*sizeof(int));
     threshold = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
-    thresholdSmoothed = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
+    thresholdSmoothed = (double*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(double) );
     edge.clear();
 }
 
@@ -76,7 +77,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
     memset(threshold,100,sizeof(float)*w32*h32+100);
     memset(thresholdSmoothed,100,sizeof(float)*w32*h32+100);
 
-    for (int x = 0; x < h32; ++x) for (int y = 0; y < w32; ++y)
+    for (int x = 0; x < w32; ++x) for (int y = 0; y < h32; ++y)
     {
         int* hist0 = gradHist;
         memset(hist0,0,sizeof(int)*50); //devide into 49 parts
@@ -120,6 +121,10 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             num++; sum+=threshold[x+y*w32];
 
             thresholdSmoothed[x+y*w32] = (sum/num) * (sum/num);
+            int isInf = isinf(thresholdSmoothed[x+y*w32]);
+//            if(isInf==1 || isInf==-1) {
+//                exit(-1)  ;
+//            }
         }
 }
 void EdgeDetector::detect(cvframePtr_t frame,
@@ -135,8 +140,6 @@ void EdgeDetector::detect(cvframePtr_t frame,
     fts.clear();
     int w  = frame->getWidth(0);
     int h  = frame->getHeight(0);
-    int vStep = h>>5;
-    int uStep = w>>5;
 
     int n3=0, n2=0, n4=0;
     int pot = 5;
@@ -176,11 +179,12 @@ void EdgeDetector::detect(cvframePtr_t frame,
 
                     if(xf<4 || xf>=w-5 || yf<4 || yf>h-4) continue;
 
-                    float pixelTH0 = thresholdSmoothed[(xf>>5) + (yf>>5) * thresholdStepU];
-                    float pixelTH1 = pixelTH0*dw1;
-                    float pixelTH2 = pixelTH1*dw2;
+                    double pixelTH0 = thresholdSmoothed[(xf>>5) + (yf>>5) * thresholdStepU];
+                    double pixelTH1 = pixelTH0*dw1;
+                    double pixelTH2 = pixelTH1*dw2;
 
                     float ag0 = frame->getGradNorm(xf,yf,0);
+
                     if(ag0 > pixelTH0*thresholdFactor)
                     {
                         cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);

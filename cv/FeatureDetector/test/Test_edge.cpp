@@ -64,6 +64,19 @@ TEST(edge_detector, edge_detector) {
     cv::imshow("result1", result1);
     cv::waitKey();
 
+    cv::Mat grad(pic.rows,pic.cols,CV_8UC1,cv::Scalar(0)),grad1(pic.rows,pic.cols,CV_8UC1,cv::Scalar(0));
+       cv::Mat gradX(pic.rows,pic.cols,CV_8UC1,cv::Scalar(0)),gradY(pic.rows,pic.cols,CV_8UC1,cv::Scalar(0)),gradXY(pic.rows,pic.cols,CV_8UC1,cv::Scalar(0));
+
+    for (int v = 0; v < pic.rows; ++v) {
+        for (int u = 0; u < pic.cols; ++u) {
+            grad.at<u_char>(v,u) = static_cast<u_char>(frame->getGradNorm(u,v,0))*10;
+            grad1.at<u_char>(v,u) = static_cast<u_char>(frame1->getGradNorm(u,v,0))*10;
+        }
+    }
+    cv::imshow("grad",grad);
+    cv::imshow("grad1", grad1);
+    cv::waitKey();
+
 #else
     detector->detect(frame1, frame1->getMeasure().measurement.imgPyr, 5, features1);
     GTEST_ASSERT_NE(features1.empty(), true);
