@@ -129,7 +129,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
 {
     if(currentFrame != frame) makeHists(frame);
 
-    float thresholdFactor = 2.0f;
+    float thresholdFactor = 1.0f;
     float dw1 = 0.75f, dw2 = dw1*dw1;
 
     fts.clear();
@@ -138,7 +138,6 @@ void EdgeDetector::detect(cvframePtr_t frame,
     int vStep = h>>5;
     int uStep = w>>5;
 
-    std::cout<<"w["<<w<<"], h["<<h<<"]\n";
     int n3=0, n2=0, n4=0;
     int pot = 5;
     int bestU0 = -1, bestU1 = -1,  bestU2 = -1, bestV0 = -1, bestV1 = -1,  bestV2 = -1;
@@ -147,7 +146,6 @@ void EdgeDetector::detect(cvframePtr_t frame,
     //        for (int cellU = 0; cellU < 32; ++cellU) {
     //            if(frame->checkCellOccupy(cellU,cellV,0))     continue;
 
-#if 1
     for(int y4=0;y4<h;y4+=(4*pot)) for(int x4=0;x4<w;x4+=(4*pot))
     {
         int my3 = std::min((4*pot), h-y4);
@@ -243,7 +241,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
             n4++;
         }
     }
-#endif
+
     //        }
     //    }
 }

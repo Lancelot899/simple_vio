@@ -85,10 +85,10 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
             for(int p = 0; p < rows; p++) {
                 for(int q = 0; q < cols; q++)
                     cvData.measurement.imgPyr[i][p * cols + q][0]
-                            = 0.25 * (cvData.measurement.imgPyr[i - 1][p * cols * 2 + q * 2][0]
-                                      + cvData.measurement.imgPyr[i - 1][p * cols * 2 + (q + 1)* 2][0]
-                                      + cvData.measurement.imgPyr[i - 1][(p + 1) * cols * 2 + (q + 1)* 2][0]
-                                      + cvData.measurement.imgPyr[i - 1][(p + 1) * cols * 2 + q * 2][0]);
+                            = 0.25 * (  cvData.measurement.imgPyr[i - 1][p * cols * 4          + q * 2][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4          + q * 2 + 1][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4 + 2*cols + q * 2 + 1][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4 + 2*cols + q * 2][0]);
             }
         }
 
@@ -96,10 +96,10 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
             for (int q = 1; q < cols - 1; ++q) {
                 cvData.measurement.imgPyr[i][p * cols + q][1]
                         = 0.5 * (cvData.measurement.imgPyr[i][p * cols + q + 1][0]
-                                 - cvData.measurement.imgPyr[i][p * cols + q - 1][0]);
+                               - cvData.measurement.imgPyr[i][p * cols + q - 1][0]);
                 cvData.measurement.imgPyr[i][p * cols + q][2]
                         = 0.5 * (cvData.measurement.imgPyr[i][p * cols + q + cols][0]
-                                 - cvData.measurement.imgPyr[i][p * cols + q - cols][0]);
+                               - cvData.measurement.imgPyr[i][p * cols + q - cols][0]);
 
                 cvData.measurement.gradNormPyr[i][p * cols + q]
                         = std::sqrt(cvData.measurement.imgPyr[i][p * cols + q][1] * cvData.measurement.imgPyr[i][p * cols + q][1]
