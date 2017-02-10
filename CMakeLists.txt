@@ -128,6 +128,7 @@ set(SOURCE_FILES
         util/util.h
         main.cpp
         cv/FeatureDetector/test/Test_fast.cpp
+        cv/FeatureDetector/test/Test_edge.cpp
         DataStructure/GraphFactor/imuG2OType.h
         DataStructure/GraphFactor/imuG2OType.cpp
         cv/FeatureDetector/FastDetector.cpp

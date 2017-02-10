@@ -1,6 +1,7 @@
 //
 // Created by lancelot on 1/5/17.
 //
+#include <alloca.h>
 
 #include "EdgeDetector.h"
 #include "DataStructure/cv/Feature.h"
@@ -12,7 +13,14 @@ using namespace std;
 using namespace Eigen;
 
 const static Vector2d directions[16] = {
-    Vector2d(0,    1.0000),
+    Vector2d(0.9808,    0.1951),
+    Vector2d(0.9239,   -0.3827),
+    Vector2d(0.7071,   -0.7071),
+    Vector2d(0.5556,    0.8315),
+    Vector2d(0.9808,   -0.1951),
+    Vector2d(1.0000,    0.0000),
+    Vector2d(0.1951,   -0.9808),
+    Vector2d(0,         1.0000),
     Vector2d(0.3827,    0.9239),
     Vector2d(0.1951,    0.9808),
     Vector2d(0.9239,    0.3827),
@@ -20,14 +28,8 @@ const static Vector2d directions[16] = {
     Vector2d(0.3827,   -0.9239),
     Vector2d(0.8315,    0.5556),
     Vector2d(0.8315,   -0.5556),
-    Vector2d(0.5556,   -0.8315),
-    Vector2d(0.9808,    0.1951),
-    Vector2d(0.9239,   -0.3827),
-    Vector2d(0.7071,   -0.7071),
-    Vector2d(0.5556,    0.8315),
-    Vector2d(0.9808,   -0.1951),
-    Vector2d(1.0000,    0.0000),
-    Vector2d(0.1951,   -0.9808)
+    Vector2d(0.5556,   -0.8315)
+
 };
 
 int computeHistQuantil(int* hist, float below)
@@ -47,15 +49,16 @@ EdgeDetector::EdgeDetector(
         const int n_pyr_levels) :
     AbstractDetector(img_width, img_height, cell_size, n_pyr_levels),currentFrame(0)
 {
-    randomPattern = new unsigned char[img_width * img_height];
+    std::allocator<char> alloc;
+    randomPattern = (unsigned char*)alloc.allocate(img_width*img_height);
     std::srand(314152926);
     for (int i = 0; i < img_width*img_height; ++i) {
         randomPattern[i] = rand() & 0xFF;
     }
 
-    gradHist = new int[100*(1+img_width/32)*(1+img_height/32)];
-    threshold = new float[(img_width/32)*(img_height/32)+100];
-    thresholdSmoothed = new float[(img_width/32)*(img_height/32)+100];
+    gradHist = (int*)alloc.allocate(100*(1+img_width/32)*(1+img_height/32)*sizeof(int));
+    threshold = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
+    thresholdSmoothed = (double*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(double) );
     edge.clear();
 }
 
@@ -74,7 +77,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
     memset(threshold,100,sizeof(float)*w32*h32+100);
     memset(thresholdSmoothed,100,sizeof(float)*w32*h32+100);
 
-    for (int x = 0; x < h32; ++x) for (int y = 0; y < w32; ++y)
+    for (int x = 0; x < w32; ++x) for (int y = 0; y < h32; ++y)
     {
         int* hist0 = gradHist;
         memset(hist0,0,sizeof(int)*50); //devide into 49 parts
@@ -118,6 +121,10 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             num++; sum+=threshold[x+y*w32];
 
             thresholdSmoothed[x+y*w32] = (sum/num) * (sum/num);
+            int isInf = isinf(thresholdSmoothed[x+y*w32]);
+//            if(isInf==1 || isInf==-1) {
+//                exit(-1)  ;
+//            }
         }
 }
 void EdgeDetector::detect(cvframePtr_t frame,
@@ -127,127 +134,120 @@ void EdgeDetector::detect(cvframePtr_t frame,
 {
     if(currentFrame != frame) makeHists(frame);
 
+    float thresholdFactor = 1.0f;
     float dw1 = 0.75f, dw2 = dw1*dw1;
 
-    float thresholdFactor = 1.0f;
-    int vStep = frame->getHeight(0)>>5;
-    int uStep = frame->getWidth(0)>>5;
-
+    fts.clear();
     int w  = frame->getWidth(0);
-
     int h  = frame->getHeight(0);
 
     int n3=0, n2=0, n4=0;
-    int pot = 3;
+    int pot = 5;
     int bestU0 = -1, bestU1 = -1,  bestU2 = -1, bestV0 = -1, bestV1 = -1,  bestV2 = -1;
 
-    for (int cellV = 0; cellV < 32; ++cellV) {
-        for (int cellU = 0; cellU < 32; ++cellU) {
-            if(frame->checkCellOccupy(cellU,cellV,0))     continue;
+    //    for (int cellV = 0; cellV < 32; ++cellV) {
+    //        for (int cellU = 0; cellU < 32; ++cellU) {
+    //            if(frame->checkCellOccupy(cellU,cellV,0))     continue;
 
-            for(int y5=0;y5<vStep;y5+=(4*pot)) for(int x5=0;x5<uStep;x5+=(4*pot))
+    for(int y4=0;y4<h;y4+=(4*pot)) for(int x4=0;x4<w;x4+=(4*pot))
+    {
+        int my3 = std::min((4*pot), h-y4);
+        int mx3 = std::min((4*pot), w-x4);
+        int bestIdx4=-1; float bestVal4=0;
+        Eigen::Vector2d dir4 = directions[randomPattern[n2] & 0xF];
+        for(int y3=0;y3<my3;y3+=(2*pot)) for(int x3=0;x3<mx3;x3+=(2*pot))
+        {
+            int x34 = x3+x4;
+            int y34 = y3+y4;
+            int my2 = std::min((2*pot), h-y34);
+            int mx2 = std::min((2*pot), w-x34);
+            int bestIdx3=-1; float bestVal3=0;
+            Eigen::Vector2d dir3 = directions[randomPattern[n2] & 0xF];
+            for(int y2=0;y2<my2;y2+=pot) for(int x2=0;x2<mx2;x2+=pot)
             {
-                int y4 = cellV*vStep + y5;
-                int x4 = cellU*uStep + x5;
-                int my3 = std::min((4*pot), h-y4);
-                int mx3 = std::min((4*pot), w-x4);
-                int bestIdx4=-1; float bestVal4=0;
-                Eigen::Vector2d dir4 = directions[randomPattern[n2] & 0xF];
-                for(int y3=0;y3<my3;y3+=(2*pot)) for(int x3=0;x3<mx3;x3+=(2*pot))
+                int x234 = x2+x34;
+                int y234 = y2+y34;
+                int my1 = std::min(pot, h-y234);
+                int mx1 = std::min(pot, w-x234);
+                int bestIdx2=-1; float bestVal2=0;
+                Eigen::Vector2d dir2 = directions[randomPattern[n2] & 0xF];
+                for(int y1=0;y1<my1;y1+=1) for(int x1=0;x1<mx1;x1+=1)
                 {
-                    int x34 = x3+x4;
-                    int y34 = y3+y4;
-                    int my2 = std::min((2*pot), h-y34);
-                    int mx2 = std::min((2*pot), w-x34);
-                    int bestIdx3=-1; float bestVal3=0;
-                    Eigen::Vector2d dir3 = directions[randomPattern[n2] & 0xF];
-                    for(int y2=0;y2<my2;y2+=pot) for(int x2=0;x2<mx2;x2+=pot)
+                    int idx = x1+x234 + w*(y1+y234);
+                    int xf = x1+x234;
+                    int yf = y1+y234;
+
+                    if(xf<4 || xf>=w-5 || yf<4 || yf>h-4) continue;
+
+                    double pixelTH0 = thresholdSmoothed[(xf>>5) + (yf>>5) * thresholdStepU];
+                    double pixelTH1 = pixelTH0*dw1;
+                    double pixelTH2 = pixelTH1*dw2;
+
+                    float ag0 = frame->getGradNorm(xf,yf,0);
+
+                    if(ag0 > pixelTH0*thresholdFactor)
                     {
-                        int x234 = x2+x34;
-                        int y234 = y2+y34;
-                        int my1 = std::min(pot, h-y234);
-                        int mx1 = std::min(pot, w-x234);
-                        int bestIdx2=-1; float bestVal2=0;
-                        Eigen::Vector2d dir2 = directions[randomPattern[n2] & 0xF];
-                        for(int y1=0;y1<my1;y1+=1) for(int x1=0;x1<mx1;x1+=1)
-                        {
-                            int idx = x1+x234 + w*(y1+y234);
-                            int xf = x1+x234;
-                            int yf = y1+y234;
+                        cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
+                        float dirNorm = fabs((float)(ag0d.dot(dir2)));
 
-                            if(xf<4 || xf>=w-5 || yf<4 || yf>h-4) continue;
-
-                            float pixelTH0 = thresholdSmoothed[(xf>>5) + (yf>>5) * thresholdStepU];
-                            float pixelTH1 = pixelTH0*dw1;
-                            float pixelTH2 = pixelTH1*dw2;
-
-                            float ag0 = frame->getGradNorm(xf,yf,0);
-                            if(ag0 > pixelTH0*thresholdFactor)
-                            {
-                                cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
-                                float dirNorm = fabs((float)(ag0d.dot(dir2)));
-
-                                if(dirNorm > bestVal2)
-                                { bestVal2 = dirNorm; bestIdx2 = idx, bestU0 = xf, bestV0 = yf; bestIdx3 = -2; bestIdx4 = -2;}
-                            }
-                            if(bestIdx3==-2) continue;
-
-                            float ag1 = frame->getGradNorm((int)(xf*0.5f+0.25f),(int)(yf*0.5f+0.25f),1);
-                            if(ag1 > pixelTH1*thresholdFactor)
-                            {
-                                cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
-                                float dirNorm = fabs((float)(ag0d.dot(dir3)));
-
-                                if(dirNorm > bestVal3)
-                                { bestVal3 = dirNorm; bestIdx3 = idx, bestU1 = (int)(xf*0.5f+0.25f), bestV1 = (int)(yf*0.5f+0.25f); bestIdx4 = -2;}
-                            }
-                            if(bestIdx4==-2) continue;
-
-                            float ag2 = frame->getGradNorm((int)(xf*0.25f+0.125f), (int)(yf*0.25f+0.125f),2);
-                            if(ag2 > pixelTH2*thresholdFactor)
-                            {
-                                cvFrame::grad_t  ag0d;    frame->getGrad(xf,yf,ag0d,0);
-                                float dirNorm = fabs((float)(ag0d.dot(dir4)));
-
-                                if(dirNorm > bestVal4)
-                                { bestVal4 = dirNorm; bestIdx4 = idx, bestU2 = (int)(xf*0.25f+0.125),bestV2 = (int)(yf*0.25f+0.125f); }
-                            }
-                        }
-
-                        if(bestIdx2>0)
-                        {
-                            cvFrame::grad_t  out;
-                            if(frame->getGrad(bestU0,bestV0,out,0))
-                                fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU0,bestV0),out,0)));
-                            bestVal3 = 1e10;
-                            n2++;
-                        }
+                        if(dirNorm > bestVal2)
+                        { bestVal2 = dirNorm; bestIdx2 = idx, bestU0 = xf, bestV0 = yf; bestIdx3 = -2; bestIdx4 = -2;}
                     }
+                    if(bestIdx3==-2) continue;
 
-                    if(bestIdx3>0)
+                    float ag1 = frame->getGradNorm((int)(xf*0.5f+0.25f),(int)(yf*0.5f+0.25f),1);
+                    if(ag1 > pixelTH1*thresholdFactor)
                     {
-                        cvFrame::grad_t  out;
-                        if(frame->getGrad(bestU1,bestV1,out,0))
-                            fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1,bestV1),out,0)));
-                        bestVal4 = 1e10;
-                        n3++;
+                        cvFrame::grad_t  ag0d;    frame->getGrad((int)(xf*0.5f+0.25f),(int)(yf*0.5f+0.25f),ag0d,1);
+                        float dirNorm = fabs((float)(ag0d.dot(dir3)));
+
+                        if(dirNorm > bestVal3)
+                        { bestVal3 = dirNorm; bestIdx3 = idx, bestU1 = (int)(xf*0.5f+0.25f), bestV1 = (int)(yf*0.5f+0.25f); bestIdx4 = -2;}
+                    }
+                    if(bestIdx4==-2) continue;
+
+                    float ag2 = frame->getGradNorm((int)(xf*0.25f+0.125f), (int)(yf*0.25f+0.125f),2);
+                    if(ag2 > pixelTH2*thresholdFactor)
+                    {
+                        cvFrame::grad_t  ag0d;    frame->getGrad((int)(xf*0.25f+0.125f),(int)(yf*0.25f+0.125f),ag0d,2);
+                        float dirNorm = fabs((float)(ag0d.dot(dir4)));
+
+                        if(dirNorm > bestVal4)
+                        { bestVal4 = dirNorm; bestIdx4 = idx, bestU2 = (int)(xf*0.25f+0.125),bestV2 = (int)(yf*0.25f+0.125f); }
                     }
                 }
 
-                if(bestIdx4>0)
+                if(bestIdx2>0)
                 {
                     cvFrame::grad_t  out;
-                    if(frame->getGrad(bestU2,bestV2,out,0))
-                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2,bestV2),out,0)));
-                    n4++;
+                    if(frame->getGrad(bestU0,bestV0,out,0))
+                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU0,bestV0),out,0)));
+                    bestVal3 = 1e10;
+                    n2++;
                 }
             }
 
+            if(bestIdx3>0)
+            {
+                cvFrame::grad_t  out;
+                if(frame->getGrad(bestU1,bestV1,out,1))
+                    fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1,bestV1),out,1)));
+                bestVal4 = 1e10;
+                n3++;
+            }
+        }
+
+        if(bestIdx4>0)
+        {
+            cvFrame::grad_t  out;
+            if(frame->getGrad(bestU2,bestV2,out,2))
+                fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2,bestV2),out,2)));
+            n4++;
         }
     }
 
-
-
+    //        }
+    //    }
 }
 
 int EdgeDetector::sample(cvframePtr_t frame, float *rate)
