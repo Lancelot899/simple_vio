@@ -15,12 +15,25 @@ class InitialImpl;
 class Initialize {
 public:
     Initialize();
-    bool init(std::vector<std::shared_ptr<viFrame>>& VecFrames,
-              std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
-              std::shared_ptr<ImuParameters> &imuParam, int n_iter = 30);
+    void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
+    void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
+    std::vector<std::shared_ptr<viFrame>>* getInitialViframe() {
+        if(isInitialed)
+            return &VecFrames;
+
+        return nullptr;
+    }
+
+    bool init(std::shared_ptr<ImuParameters> &imuParam, int n_iter = 30);
+
+private:
+    bool initImu(std::shared_ptr<ImuParameters> &imuParam, int n_iter);
 
 private:
     std::shared_ptr<InitialImpl> impl_;
+    std::vector<std::shared_ptr<viFrame>> VecFrames;
+    bool isInitialed;
+    std::vector<std::shared_ptr<imuFactor>> VecImuFactor;
 };
 
 

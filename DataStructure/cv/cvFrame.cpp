@@ -1,16 +1,5 @@
 #include "cvFrame.h"
 
-static int cellNumbel[5]=
-{
-    0, 1, 5, 21, 85
-};
-
-static int cellRowNumbel[5]=
-{
-    1, 2, 4, 8, 16
-};
-
-
 const cvMeasure& cvFrame::getMeasure() {
     return cvData;
 }
@@ -44,10 +33,10 @@ double cvFrame::getIntensity(int u, int v, int level) {
     int rows = cvData.measurement.height[level];
     int cols = cvData.measurement.width[level];
 
-    if(u >= rows || v >= cols)
+    if(u >= cols || v >= rows)
         return -1.0;
 
-    return cvData.measurement.imgPyr[level][v * rows + u][0];
+    return cvData.measurement.imgPyr[level][v * cols + u][0];
 }
 
 bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
@@ -57,10 +46,10 @@ bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     int rows = cvData.measurement.height[level];
     int cols = cvData.measurement.width[level];
 
-    if(u >= rows || v >= cols)
+    if(u >= cols || v >= rows)
         return false;
 
-    out =  cvData.measurement.imgPyr[level][v * rows + u].segment<2>(1);
+    out =  cvData.measurement.imgPyr[level][v * cols + u].segment<2>(1);
     return true;
 }
 
@@ -79,15 +68,15 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
             cols /= 2;
         }
 
-        cvData.measurement.width[i]  = rows;
-        cvData.measurement.height[i] = cols;
+        cvData.measurement.width[i]  = cols;
+        cvData.measurement.height[i] = rows;
         cvData.measurement.imgPyr[i].assign(cvData.measurement.width[i] * cvData.measurement.height[i], Eigen::Vector3d::Zero());
         cvData.measurement.gradNormPyr[i].assign(cvData.measurement.width[i] * cvData.measurement.height[i], 0.0);
 
         if(i == 0) {
             for(int p = 0; p < rows; p++) {
                 for(int q = 0; q < cols; q++) {
-                    cvData.measurement.imgPyr[i][q * rows + p][0] = double(pic.at<u_char>(p, q));
+                    cvData.measurement.imgPyr[i][p * cols + q][0] = double(pic.at<u_char>(p, q));
                 }
             }
         }
@@ -95,26 +84,26 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
         else {
             for(int p = 0; p < rows; p++) {
                 for(int q = 0; q < cols; q++)
-                    cvData.measurement.imgPyr[i][q * rows + p][0]
-                            = 0.25 * (cvData.measurement.imgPyr[i - 1][p * 2 + (q * 2) * rows * 2][0]
-                                      + cvData.measurement.imgPyr[i - 1][p * 2 + (q * 2 + 1) * rows * 2][0]
-                                      + cvData.measurement.imgPyr[i - 1][p * 2 + 1 + (q * 2 + 1) * rows * 2][0]
-                                       + cvData.measurement.imgPyr[i - 1][p * 2 + 1 + (q * 2) * rows * 2][0]);
+                    cvData.measurement.imgPyr[i][p * cols + q][0]
+                            = 0.25 * (  cvData.measurement.imgPyr[i - 1][p * cols * 4          + q * 2][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4          + q * 2 + 1][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4 + 2*cols + q * 2 + 1][0]
+                                      + cvData.measurement.imgPyr[i - 1][p * cols * 4 + 2*cols + q * 2][0]);
             }
         }
 
         for(int p = 1; p < rows - 1; ++p) {
             for (int q = 1; q < cols - 1; ++q) {
-                cvData.measurement.imgPyr[i][q * rows + p][1]
-                        = 0.5 * (cvData.measurement.imgPyr[i][q * rows + p + 1][0]
-                                 - cvData.measurement.imgPyr[i][q * rows + p - 1][0]);
-                cvData.measurement.imgPyr[i][q * rows + p][2]
-                        = 0.5 * (cvData.measurement.imgPyr[i][q * rows + p + rows][0]
-                                 - cvData.measurement.imgPyr[i][q * rows + p - rows][0]);
+                cvData.measurement.imgPyr[i][p * cols + q][1]
+                        = 0.5 * (cvData.measurement.imgPyr[i][p * cols + q + 1][0]
+                               - cvData.measurement.imgPyr[i][p * cols + q - 1][0]);
+                cvData.measurement.imgPyr[i][p * cols + q][2]
+                        = 0.5 * (cvData.measurement.imgPyr[i][p * cols + q + cols][0]
+                               - cvData.measurement.imgPyr[i][p * cols + q - cols][0]);
 
-                cvData.measurement.gradNormPyr[i][q * rows + p]
-                        = std::sqrt(cvData.measurement.imgPyr[i][q * rows + p][1] * cvData.measurement.imgPyr[i][q * rows + p][1]
-                                  + cvData.measurement.imgPyr[i][q * rows + p][2] * cvData.measurement.imgPyr[i][q * rows + p][2]);
+                cvData.measurement.gradNormPyr[i][p * cols + q]
+                        = std::sqrt(cvData.measurement.imgPyr[i][p * cols + q][1] * cvData.measurement.imgPyr[i][p * cols + q][1]
+                                  + cvData.measurement.imgPyr[i][p * cols + q][2] * cvData.measurement.imgPyr[i][p * cols + q][2]);
 
             }
         }
@@ -128,10 +117,10 @@ double cvFrame::getGradNorm(int u, int v, int level) {
     int rows = cvData.measurement.height[level];
     int cols = cvData.measurement.width[level];
 
-    if(u >= rows || v >= cols)
+    if(u >= cols || v >= rows)
         return -1.0;
 
-    return cvData.measurement.gradNormPyr[level][v * rows + u];
+    return cvData.measurement.gradNormPyr[level][v * cols + u];
 }
 
 cvFrame::~cvFrame() {

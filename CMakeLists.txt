@@ -128,6 +128,7 @@ set(SOURCE_FILES
         util/util.h
         main.cpp
         cv/FeatureDetector/test/Test_fast.cpp
+        cv/FeatureDetector/test/Test_edge.cpp
         DataStructure/GraphFactor/imuG2OType.h
         DataStructure/GraphFactor/imuG2OType.cpp
         cv/FeatureDetector/FastDetector.cpp
@@ -137,7 +138,7 @@ set(SOURCE_FILES
         DataStructure/cv/Camera/PinholeCamera.cpp
         DataStructure/cv/Camera/PinholeCamera.h
         DataStructure/cv/Camera/VIOPinholeCamera.cpp
-        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h vio/Initialize.cpp vio/Initialize.h vio/Implement/InitialImpl.cpp vio/Implement/InitialImpl.h)
+        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h vio/Initialize.cpp vio/Initialize.h vio/Implement/InitialImpl.cpp vio/Implement/InitialImpl.h cv/FeatureDetector/Detector.cpp cv/FeatureDetector/Detector.h)
 
 
 add_executable(simple_vio ${SOURCE_FILES})

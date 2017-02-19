@@ -10,6 +10,8 @@
 namespace feature_detection {
     /// FAST detector by Edward Rosten.
     class FastDetector : public AbstractDetector {
+        friend class Detector;
+        friend class EdgeDetector;
     public:
         FastDetector(
                 const int img_width,
@@ -40,6 +42,10 @@ namespace feature_detection {
         void fast_nonmax_3x3(const std::vector<fast_xy>& corners,
                              const std::vector<double>& scores,
                              std::vector<double>& nonmax_corners);
+    private:
+        int grid[detectHeightGrid * detectWidthGrid];
+        int gridWidth;
+        int gridHeight;
     };
 
 }
