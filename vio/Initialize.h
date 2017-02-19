@@ -11,10 +11,13 @@
 #include "IMU/IMU.h"
 
 class InitialImpl;
+namespace feature_detection {
+    class Detector;
+}
 
 class Initialize {
 public:
-    Initialize();
+    Initialize(std::shared_ptr<feature_detection::Detector>& detector);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
     std::vector<std::shared_ptr<viFrame>>* getInitialViframe() {
@@ -30,6 +33,7 @@ private:
     bool initImu(std::shared_ptr<ImuParameters> &imuParam, int n_iter);
 
 private:
+    std::shared_ptr<feature_detection::Detector> detector;
     std::shared_ptr<InitialImpl> impl_;
     std::vector<std::shared_ptr<viFrame>> VecFrames;
     bool isInitialed;

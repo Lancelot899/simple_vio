@@ -5,21 +5,25 @@
 #include "Initialize.h"
 #include "Implement/InitialImpl.h"
 #include "DataStructure/cv/cvFrame.h"
+#include "cv/FeatureDetector/Detector.h"
 
-Initialize::Initialize() {
+Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector) {
     impl_ = std::make_shared<InitialImpl>();
     isInitialed = false;
+    this->detector = detector;
 }
 
 void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
     std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(0, cvframe);
     Sophus::SE3d ie;
     cvframe->setPose(ie);
-
+    std::shared_ptr<feature_detection::features_t> features;
+    detector->detect(cvframe, cvframe->getMeasure().measurement.imgPyr, *features);
+    cvframe->cvData.fts_ = features;
 }
 
 void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
-
+    
 }
 
 bool Initialize::init(std::shared_ptr<ImuParameters> &imuParam, int n_iter) {

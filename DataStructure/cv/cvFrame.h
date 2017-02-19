@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <boost/noncopyable.hpp>
+#include <cv/FeatureDetector/FastDetector.h>
 
 #include "util/setting.h"
 #include "DataStructure/Measurements.h"
@@ -56,13 +57,14 @@ public:
 
 public:
     int id;
-    features_t       fts_;
-    keyPoints_t      key_pts_;
+    std::shared_ptr<features_t>       fts_;
+    keyPoints_t                       key_pts_;
 };
 
 class cvFrame : boost::noncopyable {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     friend class AbstractDetector;
+    friend feature_detection::FastDetector;
     friend class Initialize;
 
 public:
@@ -105,14 +107,12 @@ public:
 
 private:
     cvMeasure          cvData;
-    pose_t             pose_;                  //!< Transform frame from world.
-    cov_t              Cov_;                   //!< Covariance.
-    cam_t              cam_;                   //!< Camera model.
-    bool               is_keyframe_;           //!< Was this frames selected as keyframe?
-    int                last_published_ts_;     //!< Timestamp of last publishing.
-    std::vector<bool>  occupy;                 //!< whether cell is occupy by features
-
-    bool setCellOccupy(int u,int v,int level = 0, bool occupied = true);
+    pose_t             pose_;                        //!< Transform frame from world.
+    cov_t              Cov_;                         //!< Covariance.
+    cam_t              cam_;                         //!< Camera model.
+    bool               is_keyframe_;                 //!< Was this frames selected as keyframe?
+    int                last_published_ts_;           //!< Timestamp of last publishing.
+    bool occupy[detectHeightGrid * detectWidthGrid]; //!< whether cell is occupy by features
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;

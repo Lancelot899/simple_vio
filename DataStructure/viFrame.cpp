@@ -18,8 +18,7 @@ typedef Eigen::Matrix<double, 6, 1> bias_t;
 
 
 
-viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe)
-{
+viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe) {
     this->id = id;
     this->cvframe = cvframe;
     spbs.setZero();
