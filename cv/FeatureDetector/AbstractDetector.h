@@ -7,6 +7,8 @@
 /// Implementation of various feature detectors.
 namespace feature_detection {
 
+    typedef cvMeasure::ImgPyr_t    ImgPyr_t;
+    typedef cvMeasure::features_t  features_t;
 /// Temporary container used for corner detection. Features are initialized from these.
     struct Corner {
         int x;         //!< x-coordinate of corner in the image.
@@ -23,11 +25,6 @@ namespace feature_detection {
 
 /// All detectors should derive from this abstract class.
     class AbstractDetector {
-    public:
-        typedef cvMeasure::ImgPyr_t    ImgPyr_t;
-        typedef cvMeasure::features_t  features_t;
-
-
     public:
         AbstractDetector(
                 const int img_width,

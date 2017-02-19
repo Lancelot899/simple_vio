@@ -58,19 +58,31 @@ bool Matcher::align1D(std::vector<Eigen::Vector3d>::const_iterator &cur_img,
     const int patch_area = 64;
     bool converged = false;
     Eigen::Vector3d ref_patch_dv[patch_area];
-    Eigen::Matrix2d H;
-    H.setZero();
+    Eigen::Vector2d hr;
+    hr.setZero();
 
     const int ref_step = patch_size + 2;
     Eigen::Vector3d *it_dv = ref_patch_dv;
     for(int y = 0; y < patch_size; ++y) {
         Eigen::Vector3d  *it = ref_patch_with_border + (y + 1) * ref_step + 1;
         for(int x = 0; x < patch_size; ++x, ++it, ++it_dv) {
+<<<<<<< HEAD
+            double I = (*cur_img)(0);
+            Eigen::Vector2d I_x_y   = (*cur_img).block<2, 1>(1, 0);
+            Eigen::Vector2d I_xx_yx = 0.5 * ((*(cur_img - 1)).block<2, 1>(1, 0) - (*(cur_img + 1)).block<2, 1>(1, 0));
+            Eigen::Vector2d I_xy_yy = 0.5 * ((*(cur_img - cols)).block<2, 1>(1, 0) - (*(cur_img + cols)).block<2, 1>(1, 0));
+
+            hr(0) += dir(0) * dir(0) * I_xx_yx(0) + dir(0) * dir(1) * (I_xx_yx(1) + I_xy_yy(0))
+                     + dir(1) * dir(1) * I_xy_yy(1) + dir.dot(I_x_y);
+            hr(1) -= I -
+
+=======
             Eigen::Vector2d J;
 //            J(0) = 0.5*(dir(0)*(it[1] - it[-1]) + dir(1)*(it[ref_step] - it[-ref_step]));
             J(1) = 1.0;
 //            *it_dv = J;
             H += J * J.transpose();
+>>>>>>> 22c275040a9bd37f5dda37707659dbc62564d0aa
         }
     }
 
@@ -139,7 +151,7 @@ bool Matcher::align1D(std::vector<Eigen::Vector3d>::const_iterator &cur_img,
 
 
 void Matcher::createPatchFromPatchWithBorder() {
-    Eigen::Vector3d *ref_patch_ptr = patch_;
+    Eigen::Vector3d *ref_patch_ptr =  patch_;
     for(int y=1; y<patch_size_+1; ++y, ref_patch_ptr += patch_size_) {
         Eigen::Vector3d* ref_patch_border_ptr = patch_with_border_ + y*(patch_size_+2) + 1;
         for(int x=0; x<patch_size_; ++x)

@@ -128,9 +128,9 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
         }
 }
 void EdgeDetector::detect(cvframePtr_t frame,
-                          const AbstractDetector::ImgPyr_t &img_pyr,
+                          const ImgPyr_t &img_pyr,
                           const double detection_threshold,
-                          AbstractDetector::features_t &fts)
+                          features_t &fts)
 {
     if(currentFrame != frame) makeHists(frame);
 

@@ -19,7 +19,7 @@ public:
     typedef Sophus::SE3d                      pose_t;
 
 public:
-    viFrame();
+    viFrame(int id, std::shared_ptr<cvFrame>& cvframe);
     ~viFrame();
     int getID() {
         return id;
