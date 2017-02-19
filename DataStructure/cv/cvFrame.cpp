@@ -4,14 +4,8 @@ const cvMeasure& cvFrame::getMeasure() {
     return cvData;
 }
 
-bool cvFrame::checkCellOccupy(int u, int v, int level)
-{
-    return occupy[cellNumbel[level] + v*cellRowNumbel[level] + u];
-}
-
-bool cvFrame::setCellOccupy(int u, int v, int level, bool occupied)
-{
-    occupy[cellNumbel[level] + v*cellRowNumbel[level] + u] = occupied;
+bool cvFrame::checkCellOccupy(int u, int v, int level) {
+    return occupy[u + v * detectWidthGrid];
 }
 
 const cvFrame::Pic_t& cvFrame::getPicture() {
@@ -61,7 +55,7 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
 
     // 341 = 1 + 4 + 16 + 64 + 256 !>> cell's numbel for each level
     // for a point(u,v) in cell(on the l level): (u,v,l) , occupy[(4^l-1)/3 + v*2^l + u]
-    occupy.assign(341, false);
+    memset(occupy, 0, sizeof(bool) * detectHeightGrid * detectWidthGrid);
     for(int i = 0; i < IMG_LEVEL; ++i) {
         if(i != 0) {
             rows /= 2;

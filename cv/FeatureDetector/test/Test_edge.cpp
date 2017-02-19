@@ -32,7 +32,7 @@ TEST(edge_detector, edge_detector) {
     feature_detection::AbstractDetector *detector = new feature_detection::EdgeDetector(pic.cols, pic.rows, 25, IMG_LEVEL);
     GTEST_ASSERT_NE(detector, nullptr);
 
-    feature_detection::AbstractDetector::features_t features, features1;
+    feature_detection::features_t features, features1;
     features.clear(); features1.clear();
 
 #define SHOW_EDGE

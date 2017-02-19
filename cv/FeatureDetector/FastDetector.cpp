@@ -18,9 +18,6 @@ namespace feature_detection {
             const int cell_size,
             const int n_pyr_levels) :
             AbstractDetector(img_width, img_height, cell_size, n_pyr_levels) {
-        memset(grid, 0, sizeof(int) * detectHeightGrid * detectWidthGrid);
-        gridWidth = img_width / detectWidthGrid;
-        gridHeight = img_height / detectHeightGrid;
     }
 
     static inline bool test_gt_set(const cvData::Img_t::value_type& a_, double b, double& min_diff)
@@ -3219,11 +3216,12 @@ namespace feature_detection {
             features_t& fts)  {
         Corners corners(grid_n_cols_ * grid_n_rows_, Corner(0,0,detection_threshold,0,0.0f));
         //Corners corners(grid_n_cols_*grid_n_rows_, Corner(0,0,0,0,0.0f));
-        memset(grid, 0, sizeof(int) * detectHeightGrid * detectWidthGrid);
-
         for(int L=0; L<n_pyr_levels_; ++L) {
             const int scale = (1<<L);
             vector<fast_xy> fast_corners;
+            int gridWidth = frame->getWidth() / detectWidthGrid;
+            int gridHeight = frame->getHeight() / detectHeightGrid;
+
 
             fast_corner_detect_10(img_pyr[L], frame->getWidth(L),
                                   frame->getHeight(L), frame->getWidth(L), 8.0, fast_corners);
@@ -3254,7 +3252,7 @@ namespace feature_detection {
                 fts.push_back(std::shared_ptr<Feature>(new Feature(frame, Vector2d(c.x, c.y), c.level)));
                 int gridx = c.x / gridWidth;
                 int gridy = c.y / gridHeight;
-                grid[gridx + gridy * detectWidthGrid]++;
+                frame->occupy[gridx + gridy * detectWidthGrid] = true;
             }
         });
 

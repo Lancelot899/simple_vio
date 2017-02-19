@@ -25,7 +25,7 @@ TEST(fast_detector, fast_detector) {
     GTEST_ASSERT_NE(frame.get(), nullptr);
     feature_detection::AbstractDetector *detector = new feature_detection::FastDetector(pic.cols, pic.rows, 25, IMG_LEVEL);
     GTEST_ASSERT_NE(detector, nullptr);
-    feature_detection::FastDetector::features_t features, features1;
+    feature_detection::features_t features, features1;
 //  printf("-- detector start!\n");
 #ifdef SHOW_FAST
     detector->detect(frame, frame->getMeasure().measurement.imgPyr, 5,features);
