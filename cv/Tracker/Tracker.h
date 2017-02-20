@@ -5,6 +5,9 @@
 #ifndef SIMPLE_VIO_TRACKER_H
 #define SIMPLE_VIO_TRACKER_H
 
+class cvFrame;
+class viFrame;
+
 namespace direct_tracker {
 
     class Tracker {
