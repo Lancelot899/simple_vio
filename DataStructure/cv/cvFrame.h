@@ -1,5 +1,5 @@
-#ifndef viFrame_H
-#define viFrame_H
+#ifndef cvFrame_H_
+#define cvFrame_H_
 
 #include <memory>
 #include <array>
@@ -7,7 +7,6 @@
 #include <opencv2/opencv.hpp>
 
 #include <boost/noncopyable.hpp>
-#include <cv/FeatureDetector/FastDetector.h>
 
 #include "util/setting.h"
 #include "DataStructure/Measurements.h"
@@ -26,7 +25,11 @@ static const int cellRowNumbel[5]=
 typedef Sophus::SE3d pose_t;
 
 class Feature;
-class AbstractDetector;
+
+namespace feature_detection {
+    class AbstractDetector;
+    class FastDetector;
+}
 
 struct cvData {
 public:
@@ -63,7 +66,7 @@ public:
 
 class cvFrame : boost::noncopyable {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-    friend class AbstractDetector;
+    friend class feature_detection::AbstractDetector;
     friend feature_detection::FastDetector;
     friend class Initialize;
 
@@ -117,4 +120,4 @@ private:
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;
 
-#endif // viFrame_H
+#endif // cvFrame_H_

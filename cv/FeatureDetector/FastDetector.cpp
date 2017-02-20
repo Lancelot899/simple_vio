@@ -3245,6 +3245,8 @@ namespace feature_detection {
                     corners.at(k) = Corner(xy.x*scale, xy.y*scale, score, L, 0.0f);
             }
         }
+        int gridWidth = frame->getWidth() / detectWidthGrid;
+        int gridHeight = frame->getHeight() / detectHeightGrid;
 
         // Create feature for every corner that has high enough corner score
         std::for_each(corners.begin(), corners.end(), [&](Corner& c) {

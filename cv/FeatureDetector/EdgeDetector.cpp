@@ -121,7 +121,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             num++; sum+=threshold[x+y*w32];
 
             thresholdSmoothed[x+y*w32] = (sum/num) * (sum/num);
-            int isInf = isinf(thresholdSmoothed[x+y*w32]);
+            int isInf = std::isinf(thresholdSmoothed[x+y*w32]);
 //            if(isInf==1 || isInf==-1) {
 //                exit(-1)  ;
 //            }

@@ -23,7 +23,7 @@ void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
 }
 
 void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
-    
+
 }
 
 bool Initialize::init(std::shared_ptr<ImuParameters> &imuParam, int n_iter) {
