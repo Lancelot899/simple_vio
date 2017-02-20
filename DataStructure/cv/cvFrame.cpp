@@ -4,7 +4,7 @@ const cvMeasure& cvFrame::getMeasure() {
     return cvData;
 }
 
-bool cvFrame::checkCellOccupy(int u, int v, int level) {
+bool cvFrame::checkCellOccupy(int u, int v) {
     return occupy[u + v * detectWidthGrid];
 }
 

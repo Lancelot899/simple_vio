@@ -99,7 +99,7 @@ public:
     int getWidth(int level = 0);
     int getHeight(int level = 0);
     const cvMeasure& getMeasure();
-    bool checkCellOccupy(int u,int v,int level = 0);
+    bool checkCellOccupy(int u,int v);
 //    bool checkCellOccupy(int index,int level = 0);
 
 public:
@@ -112,7 +112,7 @@ private:
     cam_t              cam_;                         //!< Camera model.
     bool               is_keyframe_;                 //!< Was this frames selected as keyframe?
     int                last_published_ts_;           //!< Timestamp of last publishing.
-    bool occupy[detectHeightGrid * detectWidthGrid]; //!< whether cell is occupy by features
+    bool occupy[detectHeightGrid* detectWidthGrid];  //!< whether cell is occupy by features
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;
