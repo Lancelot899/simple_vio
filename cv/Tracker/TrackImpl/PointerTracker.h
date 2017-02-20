@@ -9,6 +9,10 @@
 
 namespace direct_tracker {
     class PointerTracker : public AbstractTracker {
+    public:
+        PointerTracker();
+        ~PointerTracker();
+        virtual bool tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j, Translation &T_ij);
 
     };
 }
