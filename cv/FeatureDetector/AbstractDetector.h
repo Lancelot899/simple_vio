@@ -6,7 +6,6 @@
 
 /// Implementation of various feature detectors.
 namespace feature_detection {
-
     typedef cvMeasure::ImgPyr_t    ImgPyr_t;
     typedef cvMeasure::features_t  features_t;
 /// Temporary container used for corner detection. Features are initialized from these.

@@ -4,10 +4,10 @@
 #define IMG_LEVEL                         5
 #define IMUMEASURE_BETWEEN_FRAME_MAX      100
 
-extern const int    detectWidthGrid = 10;
-extern const int    detectHeightGrid = 10;
-extern const double fast_threshold;
-extern const double edge_threshold;
+#define fast_threshold   10.0
+#define edge_threshold   20.0
+#define detectWidthGrid   10
+#define detectHeightGrid  10
 
 
 #endif // SETTING_H
