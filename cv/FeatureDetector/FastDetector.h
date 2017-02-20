@@ -5,11 +5,14 @@
 #ifndef SIMPLE_VIO_FASTDETECTOR_H
 #define SIMPLE_VIO_FASTDETECTOR_H
 
+
 #include "AbstractDetector.h"
 
+
 namespace feature_detection {
-    /// FAST detector by Edward Rosten.
+
     class FastDetector : public AbstractDetector {
+    public:
         friend class Detector;
     public:
         FastDetector(
@@ -42,7 +45,6 @@ namespace feature_detection {
                              const std::vector<double>& scores,
                              std::vector<double>& nonmax_corners);
     };
-
 }
 
 #endif //SIMPLE_VIO_FASTDETECTOR_H
