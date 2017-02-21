@@ -13,13 +13,12 @@
 namespace direct_tracker {
 
     typedef Eigen::Matrix<double, 1, 6> Jac_t;
-    class viFrame;
     bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_j, std::shared_ptr<Feature> &ft, const Sophus::SE3d T_SB, const Sophus::SE3d& Ti,  Sophus::SE3d& T_ji, Jac_t &jac, double &w) {
         std::shared_ptr<Point>& p = ft->point;
         Eigen::Vector2d& dir = ft->grad;
         Eigen::Vector2d grad;
         Eigen::Vector3d P = T_ji * Ti * p->pos_;
-        const viFrame::cam_t& cam = viframe_j->getCam();
+        const viFrame::cam_t & cam = viframe_j->getCam();
         Eigen::Vector3d Pj = T_SB * P;
         if(Pj(2) < 0.0000001)
             return false;
