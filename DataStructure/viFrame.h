@@ -2,12 +2,12 @@
 #define VIFRAME_H
 
 #include <memory>
-
+#include "DataStructure/cv/Camera/AbstractCamera.h"
 #include "imu/IMUMeasure.h"
 
 class cvFrame;
 class imuFactor;
-class AbstractCamera;
+
 
 class viFrame {
 public:
