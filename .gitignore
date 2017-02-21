@@ -3,3 +3,4 @@ build*
 testData
 .idea
 *debug
+*user
