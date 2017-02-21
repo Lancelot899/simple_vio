@@ -24,9 +24,16 @@ viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe) {
     spbs.setZero();
 }
 
+const viFrame::cam_t& viFrame::getCam() {
+    return cvframe->getCam();
+}
+
 viFrame::~viFrame()
 {
+}
 
+const viFrame::pose_t& viFrame::getT_BS() {
+    return dynamic_cast<VIOPinholeCamera*>(cvframe->getCam().get())->getT_BS();
 }
 
 viFrame::pose_t viFrame::getPose() {
