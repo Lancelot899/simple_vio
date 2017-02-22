@@ -2,11 +2,12 @@
 #define VIFRAME_H
 
 #include <memory>
-
+#include "DataStructure/cv/Camera/AbstractCamera.h"
 #include "imu/IMUMeasure.h"
 
 class cvFrame;
 class imuFactor;
+
 
 class viFrame {
 public:
@@ -17,6 +18,7 @@ public:
     typedef std::shared_ptr<viFrame>          imuConnection_t;
     typedef std::shared_ptr<ImuParameters>    ImuParam;
     typedef Sophus::SE3d                      pose_t;
+    typedef std::shared_ptr<AbstractCamera>   cam_t;
 
 public:
     viFrame(int id, std::shared_ptr<cvFrame>& cvframe);
@@ -25,6 +27,7 @@ public:
         return id;
     }
 
+    const pose_t& getT_BS();
     pose_t getPose();
     const std::shared_ptr<cvFrame>& getCVFrame();
     const IMUMeasure::SpeedAndBias &getSpeedAndBias();
@@ -32,6 +35,7 @@ public:
         return imuParam;
     }
 
+    const cam_t& getCam();
     const okvis::Time &getTimeStamp();
 
 private:
