@@ -97,6 +97,7 @@ public:
     const position_t& pos();
     const Pic_t&  getPicture();
     double getIntensity(int u, int v, int level = 0);
+    double getIntensityBilinear(double u, double v, int level = 0);
     bool getGrad(int u, int v, grad_t&  out, int level = 0);
     double getGradNorm(int u, int v, int level = 0);
     int getWidth(int level = 0);

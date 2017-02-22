@@ -33,6 +33,28 @@ double cvFrame::getIntensity(int u, int v, int level) {
     return cvData.measurement.imgPyr[level][v * cols + u][0];
 }
 
+double cvFrame::getIntensityBilinear(double u, double v, int level)
+{
+    int rows = cvData.measurement.height[level];
+    int cols = cvData.measurement.width[level];
+
+    if(u >= cols || v >= rows)
+        return -1.0;
+
+    int ui = std::floor(u);    int vi = std::floor(v);
+    double ud = u - ui;        double vd = v - vi;
+
+    double leftTop     = cvData.measurement.imgPyr[level][vi * cols + ui][0];
+    double rightTop    = cvData.measurement.imgPyr[level][vi * cols + ui + 1][0];
+    double leftBottom  = cvData.measurement.imgPyr[level][vi * cols + cols + ui][0];
+    double rightBottom = cvData.measurement.imgPyr[level][vi * cols + cols + ui + 1][0];
+
+    double row1 = leftTop * (1 - ud) + ud * rightTop;
+    double row2 = leftBottom * (1 - ud) + ud * rightBottom;
+
+    return row1 * (1 - vd) + row2 * vd;
+}
+
 bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     if(u < 0 || v < 0 || level > IMG_LEVEL)
         return false;

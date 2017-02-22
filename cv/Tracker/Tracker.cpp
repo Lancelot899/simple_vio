@@ -42,6 +42,7 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
     err = viframe_i->getCVFrame()->getIntensity(fx*pointI(0)/pointI(2)+cx, fy*pointI(1)/pointI(2)+cy)
             -viframe_j->getCVFrame()->getIntensity(u,v);
     err = err>0? err:-err;
+
     Eigen::Vector2d grad;viframe_j->getCVFrame()->getGrad(u,v,grad);
     double dI_du = grad(0) ,dI_dv = grad(1);
 
@@ -80,7 +81,7 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
 
     double v = cam->fy() * Pj(1) / Pj(2) + cam->cy();
 
-    if(v < 0 || v >= viframe_j->getCVFrame()->getWidth())
+    if(v < 0 || v >= viframe_j->getCVFrame()->getHeight())
         return false;
 
     for(int i = 0; i < ft->level; ++i) {
