@@ -14,7 +14,7 @@ namespace feature_detection {
         EdgeDetector(
                 const int img_width,
                 const int img_height,
-                const int cell_size,  ///<! Todo
+                const int cell_size,
                 const int n_pyr_levels);
 
         virtual ~EdgeDetector()
@@ -47,17 +47,16 @@ namespace feature_detection {
 
     private:
         void makeHists(cvframePtr_t frame);
-        int sample(cvframePtr_t frame,float *rate);
 
     private:
-        int                  *gradHist;   ///<! Todo
+        int                  *gradHist;
         float                *threshold;
         double               *thresholdSmoothed;
         unsigned char        *randomPattern;
         int                  thresholdStepU, thresholdStepV;
 
         cvframePtr_t         currentFrame;
-        features_t           edge;  //std::list<std::shared_ptr<Feature>>
+        features_t           edge;
     };
 
 }

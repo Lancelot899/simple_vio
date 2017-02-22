@@ -9,4 +9,5 @@
 #define detectWidthGrid   10
 #define detectHeightGrid  10
 
+
 #endif // SETTING_H
