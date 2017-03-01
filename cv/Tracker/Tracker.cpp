@@ -97,16 +97,9 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
         return false;
 
     Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
-    int ui = std::floor(px[0]);
-    int vi = std::floor(px[1]);
-    int uj = std::floor(u);
-    int vj = std::floor(v);
 
-    //! bilinear interpolation
-
-
-    err = viframe_i->getCVFrame()->getIntensity(px(0), px(1), ft->level)
-            - viframe_j->getCVFrame()->getIntensity(u, v, ft->level);
+    err = viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level)
+            - viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level);
 
     //! if err is to large, should I compute this point?
 

@@ -138,7 +138,7 @@ set(SOURCE_FILES
         DataStructure/cv/Camera/PinholeCamera.cpp
         DataStructure/cv/Camera/PinholeCamera.h
         DataStructure/cv/Camera/VIOPinholeCamera.cpp
-        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h vio/Initialize.cpp vio/Initialize.h vio/Implement/InitialImpl.cpp vio/Implement/InitialImpl.h cv/FeatureDetector/Detector.cpp cv/FeatureDetector/Detector.h cv/Tracker/Tracker.cpp cv/Tracker/Tracker.h)
+        DataStructure/cv/Camera/VIOPinholeCamera.h cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h vio/Initialize.cpp vio/Initialize.h vio/Implement/InitialImpl.cpp vio/Implement/InitialImpl.h cv/FeatureDetector/Detector.cpp cv/FeatureDetector/Detector.h cv/Tracker/Tracker.cpp cv/Tracker/Tracker.h cv/Tracker/test/Test_Tracker.cpp util/ThreadReduce.cpp util/ThreadReduce.h)
 
 
 add_executable(simple_vio ${SOURCE_FILES})

@@ -44,12 +44,11 @@ namespace feature_detection {
         return 0;
     }
 
-    void FastDetector::fast_corner_detect_10(const cvData::Img_t &img_,
+    void FastDetector::fast_corner_detect_10(vector<Eigen::Matrix<double, 3, 1, 0, 3, 1>>::const_iterator& img,
                                              int img_width, int img_height, int img_stride,
                                              double barrier, std::vector<fast_xy> &corners) {
         int y;
         double cb, c_b;
-        cvData::Img_t::const_iterator img = img_.begin();
         cvData::Img_t::const_iterator line_max, line_min;
         cvData::Img_t::const_iterator cache_0;
 
@@ -72,16 +71,16 @@ namespace feature_detection {
                 -1 + img_stride * 3,
         };
 
+        //printf("compute y!\n");
         for(y = 3 ; y < img_height - 3; y++)
         {
-            cache_0 = img + y*img_stride + 3;
+            cache_0 = img + y * img_stride + 3;
             line_min = cache_0 - 3;
             line_max = img + y*img_stride + img_width - 3;
             // cache_0 = &i[y][3];
             // line_min = cache_0 - 3;
             // line_max = &i[y][i.size().x - 3];
-
-
+            //printf("y = %d\n",y);
             for(; cache_0 < line_max; cache_0++)
             {
                 cb = (*cache_0)(0) + barrier;
@@ -3216,37 +3215,46 @@ namespace feature_detection {
             features_t& fts)  {
         Corners corners(grid_n_cols_ * grid_n_rows_, Corner(0,0,detection_threshold,0,0.0f));
         //Corners corners(grid_n_cols_*grid_n_rows_, Corner(0,0,0,0,0.0f));
-        for(int L=0; L<n_pyr_levels_; ++L) {
-            const int scale = (1<<L);
-            vector<fast_xy> fast_corners;
-            int gridWidth = frame->getWidth() / detectWidthGrid;
-            int gridHeight = frame->getHeight() / detectHeightGrid;
-
-
-            fast_corner_detect_10(img_pyr[L], frame->getWidth(L),
-                                  frame->getHeight(L), frame->getWidth(L), 8.0, fast_corners);
-
-            vector<double> scores, nm_corners;
-            fast_corner_score_10(img_pyr[L].begin(), frame->getWidth(L), fast_corners, 8, scores);// 20
-            fast_nonmax_3x3(fast_corners, scores, nm_corners);
-
-            for(auto it=nm_corners.begin(); it!=nm_corners.end(); ++it)
-            {
-                fast_xy& xy = fast_corners.at(*it);
-                // printf("fast 1\n");
-                const int k = static_cast<int>((xy.y*scale)/cell_size_)*grid_n_cols_
-                              + static_cast<int>((xy.x*scale)/cell_size_);
-                if(k > grid_occupancy_.size() || k > corners.size())
+        bool* cell_ = frame->cell;
+        for(int u = 0; u < detectCellWidth; ++u) {
+            for (int v = 0; v < detectCellHeight; ++v) {
+                printf("u = %d, v = %d\n", u, v);
+                if(cell_[u + v * detectCellWidth])
                     continue;
-                if(grid_occupancy_[k])
-                    continue;
-                const double score = shiTomasiScore(img_pyr[L], frame->getWidth(L), frame->getHeight(L), xy.x, xy.y);
-                if(score > corners.at(k).score)
-                    corners.at(k) = Corner(xy.x*scale, xy.y*scale, score, L, 0.0f);
+
+                for (int L = 0; L < n_pyr_levels_ - 2; ++L) {
+                    const int scale = (1 << L);
+                    vector<fast_xy> fast_corners;
+                    vector<Eigen::Matrix<double, 3, 1, 0, 3, 1>>::const_iterator img =  img_pyr[L].begin();
+                    int height = frame->getHeight(L) / detectCellHeight;
+                    int width = frame->getWidth(L) /detectCellWidth;
+                    //printf("lens = %u, index = %d\n", img_pyr[L].size(), u * width + v * height * frame->getWidth(L));
+                    img = img + u * width + v * height * frame->getWidth(L);
+                    fast_corner_detect_10(img, width, height, frame->getWidth(L), 8.0, fast_corners);
+                    //printf("a cell over!\n");
+                    vector<double> scores, nm_corners;
+                    fast_corner_score_10(img, frame->getWidth(L), fast_corners, 8, scores);// 20
+                    fast_nonmax_3x3(fast_corners, scores, nm_corners);
+
+                    for (auto it = nm_corners.begin(); it != nm_corners.end(); ++it) {
+                        fast_xy &xy = fast_corners.at(*it);
+                        // printf("fast 1\n");
+                        const int k = static_cast<int>((xy.y * scale) / cell_size_) * grid_n_cols_
+                                      + static_cast<int>((xy.x * scale) / cell_size_);
+                        if (k > grid_occupancy_.size() || k > corners.size())
+                            continue;
+                        if (grid_occupancy_[k])
+                            continue;
+                        const double score = shiTomasiScore(img_pyr[L], frame->getWidth(L), frame->getHeight(L), xy.x,
+                                                            xy.y);
+                        if (score > corners.at(k).score)
+                            corners.at(k) = Corner(xy.x * scale, xy.y * scale, score, L, 0.0f);
+                    }
+                }
             }
         }
-        int gridWidth = frame->getWidth() / detectWidthGrid;
-        int gridHeight = frame->getHeight() / detectHeightGrid;
+        int gridWidth = frame->getWidth() / (detectWidthGrid * detectCellWidth);
+        int gridHeight = frame->getHeight() / (detectHeightGrid * detectCellHeight);
 
         // Create feature for every corner that has high enough corner score
         std::for_each(corners.begin(), corners.end(), [&](Corner& c) {
@@ -6409,8 +6417,11 @@ namespace feature_detection {
                 -2 + img_stride * 2,
                 -1 + img_stride * 3,
         };
-        for(unsigned int n=0; n < corners.size(); n++)
-            scores[n] = fast_corner_score(img + corners[n].y*img_stride + corners[n].x, pixel, threshold);
+        for(unsigned int n=0; n < corners.size(); n++) {
+            //printf("n = %d\n", n);
+            scores[n] = fast_corner_score(img + corners[n].y * img_stride + corners[n].x, pixel, threshold);
+            //printf("next!\n");
+        }
     }
 
     void FastDetector::fast_nonmax_3x3(const std::vector<fast_xy> &corners, const std::vector<double> &scores,

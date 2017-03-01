@@ -7,10 +7,12 @@
 #include "DataStructure/cv/cvFrame.h"
 #include "cv/FeatureDetector/Detector.h"
 
-Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector) {
+Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector,
+                       std::shared_ptr<direct_tracker::Tracker>& tracker) {
     impl_ = std::make_shared<InitialImpl>();
     isInitialed = false;
     this->detector = detector;
+    this->tracker = tracker;
 }
 
 void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {

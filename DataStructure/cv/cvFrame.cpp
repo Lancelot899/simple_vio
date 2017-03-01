@@ -5,7 +5,7 @@ const cvMeasure& cvFrame::getMeasure() {
 }
 
 bool cvFrame::checkCellOccupy(int u, int v) {
-    return occupy[u + v * detectWidthGrid];
+    return occupy[u + v * detectWidthGrid * detectCellHeight];
 }
 
 const cvFrame::Pic_t& cvFrame::getPicture() {
@@ -33,15 +33,14 @@ double cvFrame::getIntensity(int u, int v, int level) {
     return cvData.measurement.imgPyr[level][v * cols + u][0];
 }
 
-double cvFrame::getIntensityBilinear(double u, double v, int level)
-{
+double cvFrame::getIntensityBilinear(double u, double v, int level) {
     int rows = cvData.measurement.height[level];
     int cols = cvData.measurement.width[level];
 
     if(u >= cols || v >= rows)
         return -1.0;
 
-    int ui = std::floor(u);    int vi = std::floor(v);
+    int ui = int(std::floor(u));    int vi = int(std::floor(v));
     double ud = u - ui;        double vd = v - vi;
 
     double leftTop     = cvData.measurement.imgPyr[level][vi * cols + ui][0];
@@ -54,6 +53,28 @@ double cvFrame::getIntensityBilinear(double u, double v, int level)
 
     return row1 * (1 - vd) + row2 * vd;
 }
+
+Eigen::Vector2d cvFrame::getGradBilinear(double u, double v, int level){
+    int rows = cvData.measurement.height[level];
+    int cols = cvData.measurement.width[level];
+
+    if(u >= cols || v >= rows)
+        return Eigen::Vector2d::Zero();
+
+    int ui = int(std::floor(u));    int vi = int(std::floor(v));
+    double ud = u - ui;        double vd = v - vi;
+
+    const Eigen::Vector2d& leftTop     = cvData.measurement.imgPyr[level][vi * cols + ui].block<2, 1>(1, 0);
+    const Eigen::Vector2d& rightTop    = cvData.measurement.imgPyr[level][vi * cols + ui + 1].block<2, 1>(1, 0);
+    const Eigen::Vector2d& leftBottom  = cvData.measurement.imgPyr[level][vi * cols + cols + ui].block<2, 1>(1, 0);
+    const Eigen::Vector2d& rightBottom = cvData.measurement.imgPyr[level][vi * cols + cols + ui + 1].block<2, 1>(1, 0);
+
+    Eigen::Vector2d row1 = leftTop * (1 - ud) + ud * rightTop;
+    Eigen::Vector2d row2 = leftBottom * (1 - ud) + ud * rightBottom;
+
+    return row1 * (1 - vd) + row2 * vd;
+}
+
 
 bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     if(u < 0 || v < 0 || level > IMG_LEVEL)
@@ -77,7 +98,8 @@ cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
 
     // 341 = 1 + 4 + 16 + 64 + 256 !>> cell's numbel for each level
     // for a point(u,v) in cell(on the l level): (u,v,l) , occupy[(4^l-1)/3 + v*2^l + u]
-    memset(occupy, 0, sizeof(bool) * detectHeightGrid * detectWidthGrid);
+    memset(occupy, 0, sizeof(bool) * detectCellWidth * detectCellHeight * detectHeightGrid * detectWidthGrid);
+    memset(cell, 0, sizeof(bool) * detectCellWidth * detectCellHeight);
     for(int i = 0; i < IMG_LEVEL; ++i) {
         if(i != 0) {
             rows /= 2;

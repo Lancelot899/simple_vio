@@ -35,7 +35,7 @@ namespace feature_detection {
             fast_xy(short x_, short y_) : x(x_), y(y_) {}
         };
 
-        void fast_corner_detect_10(const cvData::Img_t& img, int imgWidth, int imgHeight,
+        void fast_corner_detect_10(std::vector<Eigen::Matrix<double, 3, 1, 0, 3, 1>>::const_iterator& img, int imgWidth, int imgHeight,
                                    int img_stride, double barrier, std::vector<fast_xy>& corners);
 
         void fast_corner_score_10(cvData::Img_t::const_iterator img, const int img_stride,
