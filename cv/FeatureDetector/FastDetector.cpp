@@ -71,7 +71,6 @@ namespace feature_detection {
                 -1 + img_stride * 3,
         };
 
-        //printf("compute y!\n");
         for(y = 3 ; y < img_height - 3; y++)
         {
             cache_0 = img + y * img_stride + 3;
@@ -3218,10 +3217,8 @@ namespace feature_detection {
         bool* cell_ = frame->cell;
         for(int u = 0; u < detectCellWidth; ++u) {
             for (int v = 0; v < detectCellHeight; ++v) {
-                printf("u = %d, v = %d\n", u, v);
                 if(cell_[u + v * detectCellWidth])
                     continue;
-
                 for (int L = 0; L < n_pyr_levels_ - 2; ++L) {
                     const int scale = (1 << L);
                     vector<fast_xy> fast_corners;
@@ -3232,8 +3229,16 @@ namespace feature_detection {
                     img = img + u * width + v * height * frame->getWidth(L);
                     fast_corner_detect_10(img, width, height, frame->getWidth(L), 8.0, fast_corners);
                     //printf("a cell over!\n");
+
+                    for (auto &pt : fast_corners) {
+                        pt.x += u * width;
+                        pt.y += v * height;
+                       // printf("x, y = %d, %d", pt.x, pt.y);
+                    }
+
+
                     vector<double> scores, nm_corners;
-                    fast_corner_score_10(img, frame->getWidth(L), fast_corners, 8, scores);// 20
+                    fast_corner_score_10(img_pyr[L].begin(), frame->getWidth(L), fast_corners, 8, scores);// 20
                     fast_nonmax_3x3(fast_corners, scores, nm_corners);
 
                     for (auto it = nm_corners.begin(); it != nm_corners.end(); ++it) {
@@ -3247,6 +3252,7 @@ namespace feature_detection {
                             continue;
                         const double score = shiTomasiScore(img_pyr[L], frame->getWidth(L), frame->getHeight(L), xy.x,
                                                             xy.y);
+
                         if (score > corners.at(k).score)
                             corners.at(k) = Corner(xy.x * scale, xy.y * scale, score, L, 0.0f);
                     }
@@ -3262,7 +3268,7 @@ namespace feature_detection {
                 fts.push_back(std::shared_ptr<Feature>(new Feature(frame, Vector2d(c.x, c.y), c.level)));
                 int gridx = c.x / gridWidth;
                 int gridy = c.y / gridHeight;
-                frame->occupy[gridx + gridy * detectWidthGrid] = true;
+                frame->occupy[gridx + gridy * detectWidthGrid  * detectCellWidth] = true;
             }
         });
 
@@ -6418,9 +6424,7 @@ namespace feature_detection {
                 -1 + img_stride * 3,
         };
         for(unsigned int n=0; n < corners.size(); n++) {
-            //printf("n = %d\n", n);
             scores[n] = fast_corner_score(img + corners[n].y * img_stride + corners[n].x, pixel, threshold);
-            //printf("next!\n");
         }
     }
 
