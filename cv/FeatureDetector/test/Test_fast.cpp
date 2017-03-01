@@ -44,8 +44,6 @@ TEST(fast_detector, fast_detector) {
     }
 
     for (auto it : features) {
-        std::cout << it->px << std::endl;
-        printf("\n");
         cv::Point2i point(int((it)->px(0)), int((it)->px(1)));
         cv::circle(pic, point, 4 * (it->level + 1), cv::Scalar(0, 255, 0), 1);
     }

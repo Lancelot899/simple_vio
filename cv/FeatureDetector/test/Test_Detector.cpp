@@ -17,6 +17,9 @@ TEST(Detector, Detector) {
     std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, pic);
     feature_detection::Detector detector(pic.cols, pic.rows, 25, IMG_LEVEL);
     feature_detection::features_t fts;
+
+#if SHOW_FEATURE
+
     double t = (double)cvGetTickCount();
     detector.detect(frame, frame->getMeasure().measurement.imgPyr, fts);
     t = (double)cvGetTickCount() - t;
@@ -50,4 +53,10 @@ TEST(Detector, Detector) {
     cv::imshow("result line", resultline);
     cv::imshow("result point", resultpt);
     cv::waitKey();
+
+#else
+    detector.detect(frame, frame->getMeasure().measurement.imgPyr, fts);
+
+#endif
+
 }
