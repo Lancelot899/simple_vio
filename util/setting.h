@@ -4,7 +4,7 @@
 #define IMG_LEVEL                         5
 #define IMUMEASURE_BETWEEN_FRAME_MAX      100
 
-#define fast_threshold   10.0
+#define fast_threshold   5.0
 #define edge_threshold   20.0
 
 

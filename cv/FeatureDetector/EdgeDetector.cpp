@@ -133,7 +133,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
     float thresholdFactor = 1.0f;
     float dw1 = 0.75f, dw2 = dw1*dw1;
 
-    fts.clear();
+    //fts.clear();
     int w  = frame->getWidth(0);
     int h  = frame->getHeight(0);
 
