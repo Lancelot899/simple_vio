@@ -98,6 +98,7 @@ public:
     const Pic_t&  getPicture();
     double getIntensity(int u, int v, int level = 0);
     double getIntensityBilinear(double u, double v, int level = 0);
+    Eigen::Vector2d getGradBilinear(double u, double v, int level = 0);
     bool getGrad(int u, int v, grad_t&  out, int level = 0);
     double getGradNorm(int u, int v, int level = 0);
     int getWidth(int level = 0);
@@ -111,12 +112,13 @@ public:
 
 private:
     cvMeasure          cvData;
-    pose_t             pose_;                        //!< Transform frame from world.
-    cov_t              Cov_;                         //!< Covariance.
-    cam_t              cam_;                         //!< Camera model.
-    bool               is_keyframe_;                 //!< Was this frames selected as keyframe?
-    int                last_published_ts_;           //!< Timestamp of last publishing.
-    bool occupy[detectHeightGrid* detectWidthGrid];  //!< whether cell is occupy by features
+    pose_t             pose_;                                                            //!< Transform frame from world.
+    cov_t              Cov_;                                                             //!< Covariance.
+    cam_t              cam_;                                                             //!< Camera model.
+    bool               is_keyframe_;                                                     //!< Was this frames selected as keyframe?
+    int                last_published_ts_;                                               //!< Timestamp of last publishing.
+    bool occupy[detectCellWidth * detectCellHeight * detectHeightGrid * detectWidthGrid];  //!< whether cell is occupy by features
+    bool cell[detectCellWidth * detectCellHeight];
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;

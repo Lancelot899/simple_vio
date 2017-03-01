@@ -140,11 +140,11 @@ void EdgeDetector::detect(cvframePtr_t frame,
     int n3=0, n2=0, n4=0;
     int pot = 5;
     int bestU0 = -1, bestU1 = -1,  bestU2 = -1, bestV0 = -1, bestV1 = -1,  bestV2 = -1;
-    int cellHeight = h/detectHeightGrid;
-    int cellWidth = w/detectWidthGrid;
+    int cellHeight = h/(detectHeightGrid * detectCellHeight);
+    int cellWidth = w/(detectWidthGrid * detectCellWidth);
 
-    for (int cellV = 0; cellV < detectHeightGrid; ++cellV)
-        for (int cellU = 0; cellU < detectWidthGrid; ++cellU) {
+    for (int cellV = 0; cellV < detectHeightGrid * detectCellHeight; ++cellV)
+        for (int cellU = 0; cellU < detectWidthGrid * detectCellWidth; ++cellU) {
             if(frame->checkCellOccupy(cellU,cellV))     continue;
             int y4 = cellV * cellHeight, y4Top = y4+cellHeight;
             int x4 = cellU * cellWidth, x4Top = x4+cellWidth;

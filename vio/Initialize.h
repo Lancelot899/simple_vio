@@ -15,9 +15,14 @@ namespace feature_detection {
     class Detector;
 }
 
+namespace direct_tracker {
+    class Tracker;
+}
+
 class Initialize {
 public:
-    Initialize(std::shared_ptr<feature_detection::Detector>& detector);
+    Initialize(std::shared_ptr<feature_detection::Detector>& detector,
+               std::shared_ptr<direct_tracker::Tracker>& tracker);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
     std::vector<std::shared_ptr<viFrame>>* getInitialViframe() {
@@ -34,6 +39,7 @@ private:
 
 private:
     std::shared_ptr<feature_detection::Detector> detector;
+    std::shared_ptr<direct_tracker::Tracker> tracker;
     std::shared_ptr<InitialImpl> impl_;
     std::vector<std::shared_ptr<viFrame>> VecFrames;
     bool isInitialed;

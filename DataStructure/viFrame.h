@@ -2,6 +2,8 @@
 #define VIFRAME_H
 
 #include <memory>
+#include <boost/noncopyable.hpp>
+
 #include "DataStructure/cv/Camera/AbstractCamera.h"
 #include "imu/IMUMeasure.h"
 
@@ -9,7 +11,7 @@ class cvFrame;
 class imuFactor;
 
 
-class viFrame {
+class viFrame : boost::noncopyable {
 public:
     friend class InitialImpl;
 

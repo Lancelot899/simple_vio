@@ -5,6 +5,7 @@
 #ifndef SIMPLE_VIO_TRACKER_H
 #define SIMPLE_VIO_TRACKER_H
 
+#include <memory>
 #include "ThirdParty/sophus/se3.hpp"
 
 class cvFrame;
@@ -15,7 +16,7 @@ namespace direct_tracker {
     class Tracker {
     public:
         Tracker();
-        bool Tracking(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j, Sophus::SE3d &T_ji, int n_iter);
+        bool Tracking(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j, Sophus::SE3d &T_ji, int n_iter = 30);
 
     private:
 
