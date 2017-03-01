@@ -52,12 +52,12 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
         b.setZero();
         for (int i = 0; i < size - 1; ++i) {
             const IMUMeasure::Transformation &deltaPose = VecImuFactor[i]->deltaPose;
-            const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias();
+            const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias(); ///! TODO
             Eigen::Vector3d err = Sophus::SO3d::log(
-                    (deltaPose.so3() * Sophus::SO3d::exp(facJac.block<3, 3>(0, 0) * gbias)).inverse()
-                    * VecFrames[i]->getPose().so3() * VecFrames[i + 1]->getPose().so3().inverse());
+                        (deltaPose.so3() * Sophus::SO3d::exp(facJac.block<3, 3>(0, 0) * gbias)).inverse()
+                        * VecFrames[i]->getPose().so3() * VecFrames[i + 1]->getPose().so3().inverse());
             Err += err.transpose() * err;
-            Eigen::Matrix3d Jac = -leftJacobian(err).inverse() * facJac.block<3, 3>(0, 0);
+            Eigen::Matrix3d Jac = -leftJacobian(err).inverse() * facJac.block<3, 3>(0, 0); ///! WHY?
             b += Jac.transpose() * err;
             H += Jac.transpose() * Jac;
         }
@@ -99,7 +99,7 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
     Sophus::SO3d R3_wb = VecFrames[2]->getPose().so3().inverse();
     double dt12 = (VecFrames[1]->getTimeStamp() - VecFrames[0]->getTimeStamp()).toSec();
     p2 = scale * p1 + VecFrames[0]->spbs.block<3, 1>(0, 0) * dt12 + 0.5 * g_w * dt12 * dt12 +
-         R1_wb * VecImuFactor[0]->getPoseFac().translation() + (R1_wc.matrix() - R2_wc.matrix()) * cP_B;
+            R1_wb * VecImuFactor[0]->getPoseFac().translation() + (R1_wc.matrix() - R2_wc.matrix()) * cP_B;
 
     double dt23 = (VecFrames[2]->getTimeStamp() - VecFrames[1]->getTimeStamp()).toSec();
     p3 = scale * p2 + VecFrames[1]->spbs.block<3, 1>(0, 0) * dt23 + 0.5 * g_w * dt23 * dt23 +
@@ -124,25 +124,25 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
         C.block<3, 1>(3 * i -3, 0) = A.block<3, 1>(3 * i - 3, 0) = (p2 - p1) * dt23 - (p3 - p2) * dt12;
         A.block<3, 3>(3 * i - 3, 1) = 0.5 * Eigen::Matrix3d::Identity() * (dt12 * dt12 * dt23 - dt23 * dt23 * dt12);
         B.block<3, 1>(3 * i - 3, 0) = (R2_wc.matrix() - R1_wc.matrix()) * cP_B * dt23
-                                      - (R3_wc.matrix() - R2_wc.matrix()) * cP_B * dt12
-                                      + R2_wb * VecImuFactor[i]->getPoseFac().translation() * dt12
-                                      - R1_wb * VecImuFactor[i - 1]->getSpeedFac() * dt12 * dt23
-                                      - R1_wb * VecImuFactor[i - 1]->getPoseFac().translation() * dt23;
+                - (R3_wc.matrix() - R2_wc.matrix()) * cP_B * dt12
+                + R2_wb * VecImuFactor[i]->getPoseFac().translation() * dt12
+                + R1_wb * VecImuFactor[i - 1]->getSpeedFac() * dt12 * dt23
+                - R1_wb * VecImuFactor[i - 1]->getPoseFac().translation() * dt23;
 
         C.block<3, 3>(3 * i - 3, 3) = R2_wb.matrix() * VecImuFactor[i]->getJBias().block<3, 3>(9, 0) * dt12
-                                      + R1_wb.matrix() * VecImuFactor[i]->getJBias().block<3, 3>(3, 0) * dt12 * dt23
-                                      - R1_wb.matrix() * VecImuFactor[i - 1]->getJBias().block<3, 3>(9, 0) * dt23;
+                + R1_wb.matrix() * VecImuFactor[i]->getJBias().block<3, 3>(3, 0) * dt12 * dt23
+                - R1_wb.matrix() * VecImuFactor[i - 1]->getJBias().block<3, 3>(9, 0) * dt23;
 
-        C(3 * i - 3, 1) = 0.5 * imuParam->g * dt12 * dt12 * dt23 + dt23 * dt23 * dt12;
+        C(3 * i - 3, 1) = 0.5 * imuParam->g * (dt12 * dt12 * dt23 + dt23 * dt23 * dt12);
         C(3 * i - 3, 2) = 0.5 * imuParam->g /*dt_ij^2 */ ;
         D.block<3, 1>(3 * i - 3, 0) = (R2_wc.matrix() - R1_wc.matrix()) * cP_B * dt23
-                                      - (R3_wc.matrix() - R2_wc.matrix()) * cP_B * dt12
-                                      + R2_wb * VecImuFactor[i]->getPoseFac().translation() * dt12
-                                      + R1_wb * VecImuFactor[i - 1]->getSpeedFac() * dt12 * dt23
-                                      - R1_wb * VecImuFactor[i - 1]->getPoseFac().translation() * dt23;
+                - (R3_wc.matrix() - R2_wc.matrix()) * cP_B * dt12
+                + R2_wb * VecImuFactor[i]->getPoseFac().translation() * dt12
+                + R1_wb * VecImuFactor[i - 1]->getSpeedFac() * dt12 * dt23
+                - R1_wb * VecImuFactor[i - 1]->getPoseFac().translation() * dt23;
     }
 
-    Eigen::Vector4d s_g = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(B);
+    Eigen::Vector4d s_g = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(B); //s_g : scale(1*1) , g_w(3*1) : 4*1
     Eigen::Vector3d g_I = Eigen::Vector3d(0, 0, -1);
     Eigen::Vector3d g_what = s_g.block<3, 1>(1, 0);
     g_what.normalize();
@@ -151,16 +151,41 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
     double theta = std::atan2((crossMx(g_I) * g_what).norm(), g_I.dot(g_what));
 
     Sophus::SO3d R_WI = Sophus::SO3d::exp(theta * vhat);
+    Eigen::Matrix3d g_I_hat = Sophus::SO3d::hat(Eigen::Vector3d(0, 0, -1));
     for(int i = 1; i < size - 1; ++i) {
-        C.block<3, 2>(3 * i - 3, 1) = (C(3 * i - 3, 1) * R_WI.matrix() * Sophus::SO3d::hat(Eigen::Vector3d(0, 0, -1))).block<3, 2>(0, 1);
+        C.block<3, 2>(3 * i - 3, 1) = (C(3 * i - 3, 1) * R_WI.matrix() * g_I_hat).block<3, 2>(0, 1);
         D.block<3, 1>(3 * i - 3, 0) += R_WI * Eigen::Vector3d(0, 0, -1) * C(3 * i - 3, 2);
     }
 
     Eigen::Matrix<double, 6, 1> s_dxy_ba = C.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(D);
     g_what = (R_WI * Sophus::SO3d::exp(Eigen::Vector3d(s_dxy_ba(1, 0), s_dxy_ba(2, 0), 0))) * Eigen::Vector3d(0, 0, 1) * imuParam->g;
 
+    {  //! estimate velocity
+        Eigen::Vector3d p1 = VecFrames[0]->cvframe->getPose().translation();
+        Eigen::Vector3d p2 = VecFrames[1]->cvframe->getPose().translation();
+        double dt12 = (VecFrames[1]->getTimeStamp() - VecFrames[0]->getTimeStamp()).toSec();
+        Eigen::Matrix<double, 3, 1> delta_theta;  delta_theta<<s_dxy_ba(1,0),s_dxy_ba(2,0),0.0;
 
-    //! estimate velocity
+        Sophus::SO3d R1_wc = VecFrames[0]->cvframe->getPose().so3().inverse();
+        Sophus::SO3d R2_wc = VecFrames[1]->cvframe->getPose().so3().inverse();
 
+        Eigen::Vector3d V_wb[size];
+        for(int i = 1; i < size - 1; ++i) {
+            Sophus::SO3d R1_wb = VecFrames[i-1]->getPose().so3().inverse();
+            if(i != 1){
+                dt12 = (VecFrames[i]->getTimeStamp() - VecFrames[i-1]->getTimeStamp()).toSec();
+                p1 = p2;
+                p2 = VecFrames[i]->cvframe->getPose().translation();
+                R1_wc = R2_wc ;
+                R1_wc = VecFrames[i-1]->cvframe->getPose().so3().inverse();
+            }
+            const IMUMeasure::Transformation &deltaPose = VecImuFactor[i]->deltaPose;
+            const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias();
+
+            V_wb[i-1] = (  s_g(0,0)*p2 - s_g(0,0)*p1 + 0.5*R_WI.matrix()*g_I_hat*imuParam->g*dt12*dt12*delta_theta
+                         -  R1_wb.matrix()*(deltaPose.translation()+facJac.block<3, 3>(9, 0)*s_dxy_ba.block<3,1>(3,0))
+                         - (R1_wc.matrix() - R2_wc.matrix())*cP_B - 0.5*imuParam->g*dt12*dt12*(R_WI*Eigen::Vector3d(0, 0, -1))    ) / dt12;
+
+        }
+    }
 }
-

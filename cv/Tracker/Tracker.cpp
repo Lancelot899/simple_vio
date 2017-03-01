@@ -43,8 +43,8 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
             -viframe_j->getCVFrame()->getIntensity(u,v);
     err = err>0? err:-err;
 
-    Eigen::Vector2d grad;viframe_j->getCVFrame()->getGrad(u,v,grad);
-    double dI_du = grad(0) ,dI_dv = grad(1);
+    Eigen::Vector2d grad;   viframe_j->getCVFrame()->getGrad(u,v,grad);
+    double dI_du = grad(0), dI_dv = grad(1);
 
     double zInverse = 1.0/Z_,  fx_z = fx*zInverse, fy_z = fy*zInverse, fx_zz = fx_z*zInverse, fy_zz = fy_z*zInverse;
     Eigen::Matrix<double, 3, 6> JacR;
@@ -185,8 +185,9 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         else {
             if(chi_new - chi < 1.0e-2) {
                 converge = true;
-                break;
             }
+            break;
+
         }
     }
 
