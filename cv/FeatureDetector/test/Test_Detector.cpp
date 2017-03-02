@@ -18,7 +18,8 @@ TEST(Detector, Detector) {
     feature_detection::Detector detector(pic.cols, pic.rows, 25, IMG_LEVEL);
     feature_detection::features_t fts;
 
-#if SHOW_FEATURE
+//#define SHOW_FEATURE
+#ifdef SHOW_FEATURE
 
     double t = (double)cvGetTickCount();
     detector.detect(frame, frame->getMeasure().measurement.imgPyr, fts);

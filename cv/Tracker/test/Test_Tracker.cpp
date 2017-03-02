@@ -25,7 +25,6 @@ TEST(Tracker, Tracker) {
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
 
-#define SHOW_DETECT
 #ifdef SHOW_DETECT
 
     int levelTimes[5] = {1,2,4,8,16};
@@ -65,7 +64,8 @@ TEST(Tracker, Tracker) {
         printf("\t--successful!\n");
     else
         printf("\t--failed!\n");
-
+    std::cout<<Tij.so3().matrix()<<"\n";
+    std::cout<<Tij.translation()<<"\n";
     GTEST_ASSERT_EQ(Tij.so3().matrix(), Eigen::Matrix3d::Identity());
     GTEST_ASSERT_EQ(Tij.translation(), Eigen::Vector3d::Zero());
 

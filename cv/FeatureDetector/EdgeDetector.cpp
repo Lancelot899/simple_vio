@@ -56,9 +56,9 @@ EdgeDetector::EdgeDetector(
         randomPattern[i] = rand() & 0xFF;
     }
 
-    gradHist = (int*)alloc.allocate(100*(1+img_width/32)*(1+img_height/32)*sizeof(int));
-    threshold = (float*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(float) );
-    thresholdSmoothed = (double*)alloc.allocate( ((img_width/32)*(img_height/32)+100)*sizeof(double) );
+    gradHist = (int*)alloc.allocate(100*(1+img_width/16)*(1+img_height/16)*sizeof(int));
+    threshold = (float*)alloc.allocate( ((img_width/16)*(img_height/16)+100)*sizeof(float) );
+    thresholdSmoothed = (double*)alloc.allocate( ((img_width/16)*(img_height/16)+100)*sizeof(double) );
     edge.clear();
 }
 
@@ -68,14 +68,14 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
     int h = frame->getHeight(0);
     int w = frame->getWidth(0);
 
-    ///< size of cell grid : 32*32
-    int w32 = w>>5;
-    int h32 = h>>5;
+    ///< size of cell grid : 16*16
+    int w32 = w>>4;
+    int h32 = h>>4;
     thresholdStepU = w32;
     thresholdStepV = h32;
 
-    memset(threshold,100,sizeof(float)*w32*h32+100);
-    memset(thresholdSmoothed,100,sizeof(float)*w32*h32+100);
+    memset(threshold,0,sizeof(float)*w32*h32+100);
+    memset(thresholdSmoothed,0,sizeof(float)*w32*h32+100);
 
     for (int x = 0; x < w32; ++x) for (int y = 0; y < h32; ++y)
     {
@@ -83,10 +83,10 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
         memset(hist0,0,sizeof(int)*50); //devide into 49 parts
 
         //for each cell
-        for (int i = 0; i < 32; ++i) for (int j = 0; j < 32; ++j)
+        for (int i = 0; i < 16; ++i) for (int j = 0; j < 16; ++j)
         {
-            int it = i+32*x ;
-            int jt = j+32*y ;
+            int it = i+16*x ;
+            int jt = j+16*y ;
             if(it>w-2 || jt>h-2 || it<1 || jt<1) continue;
             int g = sqrt(frame->getGradNorm(it,jt,0));
             if(g>48) g = 48;
@@ -94,7 +94,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             hist0[0]++;
         }
 
-        threshold[x+y*w32] = computeHistQuantil(hist0,MIN_GRAD_HIST_CUT) + 3;
+        threshold[x+y*w32] = computeHistQuantil(hist0,MIN_GRAD_HIST_CUT) + 5;
     }
 
     // SSD
@@ -120,7 +120,8 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             if(y<h32-1) {num++; 	sum+=threshold[x+(y+1)*w32];}
             num++; sum+=threshold[x+y*w32];
 
-            thresholdSmoothed[x+y*w32] = (sum/num) * (sum/num);
+            double averge_ = sum/num;
+            thresholdSmoothed[x+y*w32] = averge_*averge_;
         }
 }
 void EdgeDetector::detect(cvframePtr_t frame,
@@ -133,7 +134,6 @@ void EdgeDetector::detect(cvframePtr_t frame,
     float thresholdFactor = 1.0f;
     float dw1 = 0.75f, dw2 = dw1*dw1;
 
-    //fts.clear();
     int w  = frame->getWidth(0);
     int h  = frame->getHeight(0);
 
@@ -142,6 +142,16 @@ void EdgeDetector::detect(cvframePtr_t frame,
     int bestU0 = -1, bestU1 = -1,  bestU2 = -1, bestV0 = -1, bestV1 = -1,  bestV2 = -1;
     int cellHeight = h/(detectHeightGrid * detectCellHeight);
     int cellWidth = w/(detectWidthGrid * detectCellWidth);
+
+
+    //    bool* cell_ = frame->cell;
+    //    for(int u = 0; u < detectCellWidth; ++u) {
+    //        for (int v = 0; v < detectCellHeight; ++v) {
+    //            if(cell_[u + v * detectCellWidth])
+    //                continue;
+    //    int height = frame->getHeight(L) / detectCellHeight;
+    //    int width = frame->getWidth(L) /detectCellWidth;
+    //    if(cell_[u + v * detectCellWidth]) continue;
 
     for (int cellV = 0; cellV < detectHeightGrid * detectCellHeight; ++cellV)
         for (int cellU = 0; cellU < detectWidthGrid * detectCellWidth; ++cellU) {
@@ -178,7 +188,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
 
                             if(xf<4 || xf>=w-5 || yf<4 || yf>h-4) continue;
 
-                            double pixelTH0 = thresholdSmoothed[(xf>>5) + (yf>>5) * thresholdStepU];
+                            double pixelTH0 = thresholdSmoothed[(xf>>4) + (yf>>4) * thresholdStepU];
                             double pixelTH1 = pixelTH0*dw1;
                             double pixelTH2 = pixelTH1*dw2;
 

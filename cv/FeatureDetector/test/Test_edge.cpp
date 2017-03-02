@@ -86,7 +86,7 @@ TEST(edge_detector, edge_detector) {
     GTEST_ASSERT_NE(features1.empty(), true);
 
 #endif
-    printf("file: %s,  lines: %d\n",__FILE__, __LINE__);
+    
 
 }
 

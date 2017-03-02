@@ -19,7 +19,6 @@ namespace feature_detection {
 
         virtual ~EdgeDetector()
         {
-            printf("file[%s],  lines: %d\n",__FILE__, __LINE__);
             if(randomPattern != nullptr){
                 delete[] randomPattern;
                 randomPattern = nullptr;
@@ -36,7 +35,6 @@ namespace feature_detection {
                 delete[] threshold;
                 threshold = nullptr;
             }
-            printf("file[%s],  lines: %d\n",__FILE__, __LINE__);
         }
 
         virtual void detect(
