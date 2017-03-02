@@ -105,7 +105,11 @@ public:
     int getWidth(int level = 0);
     int getHeight(int level = 0);
     const cvMeasure& getMeasure();
-    bool checkCellOccupy(int u,int v);
+    bool checkOccupy(int u,int v);
+    void setCellTrue(int u, int v);
+    bool checkCell(int u, int v) {
+        return cell[u + v * detectCellWidth];
+    }
 //    bool checkCellOccupy(int index,int level = 0);
 
 public:

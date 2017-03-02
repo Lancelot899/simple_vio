@@ -54,11 +54,37 @@ Vector3d PinholeCamera::cam2world (const Vector2d& uv) const {
 
 Vector2d PinholeCamera::world2cam(const Vector3d& xyz) const {
     //return world2cam(vk::project2d(xyz));
-    Vector2d uv= xyz.head<2>()/xyz[2];
-    return world2cam(uv);
+    const Vector2d uv= xyz.head<2>()/xyz[2];
+    return world2camUV(uv);
 }
 
 Vector2d PinholeCamera::world2cam(const Vector2d& uv) const {
+    Vector2d px;
+    if(!distortion_) {
+        px[0] = fx_*uv[0] + cx_;
+        px[1] = fy_*uv[1] + cy_;
+    }
+
+    else {
+        double x, y, r2, r4, r6, a1, a2, a3, cdist, xd, yd;
+        x = uv[0];
+        y = uv[1];
+        r2 = x*x + y*y;
+        r4 = r2*r2;
+        r6 = r4*r2;
+        a1 = 2*x*y;
+        a2 = r2 + 2*x*x;
+        a3 = r2 + 2*y*y;
+        cdist = 1 + d_[0]*r2 + d_[1]*r4 + d_[4]*r6;
+        xd = x*cdist + d_[2]*a1 + d_[3]*a2;
+        yd = y*cdist + d_[2]*a3 + d_[3]*a1;
+        px[0] = xd*fx_ + cx_;
+        px[1] = yd*fy_ + cy_;
+    }
+    return px;
+}
+
+Vector2d PinholeCamera::world2camUV(const Vector2d& uv) const {
     Vector2d px;
     if(!distortion_) {
         px[0] = fx_*uv[0] + cx_;

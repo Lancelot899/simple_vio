@@ -26,6 +26,7 @@ public:
     virtual Eigen::Vector2d world2cam(const Eigen::Vector3d& xyz_c) const;
 
     virtual Eigen::Vector2d world2cam(const Eigen::Vector2d& uv) const;
+    Eigen::Vector2d world2camUV(const Eigen::Vector2d& uv) const;
 
     Eigen::Vector2d focal_length() const {
         return Eigen::Vector2d(fx_, fy_);
