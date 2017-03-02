@@ -14,7 +14,7 @@ namespace direct_tracker {
 
 typedef Eigen::Matrix<double, 1, 6> Jac_t;
 bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFrame> &viframe_j,
-                      std::shared_ptr<Feature> &ft,const Sophus::SE3d T_SB,
+                      const std::shared_ptr<Feature> &ft,const Sophus::SE3d T_SB,
                       const Sophus::SE3d& Ti,  Sophus::SE3d& T_ji,
                       Jac_t &jac, double &w, double &err) {
     typedef Eigen::Vector3d Point3d;
@@ -59,7 +59,7 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
 
 bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
                      std::shared_ptr<viFrame> &viframe_j,
-                     std::shared_ptr<Feature> &ft,
+                     const std::shared_ptr<Feature> &ft,
                      const Sophus::SE3d T_SB,
                      const Sophus::SE3d& Ti,
                      Sophus::SE3d& T_ji,
@@ -124,6 +124,21 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
 
 Tracker::Tracker() {}
 
+int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j, Sophus::SE3d &T_ji) {
+    const cvMeasure::features_t& fts = viframe_i->getCVFrame()->getMeasure().fts_;
+    int width = viframe_j->getCVFrame()->getWidth();
+    int height = viframe_j->getCVFrame()->getHeight();
+    for(auto &ft : fts) {
+        Eigen::Vector2d uv = viframe_j->getCam()->world2cam(ft->point->pos_);
+        if(uv(0) < width && uv(1) < height && uv(0) > 0 && uv(1) > 0) {
+            std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
+                                      ft->point,uv, ft->point->pos_, ft->level);
+            viframe_j->getCVFrame()->addFeature(ft_);
+        }
+    }
+
+}
+
 bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j,
                        Sophus::SE3d &T_ji, int n_iter) {
     bool converge = false;
@@ -131,9 +146,9 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     int iter = 0;
     Eigen::Matrix<double, 6, 6> H;
     Eigen::Matrix<double, 6, 1> b;
-    const std::shared_ptr<cvMeasure::features_t>& fts = viframe_i->getCVFrame()->getMeasure().fts_;
+    const cvMeasure::features_t& fts = viframe_i->getCVFrame()->getMeasure().fts_;
     Jac_t jac;
-    int cnt_min = int(fts->size()) / 3;
+    int cnt_min = int(fts.size()) / 3;
     Sophus::SE3d T_SB = viframe_j->getT_BS().inverse();
     double w = 0;
     double e = 0;
@@ -146,7 +161,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         b.setZero();
         cnt = 0;
         jac.setZero();
-        for(auto ft : (*fts)) {
+        for(auto& ft : fts) {
             if(ft->type == Feature::EDGELET) {
                 if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji, jac, w, e))
                     continue;
