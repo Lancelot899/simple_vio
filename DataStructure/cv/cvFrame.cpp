@@ -4,8 +4,20 @@ const cvMeasure& cvFrame::getMeasure() {
     return cvData;
 }
 
-bool cvFrame::checkCellOccupy(int u, int v) {
+bool cvFrame::checkOccupy(int u, int v) {
     return occupy[u + v * detectWidthGrid * detectCellHeight];
+}
+
+void cvFrame::setCellTrue(int u, int v) {
+    cell[u + v * detectCellWidth] = true;
+    int ui = u * detectWidthGrid;
+    int vi = v * detectHeightGrid;
+    int us = ui + detectCellWidth;
+    int vs = vi + detectHeightGrid;
+    for(int i = ui; i < us; ++i) {
+        for(int j = vi; j < vs; ++j)
+            occupy[i + j * detectCellWidth * detectWidthGrid] = true;
+    }
 }
 
 const cvFrame::Pic_t& cvFrame::getPicture() {

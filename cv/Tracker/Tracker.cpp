@@ -9,6 +9,7 @@
 #include "DataStructure/viFrame.h"
 #include "DataStructure/cv/Feature.h"
 #include "DataStructure/cv/Point.h"
+#include "util/setting.h"
 
 namespace direct_tracker {
 
@@ -128,15 +129,25 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     const cvMeasure::features_t& fts = viframe_i->getCVFrame()->getMeasure().fts_;
     int width = viframe_j->getCVFrame()->getWidth();
     int height = viframe_j->getCVFrame()->getHeight();
+    int cellwidth = viframe_j->getCVFrame()->getWidth() / detectCellWidth;
+    int chellheight = viframe_j->getCVFrame()->getHeight() / detectCellHeight;
+    int cntCell = 0;
     for(auto &ft : fts) {
         Eigen::Vector2d uv = viframe_j->getCam()->world2cam(ft->point->pos_);
         if(uv(0) < width && uv(1) < height && uv(0) > 0 && uv(1) > 0) {
             std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
                                       ft->point,uv, ft->point->pos_, ft->level);
             viframe_j->getCVFrame()->addFeature(ft_);
+            int u = int(uv(0) / cellwidth);
+            int v = int(uv(1) / chellheight);
+            if(!viframe_j->getCVFrame()->checkCell(u, v)) {
+                viframe_j->getCVFrame()->setCellTrue(u, v);
+                cntCell++;
+            }
         }
     }
 
+    return cntCell;
 }
 
 bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j,
