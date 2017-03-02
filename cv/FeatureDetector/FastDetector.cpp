@@ -3218,7 +3218,6 @@ namespace feature_detection {
         bool* cell_ = frame->cell;
         for(int u = 0; u < detectCellWidth; ++u) {
             for (int v = 0; v < detectCellHeight; ++v) {
-                printf("u = %d, v = %d\n", u, v);
                 if(cell_[u + v * detectCellWidth])
                     continue;
 
