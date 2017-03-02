@@ -165,6 +165,11 @@ cvFrame::~cvFrame() {
 
 }
 
+const std::shared_ptr<Feature>& cvFrame::addFeature(const std::shared_ptr<Feature>& ft) {
+    cvData.fts_.push_back(ft);
+    return ft;
+}
+
 int cvFrame::getID() {
     return cvData.id;
 }
