@@ -28,7 +28,6 @@ TEST(fast_detector, fast_detector) {
     feature_detection::features_t features, features1;
 //  printf("-- detector start!\n");
 
-#define SHOW_FAST
 #ifdef SHOW_FAST
     detector->detect(frame, frame->getMeasure().measurement.imgPyr, 5,features);
     detector->detect(frame1, frame1->getMeasure().measurement.imgPyr, 5, features1);

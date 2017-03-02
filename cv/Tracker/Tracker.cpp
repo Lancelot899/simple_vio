@@ -168,11 +168,14 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     double chi_new = 0;
 
     for(; iter < n_iter; iter++) {
+        printf("iter = %d\n", iter);
         H.setZero();
         b.setZero();
         cnt = 0;
         jac.setZero();
+        int cntf = 0;
         for(auto& ft : fts) {
+            printf("\tfeature:%d\n", ++cntf);
             if(ft->type == Feature::EDGELET) {
                 if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji, jac, w, e))
                     continue;
