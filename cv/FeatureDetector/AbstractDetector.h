@@ -3,6 +3,8 @@
 
 #include <vector>
 #include "DataStructure/cv/cvFrame.h"
+#include "DataStructure/cv/Point.h"
+
 
 /// Implementation of various feature detectors.
 namespace feature_detection {

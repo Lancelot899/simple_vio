@@ -4,7 +4,6 @@
 
 #include "DataStructure/cv/Feature.h"
 #include "Detector.h"
-#include "util/setting.h"
 
 using namespace feature_detection;
 

@@ -33,7 +33,9 @@ struct Feature
         f(frame->getCam()->cam2world(px)),
         level(_level),
         grad(_grad)
-    {}
+    {
+        point = std::make_shared<Point>(f);
+    }
 
     Feature(cvframePtr_t& _frame, const Eigen::Vector2d& _px, int _level) :
         type(CORNER),
@@ -42,7 +44,9 @@ struct Feature
         f(frame->getCam()->cam2world(px)),
         level(_level),
         grad(1.0,0.0)
-    {}
+    {
+        point = std::make_shared<Point>(f);
+    }
 
     Feature(cvframePtr_t& _frame, const Eigen::Vector2d& _px, const Eigen::Vector3d& _f, int _level) :
         type(CORNER),
@@ -51,9 +55,11 @@ struct Feature
         f(_f),
         level(_level),
         grad(1.0,0.0)
-    {}
+    {
+        point = std::make_shared<Point>(f);
+    }
 
-    Feature(cvframePtr_t& _frame, std::shared_ptr<Point>& _point,
+    Feature(const cvframePtr_t& _frame, const std::shared_ptr<Point>& _point,
             const Eigen::Vector2d& _px, const Eigen::Vector3d& _f, int _level) :
         type(CORNER),
         frame(_frame),

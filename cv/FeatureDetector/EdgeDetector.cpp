@@ -74,12 +74,11 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
     thresholdStepU = w32;
     thresholdStepV = h32;
 
-    memset(threshold,100,sizeof(float)*w32*h32+100);
-    memset(thresholdSmoothed,100,sizeof(float)*w32*h32+100);
+    memset(threshold,0,sizeof(float)*w32*h32+100);
+    memset(thresholdSmoothed,0,sizeof(float)*w32*h32+100);
 
     for (int x = 0; x < w32; ++x) for (int y = 0; y < h32; ++y)
     {
-        if(frame->checkCellOccupy(x,y))     continue;
         int* hist0 = gradHist;
         memset(hist0,0,sizeof(int)*50); //devide into 49 parts
 
@@ -95,7 +94,7 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             hist0[0]++;
         }
 
-        threshold[x+y*w32] = computeHistQuantil(hist0,MIN_GRAD_HIST_CUT) + 3;
+        threshold[x+y*w32] = computeHistQuantil(hist0,MIN_GRAD_HIST_CUT) + 5;
     }
 
     // SSD
@@ -121,7 +120,8 @@ void EdgeDetector::makeHists(cvframePtr_t frame)
             if(y<h32-1) {num++; 	sum+=threshold[x+(y+1)*w32];}
             num++; sum+=threshold[x+y*w32];
 
-            thresholdSmoothed[x+y*w32] = (sum/num) * (sum/num);
+            double averge_ = sum/num;
+            thresholdSmoothed[x+y*w32] = averge_*averge_;
         }
 }
 void EdgeDetector::detect(cvframePtr_t frame,
@@ -144,14 +144,14 @@ void EdgeDetector::detect(cvframePtr_t frame,
     int cellWidth = w/(detectWidthGrid * detectCellWidth);
 
 
-//    bool* cell_ = frame->cell;
-//    for(int u = 0; u < detectCellWidth; ++u) {
-//        for (int v = 0; v < detectCellHeight; ++v) {
-//            if(cell_[u + v * detectCellWidth])
-//                continue;
-//    int height = frame->getHeight(L) / detectCellHeight;
-//    int width = frame->getWidth(L) /detectCellWidth;
-//    if(cell_[u + v * detectCellWidth]) continue;
+    //    bool* cell_ = frame->cell;
+    //    for(int u = 0; u < detectCellWidth; ++u) {
+    //        for (int v = 0; v < detectCellHeight; ++v) {
+    //            if(cell_[u + v * detectCellWidth])
+    //                continue;
+    //    int height = frame->getHeight(L) / detectCellHeight;
+    //    int width = frame->getWidth(L) /detectCellWidth;
+    //    if(cell_[u + v * detectCellWidth]) continue;
 
     for (int cellV = 0; cellV < detectHeightGrid * detectCellHeight; ++cellV)
         for (int cellU = 0; cellU < detectWidthGrid * detectCellWidth; ++cellU) {

@@ -27,6 +27,8 @@ TEST(fast_detector, fast_detector) {
     GTEST_ASSERT_NE(detector, nullptr);
     feature_detection::features_t features, features1;
 //  printf("-- detector start!\n");
+
+//#define SHOW_FAST
 #ifdef SHOW_FAST
     detector->detect(frame, frame->getMeasure().measurement.imgPyr, 5,features);
     detector->detect(frame1, frame1->getMeasure().measurement.imgPyr, 5, features1);
@@ -42,8 +44,6 @@ TEST(fast_detector, fast_detector) {
     }
 
     for (auto it : features) {
-        std::cout << it->px << std::endl;
-        printf("\n");
         cv::Point2i point(int((it)->px(0)), int((it)->px(1)));
         cv::circle(pic, point, 4 * (it->level + 1), cv::Scalar(0, 255, 0), 1);
     }

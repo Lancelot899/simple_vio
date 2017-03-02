@@ -60,7 +60,7 @@ public:
 
 public:
     int id;
-    std::shared_ptr<features_t>       fts_;
+    features_t                        fts_;
     keyPoints_t                       key_pts_;
 };
 
@@ -81,6 +81,7 @@ public:
 public:
     cvFrame(const std::shared_ptr<AbstractCamera>& cam, Pic_t &pic);
     ~cvFrame();
+    const std::shared_ptr<Feature>& addFeature(const std::shared_ptr<Feature>& ft);
 
     int getID();
     const okvis::Time& getTimestamp();

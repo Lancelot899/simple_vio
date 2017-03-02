@@ -16,14 +16,12 @@ TEST(edge_detector, edge_detector) {
     const CameraIO::pCamereParam cam = camTest.getCamera();
     cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png",0);
     cv::Mat pic1 = cv::imread("../testData/mav0/cam0/data/1403715310362142976.png",0);
-    cv::imshow("src",pic);
-    cv::imshow("src1", pic1);
+
 
     cv::Mat picCanny; cv::Canny(pic,picCanny,100,150);
     cv::Mat picCanny1; cv::Canny(pic1,picCanny1,100,150);
 
-    cv::imshow("Edge0",picCanny);
-    cv::imshow("Edge01",picCanny1);
+
     GTEST_ASSERT_NE(pic.empty(), true);
     std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, pic);
     std::shared_ptr<cvFrame> frame1 = std::make_shared<cvFrame>(cam, pic1);
@@ -35,8 +33,11 @@ TEST(edge_detector, edge_detector) {
     feature_detection::features_t features, features1;
     features.clear(); features1.clear();
 
-#define SHOW_EDGE
+//#define SHOW_EDGE
 #ifdef  SHOW_EDGE
+    cv::imshow("src",pic);
+    cv::imshow("src1", pic1);
+
     detector->detect(frame, frame->getMeasure().measurement.imgPyr, 5,features);
     detector->detect(frame1, frame1->getMeasure().measurement.imgPyr, 5, features1);
     GTEST_ASSERT_NE(features.empty(), true);
@@ -73,6 +74,9 @@ TEST(edge_detector, edge_detector) {
             grad1.at<u_char>(v,u) = static_cast<u_char>(frame1->getGradNorm(u,v,0))*10;
         }
     }
+    cv::imshow("Edge0",picCanny);
+    cv::imshow("Edge01",picCanny1);
+
     cv::imshow("grad",grad);
     cv::imshow("grad1", grad1);
     cv::waitKey();

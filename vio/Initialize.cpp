@@ -19,9 +19,9 @@ void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
     std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(0, cvframe);
     Sophus::SE3d ie;
     cvframe->setPose(ie);
-    std::shared_ptr<feature_detection::features_t> features;
-    detector->detect(cvframe, cvframe->getMeasure().measurement.imgPyr, *features);
-    cvframe->cvData.fts_ = features;
+    feature_detection::features_t features;
+    detector->detect(cvframe, cvframe->getMeasure().measurement.imgPyr, features);
+    cvframe->cvData.fts_.swap(features);
 }
 
 void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
