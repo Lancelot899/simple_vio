@@ -11,7 +11,7 @@
 #include "DataStructure/cv/Point.h"
 #include "util/setting.h"
 
-#define PHOTOMATRICERROR 10.0
+#define PHOTOMATRICERROR 15.0
 
 namespace direct_tracker {
 
