@@ -176,11 +176,8 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         b.setZero();
         cnt = 0;
         jac.setZero();
-        int cntf = 0;
         for(auto& ft : fts) {
-            //             printf("\tfeature:%d\t", ++cntf);
             if(ft->type == Feature::EDGELET) {
-                //                   printf("edge \n");
                 if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
                 cnt++;
@@ -189,7 +186,6 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
                 chi_new += e;
 
             } else {
-                //                printf("point \n");
                 if(!direct_tracker::compute_PointJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
                 cnt++;
@@ -208,6 +204,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
             xi = H.ldlt().solve(-b);
             printf("\tinitial err: %lf\n", chi);
             T_ji_new = Sophus::SE3d::exp(xi) * T_ji;
+            int cntf = 0;
             continue;
         }
 
