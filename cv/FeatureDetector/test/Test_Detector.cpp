@@ -56,7 +56,10 @@ TEST(Detector, Detector) {
     cv::waitKey();
 
 #else
-    detector.detect(frame, frame->getMeasure().measurement.imgPyr, fts);
+    {
+        TimeUse time(__FUNCTION__,__LINE__);
+        detector.detect(frame, frame->getMeasure().measurement.imgPyr, fts);
+    }
 
 #endif
 

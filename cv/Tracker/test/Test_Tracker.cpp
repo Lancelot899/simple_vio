@@ -12,8 +12,8 @@
 
 TEST(Tracker, Tracker) {
     direct_tracker::Tracker tracker;
-    cv::Mat pic_i = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png", 0);
-    cv::Mat pic_j = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png", 0);
+    cv::Mat pic_i = cv::imread("../testData/mav0/cam0/data/1403715273262142976.png", 0);
+    cv::Mat pic_j = cv::imread("../testData/mav0/cam0/data/1403715277962142976.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);

@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
-
+#include <sys/time.h>
 
 extern const double EPS;
 extern const double PI;
@@ -86,6 +86,29 @@ inline Eigen::Vector3d project3d(const Eigen::Vector4d& v) {
 inline Eigen::Vector4d unproject3d(const Eigen::Vector3d& v) {
     return Eigen::Vector4d(v[0], v[1], v[2], 1.0);
 }
+
+class TimeUse
+{
+public:
+    TimeUse(const char *function_= nullptr, int line_ = 0)
+        :function_T(function_),line_T(line_)
+    {
+        gettimeofday(&start_T,0);
+    }
+    ~TimeUse(){
+        gettimeofday(&end_T,0);
+        double timeUse = double(end_T.tv_sec - start_T.tv_sec)*1000.0 + double(end_T.tv_usec - start_T.tv_usec)/1000.0;
+        if(line_T && function_T!=nullptr)
+            printf("\t--Time use in FUNCTION[%s], LINE[%d], is %f ms\n\n", function_T, line_T, timeUse);
+        else
+            printf("\t--Time use is %f ms\n\n", timeUse);
+    }
+
+protected:
+    timeval           start_T,end_T;
+    const char       *function_T;
+    int               line_T;
+};
 
 
 #endif // UTIL_H
