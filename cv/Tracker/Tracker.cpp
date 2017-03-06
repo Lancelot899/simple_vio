@@ -11,6 +11,8 @@
 #include "DataStructure/cv/Point.h"
 #include "util/setting.h"
 
+#define PHOTOMATRICERROR 15.0
+
 namespace direct_tracker {
 
 typedef Eigen::Matrix<double, 1, 6> Jac_t;
@@ -22,7 +24,7 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
 
     cvMeasure::cam_t camera = viframe_j->getCam();
     double fx = camera->fx(), fy = camera->fy(), cx = camera->cx(), cy = camera->cy();
-    Point3d pointj = T_SB * T_ji * Ti * ft->point->pos_;
+    Point3d pointj = T_SB * T_ji * Ti  * ft->point->pos_;
     if(pointj(2) < 0.0000001)
         return false;
 
@@ -40,8 +42,15 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
     if(w < 0.00000001 || std::isinf(w))
         return false;
 
-    err = viframe_i->getCVFrame()->getIntensity(fx*pointI(0)/pointI(2)+cx, fy*pointI(1)/pointI(2)+cy)
-            -viframe_j->getCVFrame()->getIntensity(u,v);
+    err = viframe_i->getCVFrame()->getIntensityBilinear(fx*pointI(0)/pointI(2)+cx, fy*pointI(1)/pointI(2)+cy)
+            -viframe_j->getCVFrame()->getIntensityBilinear(u,v);
+    if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)
+    {
+        printf("wrong match!\n");
+        return false;
+    }
+    //    else printf("right match!\n");
+
     err = err>0? err:-err;
 
     Eigen::Vector2d grad;   viframe_j->getCVFrame()->getGrad(u,v,grad);
@@ -71,20 +80,22 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     std::shared_ptr<Point>& p = ft->point;
     Eigen::Vector2d& dir = ft->grad;
     Eigen::Vector2d grad;
-    Eigen::Vector3d P = T_ji * Ti * p->pos_;
+    Eigen::Vector3d P = T_ji * Ti  * p->pos_;
     const viFrame::cam_t & cam = viframe_j->getCam();
     Eigen::Vector3d Pj = T_SB * P;
     if(Pj(2) < 0.001)
         return false;
-
-    double u = cam->fx() * Pj(0) / Pj(2) + cam->cx();
+    std::cout << "pos_ = \n" << p->pos_ << "\nPj = \n" << Pj  << "\n <<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+    double u = cam->fx() * (Pj(0) / Pj(2)) + cam->cx();
     if(u < 0 || u >= viframe_j->getCVFrame()->getWidth())
         return false;
 
-    double v = cam->fy() * Pj(1) / Pj(2) + cam->cy();
+    double v = cam->fy() * (Pj(1) / Pj(2)) + cam->cy();
 
     if(v < 0 || v >= viframe_j->getCVFrame()->getHeight())
         return false;
+
+    std::cout << u << "\t" << v << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 
     for(int i = 0; i < ft->level; ++i) {
         u /= 2.0;
@@ -97,11 +108,15 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     w = 1.0 / viframe_j->getCVFrame()->getGradNorm(u, v, ft->level);
     if(w < 0.001 || std::isinf(w))
         return false;
-    //    printf("FILE[%s], LINE[%d]\n",__FILE__,__LINE__);
     Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
-    //    printf("FILE[%s], LINE[%d]\n",__FILE__,__LINE__);
     err = viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level)
             - viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level);
+
+    if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)     {
+        //        printf("wrong match!\n");
+        return false;
+    }
+    //    else printf("right match!\n");
     //! if err is to large, should I compute this point?
 
     double Ix = dir(1) * dir(0);
@@ -153,7 +168,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j,
                        Sophus::SE3d &T_ji_, int n_iter) {
     Sophus::SE3d T_ji = T_ji_;
-    Sophus::SE3d T_ji_new;
+    Sophus::SE3d T_ji_new = T_ji;
     bool converge = false;
     int cnt = 0;
     int iter = 0;
@@ -176,11 +191,15 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         b.setZero();
         cnt = 0;
         jac.setZero();
+
+        int cntf = 0;
+        int cntP = 0, cntE = 0;
+
         for(auto& ft : fts) {
             if(ft->type == Feature::EDGELET) {
                 if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
-                cnt++;
+                cnt++; cntE++;
                 H += jac.transpose() * jac * w;
                 b += jac.transpose() * e * w;
                 chi_new += e;
@@ -188,20 +207,21 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
             } else {
                 if(!direct_tracker::compute_PointJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
-                cnt++;
+                cnt++; cntP++;
                 H += jac.transpose() * jac * w;
                 b += jac.transpose() * e * w;
                 chi_new += e;
             }
         }
 
-        std::cout<<"cnt = "<<cnt;
+        std::cout<<"cntP = "<<cntP<<" cntE = "<<cntE;
         if(cnt <= cnt_min && cnt <= 12)
             return false;
 
         if(iter == 0) {
             chi = chi_new;
             xi = H.ldlt().solve(-b);
+            std::cout<<"\n xi = \n"<<xi<<"\n";
             printf("\tinitial err: %lf\n", chi);
             T_ji_new = Sophus::SE3d::exp(xi) * T_ji;
             int cntf = 0;
@@ -209,6 +229,8 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         }
 
         xi = H.ldlt().solve(-b);
+        std::cout<<"\n xi = "<<xi<<"\n";
+
         printf("\tnew err: %lf\n", chi_new);
         if(chi_new < chi) {
             T_ji = T_ji_new;

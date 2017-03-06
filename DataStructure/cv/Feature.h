@@ -34,7 +34,7 @@ struct Feature
         level(_level),
         grad(_grad)
     {
-        point = std::make_shared<Point>(f);
+        point = std::make_shared<Point>( _frame->getPose().inverse() * f);
     }
 
     Feature(cvframePtr_t& _frame, const Eigen::Vector2d& _px, int _level) :
@@ -45,7 +45,7 @@ struct Feature
         level(_level),
         grad(1.0,0.0)
     {
-        point = std::make_shared<Point>(f);
+        point = std::make_shared<Point>( _frame->getPose().inverse() * f);
     }
 
     Feature(cvframePtr_t& _frame, const Eigen::Vector2d& _px, const Eigen::Vector3d& _f, int _level) :
@@ -56,7 +56,7 @@ struct Feature
         level(_level),
         grad(1.0,0.0)
     {
-        point = std::make_shared<Point>(f);
+        point = std::make_shared<Point>( _frame->getPose().inverse() * f);
     }
 
     Feature(const cvframePtr_t& _frame, const std::shared_ptr<Point>& _point,
