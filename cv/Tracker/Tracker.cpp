@@ -24,7 +24,7 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
 
     cvMeasure::cam_t camera = viframe_j->getCam();
     double fx = camera->fx(), fy = camera->fy(), cx = camera->cx(), cy = camera->cy();
-    Point3d pointj = T_SB * T_ji * Ti * T_SB.inverse() * ft->point->pos_;
+    Point3d pointj = T_SB * T_ji * Ti  * ft->point->pos_;
     if(pointj(2) < 0.0000001)
         return false;
 
@@ -80,20 +80,22 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     std::shared_ptr<Point>& p = ft->point;
     Eigen::Vector2d& dir = ft->grad;
     Eigen::Vector2d grad;
-    Eigen::Vector3d P = T_ji * Ti * T_SB.inverse() * p->pos_;
+    Eigen::Vector3d P = T_ji * Ti  * p->pos_;
     const viFrame::cam_t & cam = viframe_j->getCam();
     Eigen::Vector3d Pj = T_SB * P;
     if(Pj(2) < 0.001)
         return false;
-
-    double u = cam->fx() * Pj(0) / Pj(2) + cam->cx();
+    std::cout << "pos_ = \n" << p->pos_ << "\nPj = \n" << Pj  << "\n <<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+    double u = cam->fx() * (Pj(0) / Pj(2)) + cam->cx();
     if(u < 0 || u >= viframe_j->getCVFrame()->getWidth())
         return false;
 
-    double v = cam->fy() * Pj(1) / Pj(2) + cam->cy();
+    double v = cam->fy() * (Pj(1) / Pj(2)) + cam->cy();
 
     if(v < 0 || v >= viframe_j->getCVFrame()->getHeight())
         return false;
+
+    std::cout << u << "\t" << v << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 
     for(int i = 0; i < ft->level; ++i) {
         u /= 2.0;
@@ -166,7 +168,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFrame> &viframe_j,
                        Sophus::SE3d &T_ji_, int n_iter) {
     Sophus::SE3d T_ji = T_ji_;
-    Sophus::SE3d T_ji_new;
+    Sophus::SE3d T_ji_new = T_ji;
     bool converge = false;
     int cnt = 0;
     int iter = 0;
@@ -189,10 +191,11 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         b.setZero();
         cnt = 0;
         jac.setZero();
+
         int cntf = 0;
         int cntP = 0, cntE = 0;
+
         for(auto& ft : fts) {
-            //             printf("\tfeature:%d\t", ++cntf);
             if(ft->type == Feature::EDGELET) {
                 if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
@@ -221,6 +224,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
             std::cout<<"\n xi = \n"<<xi<<"\n";
             printf("\tinitial err: %lf\n", chi);
             T_ji_new = Sophus::SE3d::exp(xi) * T_ji;
+            int cntf = 0;
             continue;
         }
 

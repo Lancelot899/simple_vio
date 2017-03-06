@@ -14,10 +14,10 @@ Vector3d VIOPinholeCamera::cam2world(const double &x, const double &y) const {
 }
 
 Vector3d VIOPinholeCamera::cam2world(const Vector2d &px) const {
-    Vector3d tmp = PinholeCamera::cam2world(px);
-    tmp = T_BS * tmp;
-    tmp /= tmp[2];
-    return tmp;
+    return PinholeCamera::cam2world(px);
+//    tmp = T_BS * tmp;
+//    tmp /= tmp[2];
+//    return tmp;
 }
 
 Vector2d VIOPinholeCamera::world2cam(const Vector3d &xyz_c) const {
