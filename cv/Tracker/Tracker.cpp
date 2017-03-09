@@ -46,10 +46,8 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
             -viframe_j->getCVFrame()->getIntensityBilinear(u,v);
     if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)
     {
-        printf("wrong match!\n");
         return false;
     }
-    //    else printf("right match!\n");
 
     err = err>0? err:-err;
 
@@ -85,7 +83,6 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     Eigen::Vector3d Pj = T_SB * P;
     if(Pj(2) < 0.001)
         return false;
-    std::cout << "pos_ = \n" << p->pos_ << "\nPj = \n" << Pj  << "\n <<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
     double u = cam->fx() * (Pj(0) / Pj(2)) + cam->cx();
     if(u < 0 || u >= viframe_j->getCVFrame()->getWidth())
         return false;
@@ -97,9 +94,12 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
 
     std::cout << u << "\t" << v;
 
+    Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
+
     for(int i = 0; i < ft->level; ++i) {
         u /= 2.0;
         v /= 2.0;
+        px /= 2.0;
     }
 
     if(!viframe_j->getCVFrame()->getGrad(u, v, grad, ft->level))
@@ -109,15 +109,16 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     if(w < 0.001 || std::isinf(w))
         return false;
     Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
+
+    printf("feature: u[%f],v[%f];\nUV: %d  u[%f],v[%f];\npx: %d   px(0)[%f],px(1)[%f]\n\n",ft->px(0),ft->px(1), ft->level,u,v, ft->level,px(0),px(1));
     std::cout << "\t"  << px(0) << '\t' << px(1) << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+
     err = viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level)
             - viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level);
 
     if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)     {
-        //        printf("wrong match!\n");
         return false;
     }
-    //    else printf("right match!\n");
     //! if err is to large, should I compute this point?
 
     double Ix = dir(1) * dir(0);
