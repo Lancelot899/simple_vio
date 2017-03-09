@@ -13,6 +13,6 @@ Detector::Detector(const int img_width, const int img_height, const int cell_siz
 }
 
 void Detector::detect(cvframePtr_t frame, const ImgPyr_t &img_pyr, features_t &fts) {
-    fastDetector->detect(frame, img_pyr, fast_threshold, fts);
+//    fastDetector->detect(frame, img_pyr, fast_threshold, fts);
     edgeDetector->detect(frame, img_pyr, edge_threshold, fts);
 }
