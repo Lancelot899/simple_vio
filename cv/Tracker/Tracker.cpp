@@ -95,7 +95,7 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     if(v < 0 || v >= viframe_j->getCVFrame()->getHeight())
         return false;
 
-    std::cout << u << "\t" << v << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+    std::cout << u << "\t" << v;
 
     for(int i = 0; i < ft->level; ++i) {
         u /= 2.0;
@@ -109,6 +109,7 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     if(w < 0.001 || std::isinf(w))
         return false;
     Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
+    std::cout << "\t"  << px(0) << '\t' << px(1) << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     err = viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level)
             - viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level);
 
