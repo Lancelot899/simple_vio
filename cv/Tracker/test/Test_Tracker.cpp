@@ -24,14 +24,14 @@ TEST(Tracker, Tracker) {
     detector.detect(cvframe_i, cvframe_i->getMeasure().measurement.imgPyr, fts);
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
-
+#define SHOW_DETECT
 #ifdef SHOW_DETECT
 
     int levelTimes[5] = {1,2,4,8,16};
     cv::Scalar color[3] = {cv::Scalar(255,0,0),cv::Scalar(255,255,0),cv::Scalar(0,0,255)};
     cv::Mat result = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png");
     const cvMeasure::features_t& fts_ = cvframe_i->getMeasure().fts_;
-    printf("\t--size of feature:%u\n", fts_.size());
+    printf("====>> size of feature:%lu\n", fts_.size());
     for (auto &it : fts_) {
         if(it->type == Feature::EDGELET) {
             cv::Point2i point0((it)->px(0)*levelTimes[it->level]+it->grad(1)*0.75, (it)->px(1)*levelTimes[it->level]-it->grad(0)*0.75);
@@ -49,7 +49,7 @@ TEST(Tracker, Tracker) {
     cv::imshow("result", result);
     cv::waitKey();
 
-#endif //SHOW_DETECT
+#endif //
 
     std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i);
 
