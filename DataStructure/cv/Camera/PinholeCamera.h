@@ -40,8 +40,8 @@ public:
         return fabs(4.0*fx_*fy_);
     }
 
-    inline const Eigen::Matrix3d& K() const { return K_; }
-    inline const Eigen::Matrix3d& K_inv() const { return K_inv_; }
+    const Eigen::Matrix3d K() const { return K_; }
+    const Eigen::Matrix3d K_inv() const { return K_inv_; }
     virtual double fx() const { return fx_; }
     virtual double fy() const { return fy_; }
     virtual double cx() const { return cx_; }
