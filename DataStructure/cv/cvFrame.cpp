@@ -54,15 +54,15 @@ double cvFrame::getIntensityBilinear(double u, double v, int level) {
 
     int ui = int(std::floor(u));    int vi = int(std::floor(v));
     double ud = u - ui;        double vd = v - vi;
-
-    double leftTop     = cvData.measurement.imgPyr[level][vi * cols + ui][0];
-    double rightTop    = cvData.measurement.imgPyr[level][vi * cols + ui + 1][0];
-    double leftBottom  = cvData.measurement.imgPyr[level][vi * cols + cols + ui][0];
-    double rightBottom = cvData.measurement.imgPyr[level][vi * cols + cols + ui + 1][0];
+//    printf("u: %lf, v: %lf\n",u,v);
+    double leftTop     = cvData.measurement.imgPyr[level][vi * cols + ui](0);
+    double rightTop    = cvData.measurement.imgPyr[level][vi * cols + ui + 1](0);
+    double leftBottom  = cvData.measurement.imgPyr[level][vi * cols + cols + ui](0);
+    double rightBottom = cvData.measurement.imgPyr[level][vi * cols + cols + ui + 1](0);
 
     double row1 = leftTop * (1 - ud) + ud * rightTop;
     double row2 = leftBottom * (1 - ud) + ud * rightBottom;
-
+//    printf("row1: %lf,row2: %lf,ud: %lf,vd: %lf; lt %lf,rt %lf,lb %lf,rb %lf\n",row1,row2,ud,vd,leftTop,rightTop,leftBottom,rightBottom);
     return row1 * (1 - vd) + row2 * vd;
 }
 

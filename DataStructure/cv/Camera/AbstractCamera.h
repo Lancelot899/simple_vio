@@ -31,6 +31,8 @@ public:
 
     inline int height() const { return height_; }
 
+    virtual Sophus::SE3d getT_BS(void) {return  Sophus::SE3d();}
+
     inline bool isInFrame(const Eigen::Vector2i & obs, int boundary=0) const {
         if(obs[0]>=boundary && obs[0]<width()-boundary
                 && obs[1]>=boundary && obs[1]<height()-boundary)

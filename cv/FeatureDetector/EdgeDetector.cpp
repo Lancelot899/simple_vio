@@ -245,7 +245,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
                         if(frame->getGrad(bestU1,bestV1,out,1)){
                             double outNormal = sqrt(out(0)*out(0)+out(1)*out(1));
                             out /= outNormal;
-                            fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1,bestV1),out,1)));
+                            fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU1*2,bestV1*2),out,1)));
                         }
                         bestVal4 = 1e10;
                         n3++;
@@ -258,7 +258,7 @@ void EdgeDetector::detect(cvframePtr_t frame,
                     if(frame->getGrad(bestU2,bestV2,out,2)){
                         double outNormal = sqrt(out(0)*out(0)+out(1)*out(1));
                         out /= outNormal;
-                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2,bestV2),out,2)));
+                        fts.push_back(std::shared_ptr<Feature>(new Feature(frame,Eigen::Vector2d(bestU2*4,bestV2*4),out,2)));
                     }
                     n4++;
                 }

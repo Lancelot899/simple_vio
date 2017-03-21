@@ -27,23 +27,34 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
     Point3d pointj = T_SB * T_ji * Ti  * ft->point->pos_;
     if(pointj(2) < 0.0000001)
         return false;
+    Point3d pointI =  Ti * ft->point->pos_;
+    double ui = fx*pointI(0)/pointI(2)+cx;
+    double vi = fy*pointI(1)/pointI(2)+cy;
 
     double X_ = pointj(0), Y_ = pointj(1), Z_ = pointj(2);
-    double u = fx*X_/Z_ + cx;
-    double v = fy*Y_/Z_ + cy;
+    double uj = fx*X_/Z_ + cx;
+    double vj = fy*Y_/Z_ + cy;
 
-    Point3d pointI =  Ti * ft->point->pos_;
-
-    if(u < 0 || u >= viframe_j->getCVFrame()->getWidth() ||
-            v < 0 || v >= viframe_j->getCVFrame()->getHeight())
+    if(uj < 0 || uj >= viframe_j->getCVFrame()->getWidth() ||
+            vj < 0 || vj >= viframe_j->getCVFrame()->getHeight())
         return false;
 
-    w = 1.0 / viframe_j->getCVFrame()->getGradNorm(u, v, ft->level);
+    for(int i = 0; i < ft->level; ++i) {
+        ui /= 2.0;
+        vi /= 2.0;
+        uj /= 2.0;
+        vj /= 2.0;
+    }
+
+    printf("px: %lf, %lf,| uv: %lf, %lf | f->px: %lf, %lf, level: %d\n",uj, vj,ui,vi,ft->px(0),ft->px(1),ft->level);
+
+
+    w = 1.0 / viframe_j->getCVFrame()->getGradNorm(uj, vj, ft->level);
     if(w < 0.00000001 || std::isinf(w))
         return false;
 
-    err = viframe_i->getCVFrame()->getIntensityBilinear(fx*pointI(0)/pointI(2)+cx, fy*pointI(1)/pointI(2)+cy)
-            -viframe_j->getCVFrame()->getIntensityBilinear(u,v);
+    err = viframe_i->getCVFrame()->getIntensityBilinear(ui, vi)
+            -viframe_j->getCVFrame()->getIntensityBilinear(uj,vj);
     if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)
     {
         return false;
@@ -51,7 +62,7 @@ bool compute_PointJac(std::shared_ptr<viFrame> &viframe_i,std::shared_ptr<viFram
 
     err = err>0? err:-err;
 
-    Eigen::Vector2d grad;   viframe_j->getCVFrame()->getGrad(u,v,grad);
+    Eigen::Vector2d grad;   viframe_j->getCVFrame()->getGrad(uj,vj,grad);
     double dI_du = grad(0), dI_dv = grad(1);
 
     double zInverse = 1.0/Z_,  fx_z = fx*zInverse, fy_z = fy*zInverse, fx_zz = fx_z*zInverse, fy_zz = fy_z*zInverse;
@@ -81,6 +92,7 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     Eigen::Vector3d P = T_ji * Ti  * p->pos_;
     const viFrame::cam_t & cam = viframe_j->getCam();
     Eigen::Vector3d Pj = T_SB * P;
+//    std::cout << (T_SB * T_ji * Ti).matrix3x4() << std::endl;
     if(Pj(2) < 0.001)
         return false;
     double u = cam->fx() * (Pj(0) / Pj(2)) + cam->cx();
@@ -92,10 +104,8 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     if(v < 0 || v >= viframe_j->getCVFrame()->getHeight())
         return false;
 
-    std::cout << u << "\t" << v;
-
     Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
-
+ //   printf("px: %lf, %lf,| uv: %lf, %lf | f->px: %lf, %lf, level: %d ",px(0), px(1),u,v,ft->px(0),ft->px(1),ft->level );
     for(int i = 0; i < ft->level; ++i) {
         u /= 2.0;
         v /= 2.0;
@@ -108,13 +118,18 @@ bool compute_EdgeJac(std::shared_ptr<viFrame> &viframe_i,
     w = 1.0 / viframe_j->getCVFrame()->getGradNorm(u, v, ft->level);
     if(w < 0.001 || std::isinf(w))
         return false;
-    Eigen::Vector2d px = viframe_i->getCam()->world2cam(p->pos_);
 
-    printf("feature: u[%f],v[%f];\nUV: %d  u[%f],v[%f];\npx: %d   px(0)[%f],px(1)[%f]\n\n",ft->px(0),ft->px(1), ft->level,u,v, ft->level,px(0),px(1));
-    std::cout << "\t"  << px(0) << '\t' << px(1) << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+//    std::cout << "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
+//    std::cout << "pos_:" << p->pos_(0) << " " << p->pos_(1) << " " <<p->pos_(2) << "\tP_j :" << Pj(0) << " " << Pj(1) << " " << Pj(2) << std::endl;
+//    printf("feature: u[%f],v[%f];\nUV: %d  u[%f],v[%f];\npx: %d   px(0)[%f],px(1)[%f]\n\n",ft->px(0),ft->px(1), ft->level,u,v, ft->level,px(0),px(1));
+//    std::cout << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+
 
     err = viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level)
             - viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level);
+ //   std::cout<<"\n\n";
+ //   std::cout<<"\n\n";
+//    printf("error = %lf\n", err);
 
     if(err>PHOTOMATRICERROR ||err<-PHOTOMATRICERROR)     {
         return false;
@@ -199,14 +214,17 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 
         for(auto& ft : fts) {
             if(ft->type == Feature::EDGELET) {
-                if(!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
+                if (!direct_tracker::compute_EdgeJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new,
+                                                     jac, w, e))
                     continue;
-                cnt++; cntE++;
+                cnt++;
+                cntE++;
                 H += jac.transpose() * jac * w;
                 b += jac.transpose() * e * w;
                 chi_new += e;
+            }
 
-            } else {
+            else {
                 if(!direct_tracker::compute_PointJac(viframe_i, viframe_j, ft, T_SB, viframe_i->getPose(), T_ji_new, jac, w, e))
                     continue;
                 cnt++; cntP++;
@@ -219,6 +237,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         std::cout<<"cntP = "<<cntP<<" cntE = "<<cntE;
         if(cnt <= cnt_min && cnt <= 12)
             return false;
+        cv::waitKey();
 
         if(iter == 0) {
             chi = chi_new;
@@ -227,6 +246,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
             printf("\tinitial err: %lf\n", chi);
             T_ji_new = Sophus::SE3d::exp(xi) * T_ji;
             int cntf = 0;
+            sleep(1);
             continue;
         }
 
@@ -250,6 +270,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
             break;
 
         }
+        sleep(1);
     }
     T_ji_ = T_ji;
     return converge;

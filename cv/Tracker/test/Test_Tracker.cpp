@@ -46,8 +46,8 @@ TEST(Tracker, Tracker) {
 
     }
 
-    cv::imshow("result", result);
-    cv::waitKey();
+//    cv::imshow("result", result);
+//    cv::waitKey();
 
 #endif //
 
@@ -56,7 +56,10 @@ TEST(Tracker, Tracker) {
     std::shared_ptr<cvFrame> cvframe_j = std::make_shared<cvFrame>(cam, pic_j);
     std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j);
 
+    Eigen::Matrix<double, 3, 4> Mij;
+    Mij << 1, 0, 0, 0 , 0, 1, 0, 0, 0, 0, 1, 0;
     Sophus::SE3d Tij;
+    GTEST_ASSERT_EQ(Tij.matrix3x4(), Mij);
     //! test runing time
     printf("\t--start tracking!\n");
     bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
