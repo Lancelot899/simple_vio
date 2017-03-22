@@ -13,7 +13,7 @@ PinholeCamera::PinholeCamera(double width, double height,
                              double d0, double d1, double d2, double d3, double d4) :
         AbstractCamera(width, height),
         fx_(fx), fy_(fy), cx_(cx), cy_(cy),
-        distortion_(fabs(d0) > 0.0000001),
+        distortion_(false),
         undist_map1_(height_, width_, CV_16SC2),
         undist_map2_(height_, width_, CV_16SC2),
         use_optimization_(false) {
