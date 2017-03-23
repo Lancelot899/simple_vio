@@ -46,12 +46,7 @@ public:
     virtual double fy() const { return fy_; }
     virtual double cx() const { return cx_; }
     virtual double cy() const { return cy_; }
-    inline double d0() const { return d_[0]; }
-    inline double d1() const { return d_[1]; }
-    inline double d2() const { return d_[2]; }
-    inline double d3() const { return d_[3]; }
-    inline double d4() const { return d_[4]; }
-
+    virtual double d(int i) const { return d_[i]; }
     void undistortImage(const cv::Mat& raw, cv::Mat& rectified);
 
 private:
