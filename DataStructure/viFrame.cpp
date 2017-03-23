@@ -32,12 +32,12 @@ viFrame::~viFrame()
 {
 }
 
-const viFrame::pose_t& viFrame::getT_BS() {
-    return dynamic_cast<VIOPinholeCamera*>(cvframe->getCam().get())->getT_BS();
+viFrame::pose_t viFrame::getT_BS() {
+    return cvframe->getCam()->getT_BS();
 }
 
 viFrame::pose_t viFrame::getPose() {
-    return dynamic_cast<VIOPinholeCamera*>(cvframe->getCam().get())->getT_BS() * cvframe->getPose();
+    return  cvframe->getCam()->getT_BS() * cvframe->getPose();
 }
 
 const cvframePtr_t &viFrame::getCVFrame() {

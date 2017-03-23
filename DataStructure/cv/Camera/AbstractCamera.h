@@ -31,6 +31,8 @@ public:
 
     inline int height() const { return height_; }
 
+    virtual Sophus::SE3d getT_BS(void) {return  Sophus::SE3d();}
+
     inline bool isInFrame(const Eigen::Vector2i & obs, int boundary=0) const {
         if(obs[0]>=boundary && obs[0]<width()-boundary
                 && obs[1]>=boundary && obs[1]<height()-boundary)
@@ -49,6 +51,8 @@ public:
     virtual double fy() const { return 0.0; }
     virtual double cx() const { return 0.0; }
     virtual double cy() const { return 0.0; }
+    virtual double d(int i) const { return 0; }
+
     virtual const Eigen::Matrix3d K() const { return  Eigen::Matrix3d::Identity(3,3); }
     virtual const Eigen::Matrix3d K_inv() const { return  Eigen::Matrix3d::Identity(3,3);}
 protected:
