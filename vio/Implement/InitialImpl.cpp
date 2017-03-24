@@ -3,17 +3,56 @@
 //
 
 #include <limits>
+#include <ceres/ceres.h>
 
 #include "InitialImpl.h"
 #include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/imu/imuFactor.h"
 #include "util/util.h"
 
+class gbiasErr : public ceres::SizedCostFunction<3, 3> {
+public:
+    gbiasErr(std::shared_ptr<viFrame> viframe_1, std::shared_ptr<viFrame> viframe_2,
+             const IMUMeasure::Transformation &deltaPose, const imuFactor::FacJBias_t &facJac)
+    : deltaPose_(deltaPose), facJac_(facJac) {
+        this->viframe_1 = viframe_1; this->viframe_2 = viframe_2;
+    }
+
+    virtual ~gbiasErr() {}
+
+    virtual bool Evaluate(double const* const* parameters,
+                          double* residuals,
+                          double** jacobians) const {
+
+        Eigen::Map<const Eigen::Vector3d> gbias(parameters[0]);
+        Eigen::Vector3d err = Sophus::SO3d::log(
+                (deltaPose_.so3() * Sophus::SO3d::exp(facJac_.block<3, 3>(0, 0) * gbias)).inverse()
+                * viframe_1->getPose().so3() * viframe_2->getPose().so3().inverse());
+
+        Eigen::Matrix3d Jac = -leftJacobian(err).inverse() * facJac_.block<3, 3>(0, 0);
+
+        int k = 0;
+        for(int i = 0; i < 3; ++i) {
+            residuals[i] = err(i);
+            if(jacobians && jacobians[0]) {
+                for (int j = 0; j < 3; ++j)
+                    jacobians[0][k++] = Jac(i, j);
+            }
+        }
+
+        return true;
+    }
+
+private:
+    std::shared_ptr<viFrame> viframe_1;
+    std::shared_ptr<viFrame> viframe_2;
+    const IMUMeasure::Transformation &deltaPose_;
+    const imuFactor::FacJBias_t &facJac_;
+};
 
 InitialImpl::InitialImpl() {
     imu_ =  std::make_shared<IMU>();
 }
-
 
 bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
                        std::vector<std::shared_ptr<imuFactor>>& VecImuFactor,
@@ -34,51 +73,26 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
     }
 
     //! esitmate gbias;
-    Eigen::Vector3d gbias(0.0, 0.0, 0.0);
-    double Err;
-    Eigen::Vector3d b;
-    Eigen::Matrix3d H;
-    double errOld;
-    bool converge = false;
-
-    for(int iter = 0; iter < n_iter; ++iter) {
-        if(iter == 0)
-            errOld = std::numeric_limits<double>::max();
-        else
-            errOld = Err;
-
-        Err = 0.0;
-        H.setZero();
-        b.setZero();
+    double gbias_[3] = {0.0, 0.0, 0.0};
+    ceres::Problem problem;
         for (int i = 0; i < size - 1; ++i) {
             const IMUMeasure::Transformation &deltaPose = VecImuFactor[i]->deltaPose;
-            const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias(); ///! TODO
-            Eigen::Vector3d err = Sophus::SO3d::log(
-                        (deltaPose.so3() * Sophus::SO3d::exp(facJac.block<3, 3>(0, 0) * gbias)).inverse()
-                        * VecFrames[i]->getPose().so3() * VecFrames[i + 1]->getPose().so3().inverse());
-            Err += err.transpose() * err;
-            Eigen::Matrix3d Jac = -leftJacobian(err).inverse() * facJac.block<3, 3>(0, 0); ///! WHY?
-            b += Jac.transpose() * err;
-            H += Jac.transpose() * Jac;
+            const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias();
+            problem.AddResidualBlock(new gbiasErr(VecFrames[i], VecFrames[i + 1], deltaPose, facJac),
+                                     new ceres::HuberLoss(0.5), gbias_);
         }
+    ceres::Solver::Options options;
+    ceres::Solver::Summary summary;
 
-        if(Err > errOld)
-            return false;
+    options.max_num_iterations = n_iter;
+    options.minimizer_type = ceres::TRUST_REGION;
+    options.linear_solver_type = ceres::DENSE_QR;
+    ceres::Solve(options, &problem, &summary);
 
-        if(std::abs(Err - errOld) <= convergeErr) {
-            for(size_t i = 0; i < size; ++i) {
-                VecFrames[i]->spbs.block<3, 1>(3, 0) = gbias;
-            }
-            converge = true;
-            break;
-        }
-
-        Eigen::Vector3d delta_bg = H.ldlt().solve(-b);
-        gbias += delta_bg;
-    }
-
-    if(false == converge)
+    if(summary.termination_type != ceres::CONVERGENCE)
         return false;
+
+    Eigen::Map<Eigen::Vector3d> gbias(gbias_);
 
     //! estimate scale and gravity; refine bias_a, scale, gravity
     double scale = 1.0;
