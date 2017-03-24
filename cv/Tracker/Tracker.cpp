@@ -15,7 +15,7 @@
 #include "DataStructure/cv/Point.h"
 #include "util/setting.h"
 
-#define PHOTOMATRICERROR 20.0
+#define PHOTOMATRICERROR 100.0
 
 
 namespace direct_tracker {
@@ -98,54 +98,37 @@ public:
 		}
 
 		Sophus::SO3d R_ji = Sophus::SO3d::exp(so3);
-		//std::cout << "rotation :\n" << R_ji.matrix() << std::endl;
-		//std::cout << "translation:\n" << trans_ji << std::endl;
 		const Eigen::Vector3d &p = ft->point->pos_;
 		Eigen::Vector3d pi = viframe_i->getCVFrame()->getPose() * p;
-		if (pi(2) > 0.0001) {
-		std::cout << "pi = ("<< pi(0) << " " << pi(1) << " " << pi(2) << "), pj = (";
+		if (pi(2) > 0.0000000001) {
 		Eigen::Vector3d pj = T_SB * (R_ji * (viframe_j->getT_BS() * pi) + trans_ji);
-		if (pj(2) > 0.0001) {
-				std::cout << pj(0) << " " << pj(1) << " " << pj(2) << ")" << std::endl;
+		if (pj(2) > 0.0000000001) {
 				const viFrame::cam_t &cam = viframe_j->getCam();
-
 				double u = cam->fx() * (pj(0) / pj(2)) + cam->cx();
 				if (u >= 0 && u < viframe_j->getCVFrame()->getWidth()) {
-
 					double v = cam->fy() * (pj(1) / pj(2)) + cam->cy();
-
 					if (v >= 0 && v < viframe_j->getCVFrame()->getHeight()) {
-
 						Eigen::Vector2d px = cam->world2cam(pi);
-
 						if (px(0) >= 0 && px(0) < viframe_i->getCVFrame()->getWidth()
 						    && px(1) >= 0 && px(1) < viframe_i->getCVFrame()->getHeight()) {
-
-
 							for (int i = 0; i < ft->level; ++i) {
 								u /= 2.0;
 								v /= 2.0;
 								px /= 2.0;
 							}
-							//std::cout << "uv = " << u <<" " << v << ", px = "<< px(0) << " " << px(1) << std::endl;
-
 							double err = viframe_j->getCVFrame()->getIntensityBilinear(u, v, ft->level)
 							             - viframe_i->getCVFrame()->getIntensityBilinear(px(0), px(1), ft->level);
 							if (err < PHOTOMATRICERROR && err > -PHOTOMATRICERROR) {
 								double w = 1.0 / viframe_j->getCVFrame()->getGradNorm(u, v, ft->level);
-								std::cout << "w = " << w << std::endl;
 								if (w > 0.0000001 && !std::isinf(w)) {
 									*residuals = w * err;
-									std::cout << "err = " << *residuals << std::endl;
 									Eigen::Vector2d grad;
 									if (viframe_j->getCVFrame()->getGrad(u, v, grad, ft->level)) {
 										Eigen::Vector2d &dir = ft->grad;
 										w = std::sqrt(w);
-										std::cout << "w = " << w << std::endl;
 										if (jacobians && jacobians[0]) {
 											double Ix, Iy;
 											if (ft->type == Feature::EDGELET) {
-												std::cout << "norm = \n" << dir << std::endl;
 												Ix = dir(1) * dir(0);
 												Iy = Ix * grad(0) + dir(1) * dir(1) * grad(1);
 												Ix *= grad(1);
@@ -155,27 +138,21 @@ public:
 												Iy = grad(1);
 											}
 											Eigen::Matrix<double, 1, 3> Jac;
-											Jac(0, 0) = Ix * cam->fx() / pj(2) / double(viframe_j->getCVFrame()
-													                                     ->getWidth());
-											Jac(0, 1) = Iy * cam->fy() / pj(2) / double(viframe_j->getCVFrame()
-													                                            ->getHeight());
-											Jac(0, 2) = -Ix * cam->fx() / double(viframe_j->getCVFrame()
-													                                     ->getWidth()) * pj(0) / pj(2) / pj(2) -
-													Iy * cam->fy() / double(viframe_j->getCVFrame()
-															                        ->getHeight()) * pj(1) / pj(2) / pj(2);
-											std::cout << Jac << std::endl;
+											Jac(0, 0) = Ix * cam->fx() / pj(2);
+											Jac(0, 1) = Iy * cam->fy() / pj(2);
+											Jac(0, 2) = -Ix * cam->fx()  * pj(0) / pj(2) / pj(2) -
+													Iy * cam->fy() * pj(1) / pj(2) / pj(2);
 											Jac = w * Jac * T_SB.rotationMatrix();
-											std::cout << Jac << std::endl;
 											jacobians[0][3] = Jac(0, 0);
 											jacobians[0][4] = Jac(0, 1);
 											jacobians[0][5] = Jac(0, 2);
 											Jac = -Jac * Sophus::SO3d::hat(R_ji * pi);
-											std::cout << Jac << "\n" << std::endl;
 											jacobians[0][0] = Jac(0, 0);
 											jacobians[0][1] = Jac(0, 1);
 											jacobians[0][2] = Jac(0, 2);
 										}
 									}
+									return true;
 								}
 							}
 						}
@@ -183,6 +160,9 @@ public:
 				}
 			}
 		}
+		*residuals = 0;
+		if(jacobians && jacobians[0])
+			memset(jacobians[0], 0, sizeof(double) * 6);
 		return true;
 	}
 
@@ -270,6 +250,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	ceres::Solver::Summary summary;
 
 	const cvMeasure::features_t& fts = viframe_i->getCVFrame()->getMeasure().fts_;
+	std::cout << "size of fts :" << fts.size() << std::endl;
 	Eigen::Vector3d so3 = T_ji_.so3().log();
 	Eigen::Vector3d& t = T_ji_.translation();
 	double t_ji[6];
@@ -279,6 +260,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	}
 
 	for(auto &f : fts) {
+		//printf("add residual!\n");
 		problem.AddResidualBlock(new TrackingErr(f, viframe_i, viframe_j), new ceres::HuberLoss(0.5), t_ji);
 	}
 	problem.SetParameterization(t_ji, new SE3Parameterization);
@@ -286,7 +268,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	options.max_num_iterations = n_iter;
 	options.minimizer_type = ceres::TRUST_REGION;
 	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = true;
+	//options.minimizer_progress_to_stdout = true;
 
 	ceres::Solve(options, &problem, &summary);
 	std::cout << summary.BriefReport() << std::endl;
@@ -296,8 +278,10 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	}
 
 	T_ji_.so3() = Sophus::SO3d::exp(so3);
+	if(summary.termination_type == ceres::CONVERGENCE)
+		return true;
 
-	return true;
+	return false;
 }
 
 }

@@ -13,8 +13,9 @@
 TEST(Tracker, Tracker) {
 
     direct_tracker::Tracker tracker;
-    cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715273262142976.png", 0);
-    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715273312143104.png", 0);
+    cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
+	cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
+    //cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
@@ -72,10 +73,30 @@ TEST(Tracker, Tracker) {
         printf("\t--failed!\n");
     std::cout<<Tij.so3().matrix()<<"\n";
     std::cout<<Tij.translation()<<"\n";
-    GTEST_ASSERT_EQ(Tij.so3().matrix(), Eigen::Matrix3d::Identity());
-    GTEST_ASSERT_EQ(Tij.translation(), Eigen::Vector3d::Zero());
 
-    pic_j = cv::imread("../testData/mav0/cam0/data/1403715273312143104.png", 0);
+
+	pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
+	pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
+	pic_i = Undistort(pic_i_, cam);
+	pic_j = Undistort(pic_j_, cam);
+
+	cvframe_i = std::make_shared<cvFrame>(cam, pic_i);
+	fts.clear();
+	feature_detection::Detector detector_(pic_i.cols, pic_i.rows, 25, IMG_LEVEL);
+	detector_.detect(cvframe_i, cvframe_i->getMeasure().measurement.imgPyr, fts);
+	for(auto &ft : fts)
+		cvframe_i->addFeature(ft);
+
+
+	viframe_i = std::make_shared<viFrame>(1, cvframe_i);
+
+	cvframe_j = std::make_shared<cvFrame>(cam, pic_j);
+	viframe_j = std::make_shared<viFrame>(2, cvframe_j);
+
+	Sophus::SE3d Tij_;
+	GTEST_ASSERT_EQ(Tij_.matrix3x4(), Mij);
+
+	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
 
     if(isTracked)
         printf("successful!\n");
