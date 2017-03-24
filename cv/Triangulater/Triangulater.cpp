@@ -16,8 +16,7 @@ public:
                                     const Sophus::SE3d T_nk_,
                                     double u_,double v_)
         :keyFrame(keyframe_),nextFrame(nextframe_),T_nk(T_nk_),u_Key(u_),v_Key(v_)
-    {
-    }
+    {}
 
     virtual bool Evaluate(double const* const* parameters,double* residuals,double** jacobians) const
     {
@@ -49,15 +48,34 @@ private:
     double                    u_Key,v_Key;
 };
 
-struct EllipsoidFittingSolver
+class CERES_EXPORT DepthParameter : public ceres::LocalParameterization {
+public:
+    virtual ~DepthParameter() {}
+    virtual bool Plus(const double* x,
+                      const double* delta,
+                      double* x_plus_delta) const
+    {
+        *x_plus_delta = *x + * delta;
+    }
+    virtual bool ComputeJacobian(const double* x,
+                                 double* jacobian) const
+    {
+        ceres::MatrixRef(jacobian, 1, 1) = ceres::Matrix::Identity(1, 1);
+        return true;
+    }
+    virtual int GlobalSize() const { return 1; }
+    virtual int LocalSize() const { return 1; }
+};
+
+struct TriangulaterSolver
 {
-    EllipsoidFittingSolver()
+    TriangulaterSolver()
     {
         m_options.max_num_iterations = 25;
         m_options.linear_solver_type = ceres::SPARSE_SCHUR;
         m_options.trust_region_strategy_type = ceres::DOGLEG;
         m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
-//        m_options.minimizer_progress_to_stdout = true;
+        /// m_options.minimizer_progress_to_stdout = true;
         m_bInitParameters = false;
     }
 
@@ -67,15 +85,15 @@ struct EllipsoidFittingSolver
             return false;
 
         ceres::Problem problem;
-        for(size_t i = 0; i < edges.size(); ++i) {
-            ceres::CostFunction* costFun = new PoseGraphError(i, edges[i].pose, edges[i].infomation);
-            problem.AddResidualBlock(costFun, new ceres::HuberLoss(1.5), vertexes[edges[i].i].pose.data(),
-                                     vertexes[edges[i].j].pose.data());
-        }
+        double depthInit = 1.0;
 
-        for(size_t i = 0; i < vertexes.size(); ++i) {
-            problem.SetParameterization(vertexes[i].pose.data(), new SE3Parameterization());
+        for(auto &ft: fts) {
+            problem.AddResidualBlock(new TriangulaterPhotometrixResidual(keyFrame,nextFrame,T_nk,ft->px(0),ft->px(1)),
+                                     new ceres::HuberLoss(0.5),depthInit);
         }
+        problem.SetParameterization(&depthInit,new DepthParameter);
+
+        ceres::Solve(m_options,&problem,&m_summary);
         return true;
     }
 
@@ -83,6 +101,7 @@ struct EllipsoidFittingSolver
     double                             m_EllipsoidParameters[6];
     std::shared_ptr<cvFrame>           keyFrame,nextFrame;
     cvMeasure::features_t              fts;
+    Sophus::SE3d                       T_nk;
     ceres::Solver::Options             m_options;
     ceres::Solver::Summary             m_summary;
 };
