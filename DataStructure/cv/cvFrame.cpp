@@ -104,6 +104,7 @@ bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
 
 cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
     cam_ = cam;
+    //pose_ = Sophus::SE3d::exp(Eigen::Matrix<double, 6, 1>::Zero());
     cvData.measurement.pic = pic;
     int rows = pic.rows;
     int cols = pic.cols;

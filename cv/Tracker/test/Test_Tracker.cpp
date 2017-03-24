@@ -14,7 +14,7 @@ TEST(Tracker, Tracker) {
 
     direct_tracker::Tracker tracker;
     cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715273262142976.png", 0);
-    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715277962142976.png", 0);
+    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715273312143104.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
@@ -27,7 +27,7 @@ TEST(Tracker, Tracker) {
     detector.detect(cvframe_i, cvframe_i->getMeasure().measurement.imgPyr, fts);
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
-#define SHOW_DETECT
+
 #ifdef SHOW_DETECT
 
     int levelTimes[5] = {1,2,4,8,16};
