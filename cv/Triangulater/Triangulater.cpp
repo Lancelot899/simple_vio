@@ -1,9 +1,92 @@
+#include <glog/logging.h>
+#include <ceres/ceres.h>
+
 #include "Triangulater.h"
 
 #include "../DataStructure/viFrame.h"
 #include "../DataStructure/cv/cvFrame.h"
 #include "../DataStructure/cv/Feature.h"
 #include "../DataStructure/cv/Point.h"
+
+class TriangulaterPhotometrixResidual: public ceres::SizedCostFunction<1,1> {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    TriangulaterPhotometrixResidual(const std::shared_ptr<cvFrame> keyframe_,
+                                    const std::shared_ptr<cvFrame> nextframe_,
+                                    const Sophus::SE3d T_nk_,
+                                    double u_,double v_)
+        :keyFrame(keyframe_),nextFrame(nextframe_),T_nk(T_nk_),u_Key(u_),v_Key(v_)
+    {
+    }
+
+    virtual bool Evaluate(double const* const* parameters,double* residuals,double** jacobians) const
+    {
+        double depth = *parameters[0];
+        Eigen::Vector3d posNF = T_nk.rotationMatrix()* nextFrame->getCam()->K_inv()* Eigen::Vector3d(u_Key*depth,v_Key*depth,depth) + T_nk.translation();
+        Eigen::Vector3d pos_ = nextFrame->getCam()->K() * posNF;
+
+        double depth2 = pos_(2);
+        if(depth2<1e-5) {
+            printf("TriangulaterPhotometrixResidual with wrong depth!\n");
+            exit(-1);
+        }
+
+        double fx = nextFrame->getCam()->fx();  double fy = nextFrame->getCam()->fy();
+
+        Eigen::Matrix<double,2,3> uv_XYZ;
+        uv_XYZ<<fx/posNF(2), 0, -fx*pos_(0)/(posNF(2)*posNF(2)), 0, fy/posNF(2), -fy*posNF(1)/(posNF(2)*posNF(2));
+
+        pos_ /= depth2;
+        *residuals = keyFrame->getIntensityBilinear(u_Key,v_Key) - nextFrame->getIntensityBilinear(pos_(0),pos_(1));
+
+        *jacobians[0] = (keyFrame->getGradBilinear(u_Key,v_Key).transpose() * uv_XYZ *
+                     (T_nk.rotationMatrix() * (nextFrame->getCam()->K_inv() * Eigen::Vector3d(u_Key,v_Key,1)) + T_nk.translation()))(0);
+    }
+
+private:
+    std::shared_ptr<cvFrame>  keyFrame,nextFrame;
+    Sophus::SE3d              T_nk;
+    double                    u_Key,v_Key;
+};
+
+struct EllipsoidFittingSolver
+{
+    EllipsoidFittingSolver()
+    {
+        m_options.max_num_iterations = 25;
+        m_options.linear_solver_type = ceres::SPARSE_SCHUR;
+        m_options.trust_region_strategy_type = ceres::DOGLEG;
+        m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
+//        m_options.minimizer_progress_to_stdout = true;
+        m_bInitParameters = false;
+    }
+
+    bool SolveParameters()
+    {
+        if(keyFrame == true || keyFrame == true)
+            return false;
+
+        ceres::Problem problem;
+        for(size_t i = 0; i < edges.size(); ++i) {
+            ceres::CostFunction* costFun = new PoseGraphError(i, edges[i].pose, edges[i].infomation);
+            problem.AddResidualBlock(costFun, new ceres::HuberLoss(1.5), vertexes[edges[i].i].pose.data(),
+                                     vertexes[edges[i].j].pose.data());
+        }
+
+        for(size_t i = 0; i < vertexes.size(); ++i) {
+            problem.SetParameterization(vertexes[i].pose.data(), new SE3Parameterization());
+        }
+        return true;
+    }
+
+    bool                               m_bInitParameters;
+    double                             m_EllipsoidParameters[6];
+    std::shared_ptr<cvFrame>           keyFrame,nextFrame;
+    cvMeasure::features_t              fts;
+    ceres::Solver::Options             m_options;
+    ceres::Solver::Summary             m_summary;
+};
+
 
 Triangulater::Triangulater()
 {}
@@ -24,22 +107,25 @@ bool Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame, std::shared_p
         double depthInit = 1.0; int iter = 12;
         bool foundGoodDepth = false; double old_err = 99999;
         while (iter--) {
-            PointType point = nextFrame->getCVFrame()->getCam()->K() * Rotation *
-                    PointType(ftKey->point->pos_(0),ftKey->point->pos_(1),depthInit) + T_nk.translation();
+            PointType Pnext(ftKey->point->pos_(0),ftKey->point->pos_(1),depthInit);
+            PointType point = nextFrame->getCVFrame()->getCam()->K() * Rotation * Pnext
+                    + T_nk.translation();
 
             if(point(2)==0) break;
             double u = point(0)/point(2);   if(u<0 || u>width_) break;
             double v = point(1)/point(2);   if(v<0 || v>height_) break;
 
             cvFrame::grad_t  grad;  nextFrame->getCVFrame()->getGrad(u,v,grad);
-            Eigen::Vector3d uv_d = nextFrame->getCVFrame()->getCam()->K() * Rotation * ftKey->point->pos_;
+            Eigen::Vector3d uv_d = nextFrame->getCVFrame()->getCam()->K() * Rotation * Pnext;
             if(uv_d(2)==0) break;
             uv_d /= uv_d(2);
 
             double Jacob = grad.transpose() * Eigen::Vector2d(uv_d(0),uv_d(1));
             if(Jacob<1e-3) break;
 
-            double err = keyFrame->getCVFrame()->getIntensity(ftKey->px(0),ftKey->px(1)) - nextFrame->getCVFrame()->getIntensity(u,v);
+            double err = keyFrame->getCVFrame()->getIntensityBilinear(ftKey->px(0),ftKey->px(1))
+                       - nextFrame->getCVFrame()->getIntensityBilinear(u,v);
+
             err = err>0?err:-err;
             if(err<old_err) old_err = err;
             else {
