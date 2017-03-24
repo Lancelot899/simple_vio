@@ -28,7 +28,7 @@ public:
     virtual Eigen::Vector2d world2cam(const Eigen::Vector3d& xyz_c) const;
     virtual Eigen::Vector2d world2cam(const Eigen::Vector2d& uv) const;
 
-    const Sophus::SE3d&    getT_BS(void) {return  T_BS;}
+    Sophus::SE3d           getT_BS(void) {return  T_BS;}
     int                    getRate(void) {return m_Rate;}
     const std::string&     getCameraMode(void) {return m_CamMode;}
     const std::string&     getDistorMode(void) {return m_DistortionMode;}

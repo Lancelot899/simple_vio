@@ -28,6 +28,22 @@ FIND_PACKAGE(Eigen)
 #g2o
 FIND_PACKAGE(G2O REQUIRED QUIET)
 
+FIND_LIBRARY(GFLAGS_LIB
+        NAMES flags libgflags.so
+        PATH
+        /usr/lib/x86_64-linux-gnu
+        /usr/lib
+        /usr/local/lib
+        )
+
+FIND_LIBRARY(GOMP_LIB
+        NAMES gomp libgomp.so.1
+        PATH
+        /usr/lib/x86_64-linux-gnu
+        /usr/lib
+        /usr/local/lib
+        )
+
 #ceres
 FIND_PACKAGE(Ceres REQUIRED QUIET)
 #if(NOT CERES_FOUND)
@@ -49,7 +65,10 @@ FIND_PACKAGE(Ceres REQUIRED QUIET)
 
 FIND_PACKAGE(OpenCV REQUIRED QUIET)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS thread system regex)
-
+FIND_PACKAGE(BLAS REQUIRED QUIET)
+FIND_PACKAGE(LAPACK REQUIRED QUIET)
+FIND_PACKAGE(SuiteSparse REQUIRED)
+FIND_PACKAGE(Cholmod REQUIRED QUIET)
 
 INCLUDE_DIRECTORIES(
         .
@@ -69,6 +88,12 @@ LIST(APPEND LINK_LIBS
         ${Boost_LIBRARIES}
         ${GLOG_LIBRARIES}
         ${CERES_LIBRARIES}
+        ${GFLAGS_LIB}
+        ${GOMP_LIB}
+        ${SUITESPARSE_LIBRARIES}
+        ${CHOLMOD_LIBRARIES}
+        ${LAPACK_LIBRARIES}
+        ${BLAS_LIBRARIES}
         )
 
 LIST(APPEND LINK_LIBS
@@ -154,6 +179,7 @@ set(SOURCE_FILES
         cv/FeatureDetector/test/Test_Detector.cpp
         cv/Triangulater/Triangulater.h
         cv/Triangulater/Triangulater.cpp
+        DataStructure/cv/test/Test_cvFrame.cpp
         )
 
 

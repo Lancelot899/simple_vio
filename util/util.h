@@ -1,12 +1,16 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <memory>
+
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include <sys/time.h>
 
 extern const double EPS;
 extern const double PI;
+
+class AbstractCamera;
 
 typedef Eigen::Matrix<double, 2, 3>  Matrix23d;
 
@@ -110,5 +114,6 @@ protected:
     int               line_T;
 };
 
+cv::Mat Undistort(const cv::Mat& src, std::shared_ptr<AbstractCamera> cam);
 
 #endif // UTIL_H

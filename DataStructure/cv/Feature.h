@@ -30,7 +30,7 @@ struct Feature
         type(EDGELET),
         frame(_frame),
         px(_px),
-        f(frame->getCam()->cam2world(px)),
+        f(frame->getCam()->cam2world(_px)),
         level(_level),
         grad(_grad)
     {
@@ -41,7 +41,7 @@ struct Feature
         type(CORNER),
         frame(_frame),
         px(_px),
-        f(frame->getCam()->cam2world(px)),
+        f(frame->getCam()->cam2world(_px)),
         level(_level),
         grad(1.0,0.0)
     {

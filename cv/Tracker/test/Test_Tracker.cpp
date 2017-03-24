@@ -11,20 +11,23 @@
 #include "DataStructure/cv/Feature.h"
 
 TEST(Tracker, Tracker) {
+
     direct_tracker::Tracker tracker;
-    cv::Mat pic_i = cv::imread("../testData/mav0/cam0/data/1403715273262142976.png", 0);
-    cv::Mat pic_j = cv::imread("../testData/mav0/cam0/data/1403715277962142976.png", 0);
+    cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715273262142976.png", 0);
+    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715273312143104.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
     const CameraIO::pCamereParam cam = camTest.getCamera();
+    cv::Mat pic_i = Undistort(pic_i_, cam);
+    cv::Mat pic_j = Undistort(pic_j_, cam);
     std::shared_ptr<cvFrame> cvframe_i = std::make_shared<cvFrame>(cam, pic_i);
     cvMeasure::features_t fts;
     feature_detection::Detector detector(pic_i.cols, pic_i.rows, 25, IMG_LEVEL);
     detector.detect(cvframe_i, cvframe_i->getMeasure().measurement.imgPyr, fts);
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
-#define SHOW_DETECT
+
 #ifdef SHOW_DETECT
 
     int levelTimes[5] = {1,2,4,8,16};
@@ -56,7 +59,10 @@ TEST(Tracker, Tracker) {
     std::shared_ptr<cvFrame> cvframe_j = std::make_shared<cvFrame>(cam, pic_j);
     std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j);
 
+    Eigen::Matrix<double, 3, 4> Mij;
+    Mij << 1, 0, 0, 0 , 0, 1, 0, 0, 0, 0, 1, 0;
     Sophus::SE3d Tij;
+    GTEST_ASSERT_EQ(Tij.matrix3x4(), Mij);
     //! test runing time
     printf("\t--start tracking!\n");
     bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
@@ -75,4 +81,5 @@ TEST(Tracker, Tracker) {
         printf("successful!\n");
     else
         printf("failed!\n");
+
 }

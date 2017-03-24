@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "DataStructure/cv/Camera/AbstractCamera.h"
+
 const double EPS = 0.0000000001;
 const double PI = 3.14159265;
 
@@ -105,3 +107,21 @@ float shiTomasiScore(const cv::Mat& img, int u, int v) {
   dXY = dXY / (2.0 * box_area);
   return 0.5 * (dXX + dYY - sqrt( (dXX + dYY) * (dXX + dYY) - 4 * (dXX * dYY - dXY * dXY) ));
 }
+
+
+cv::Mat Undistort(const cv::Mat& src, std::shared_ptr<AbstractCamera> cam) {
+    cv::Mat dst;
+    const Eigen::Matrix<double, 3, 3> &K_ = cam->K();
+    cv::Mat K(3, 3, CV_64FC1);
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j)
+            K.at<double>(i, j) = K_(i, j);
+    }
+    cv::Mat distCoeffs(4, 1, CV_64FC1);
+    for(int i = 0; i < 4; ++i)
+        distCoeffs.at<double>(i, 0) = cam->d(i);
+
+    cv::undistort(src, dst, K, distCoeffs);
+
+    return dst;
+};
