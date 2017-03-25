@@ -179,6 +179,7 @@ set(SOURCE_FILES
         cv/FeatureDetector/test/Test_Detector.cpp
         cv/Triangulater/Triangulater.h
         cv/Triangulater/Triangulater.cpp
+        cv/Triangulater/test/Test_Triangulater.cpp
         DataStructure/cv/test/Test_cvFrame.cpp
         )
 

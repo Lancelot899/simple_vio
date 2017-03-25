@@ -6,7 +6,6 @@
 #include "../DataStructure/cv/Feature.h"
 #include "../DataStructure/cv/Point.h"
 
-
 class depthErr : public ceres::SizedCostFunction<1, 1> {
 public:
     virtual ~depthErr() {}
@@ -24,9 +23,13 @@ public:
         Eigen::Vector3d P_next = T_nk_ * (d * f_->f);
         auto &cam = nextFrame->getCam();
         auto uv = cam->world2cam(P_next);
+        if(uv(0)<0 || uv(0)>=nextFrame->getCVFrame()->getWidth() || uv(1)<0 || uv(1)>=nextFrame->getCVFrame()->getHeight())
+            return false;
+
         for(int i = 0; i < f_->level; ++i) {
             uv /= 2.0;
         }
+
         *residuals = nextFrame->getCVFrame()->getIntensityBilinear(uv(0), uv(1), f_->level) - I_k;
         if (jacobians && jacobians[0]) {
             Eigen::Vector2d grad = nextFrame->getCVFrame()->getGradBilinear(uv(0), uv(1), f_->level);
@@ -51,7 +54,6 @@ public:
             jacobians[0][0] = Jac * f_->f;
         }
 
-
     }
 
 private:
@@ -64,93 +66,115 @@ private:
 Triangulater::Triangulater()
 {}
 
-bool Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
-                               std::shared_ptr<viFrame> &nextFrame, const Sophus::SE3d &T_nk)
+int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
+                               std::shared_ptr<viFrame> &nextFrame, const Sophus::SE3d &T_nk, int iter)
 {
-    typedef Eigen::Vector3d     PointType;
-
+    int newCreatPoint = 0;
     int height_ = keyFrame->getCVFrame()->getHeight();
     int width_  = keyFrame->getCVFrame()->getWidth();
 
     const cvMeasure::features_t& fts = keyFrame->getCVFrame()->getMeasure().fts_;
+
+    ceres::Solver::Options option;
+    option.max_num_iterations = iter;
+    option.minimizer_type = ceres::LINE_SEARCH;
+    option.linear_solver_type = ceres::DENSE_QR;
+
     for(auto& ftKey : fts) {
+        ceres::Solver::Summary summary;
+        ceres::Problem problem;
         if(ftKey->point->pos_[2]!=1) continue;    //! Already had depth
-        Eigen::Matrix<double, 3, 3> Rotation       = T_nk.rotationMatrix();
 
-        ///< search in the epipoleline on next frame:  menthod: GN
-        double depthInit = 1.0; int iter = 12;
-        bool foundGoodDepth = false; double old_err = 99999;
-        while (iter--) {
-            PointType point = nextFrame->getCVFrame()->getCam()->K() * Rotation *
-                    PointType(ftKey->point->pos_(0),ftKey->point->pos_(1),depthInit) + T_nk.translation();
-
-            if(point(2)==0) break;
-            double u = point(0)/point(2);   if(u<0 || u>width_) break;
-            double v = point(1)/point(2);   if(v<0 || v>height_) break;
-
-            cvFrame::grad_t  grad;  nextFrame->getCVFrame()->getGrad(u,v,grad);
-            Eigen::Vector3d uv_d = nextFrame->getCVFrame()->getCam()->K() * Rotation * ftKey->point->pos_;
-            if(uv_d(2)==0) break;
-            uv_d /= uv_d(2);
-
-            double Jacob = grad.transpose() * Eigen::Vector2d(uv_d(0),uv_d(1));
-            if(Jacob<1e-3) break;
-
-            double err = keyFrame->getCVFrame()->getIntensity(ftKey->px(0),ftKey->px(1)) - nextFrame->getCVFrame()->getIntensity(u,v);
-            err = err>0?err:-err;
-            if(err<old_err) old_err = err;
-            else {
-                foundGoodDepth = true;
-                break;
-            }
-
-            double H = Jacob * Jacob;
-            double b = Jacob * err;
-            double deltaDepth = -b/H;
-            depthInit += deltaDepth;
-        }   // end of while
-    }   //end of auto ftKey: fts
-
-#ifdef ORB_TRIANGULAR
-        Eigen::Matrix<double, 3, 3> Rotation       = T_nk.rotationMatrix();
-        Eigen::Matrix<double, 3, 3> translationHat = Sophus::SO3d::hat(T_nk.translation());
-        Eigen::Matrix<double, 1, 3> epipoleLine    = ftKey->point->pos_.transpose() * translationHat * Rotation;
-
-        double &a = epipoleLine(0,0); double &b = epipoleLine(0,1); double &c = epipoleLine(0,2);
-
-        double denominator = sqrt(a*a + b*b);
-        if(denominator < 1e-4) continue;
-        denominator = 1.0/denominator;
-
-        double    yBoundary,xBoundary;
-        if(b && a){
-            double y_x0 = -c/b;
-            double x_y0 = -c/a;
-            double y_xMax = (-c+a*width_)/b;
-            double x_yMax = (-c+b*height_)/a;
-            xBoundary =
+        double u_ = ftKey->px(0), v_ = ftKey->px(1);
+        for(int level = 0; level<ftKey->level;level++){
+            u_ /= 2.0; v_ /= 2.0;
         }
 
-
-        for (int v = 0; v < height_; ++v) {
-            for (int u = 0; u < width_; ++u) {
-                double temp_ = a*u + b*v + c ;
-                double factorA = temp_ + epilolineThreshold*denominator;
-                double factorB = temp_ - epilolineThreshold*denominator;
-                if(factorA*factorB>0) continue;  //!<  far away from the epiloline, discard
-                cvFrame::grad_t  grad;  nextFrame->getCVFrame()->getGrad(u,v,grad);
-                Eigen::Vector3d uv_d = nextFrame->getCVFrame()->getCam()->K() * Rotation * ftKey->point->pos_;
-                uv_d /= uv_d(2);
-                double Jacob = grad.transpose() * Eigen::Vector2d(uv_d(0),uv_d(1));
-                double err = keyFrame->getCVFrame()->getIntensity(ftKey->px(0),ftKey->px(1)) - nextFrame->getCVFrame()->getIntensity(u,v) ;
-                double H = Jacob * Jacob;
-                double b = Jacob * err;
-
-            }
+        double factorInit = std::min(width_,height_);
+        double initDepth = factorInit; bool depthIsValid = false;
+        auto cam = nextFrame->getCam();
+        Eigen::Vector3d tmpPoint;
+        int count_loop = 0;
+        while (true) {
+            tmpPoint<<ftKey->px(0)*initDepth,ftKey->px(1)*initDepth,initDepth;
+            Eigen::Vector2d px = cam->world2cam(Eigen::Vector3d(T_nk.rotationMatrix()*tmpPoint+T_nk.translation()));
+            if(px(0)<0 || px(1)<0){ initDepth *= 0.1; }
+            else if(px(0)>width_ || px(1)>height_) { initDepth *= 10; }
+            else break;
+            count_loop ++;
         }
-
-        double numerator = ;
-        double distance = ;
-#endif
-
+        std::cout<<"loop = "<<count_loop<<" and initDepth = "<<initDepth<<" ";
+        problem.AddResidualBlock(
+                    new depthErr(nextFrame,keyFrame->getCVFrame()->getIntensityBilinear(u_,v_,ftKey->level),T_nk,ftKey),
+                    nullptr,&initDepth);
+        problem.SetParameterBlockVariable(&initDepth);
+        ceres::Solve(option,&problem,&summary);
+        if(summary.termination_type == ceres::CONVERGENCE)
+        {
+            newCreatPoint++;
+            ftKey->point->pos_[2] = initDepth;
+        }
+         std::cout<<"ResultDepth "<<initDepth<<"\n\n\n";
+    }
+    return newCreatPoint;
 }
+
+#if 0
+/// select a depth init which make sence
+///
+double depthMin = 0, depthMax = 0;
+auto cam = keyFrame->getCam();
+double fx = cam->fx(),  fy = cam->fy(), cx = cam->cx(), cy = cam->cy();
+auto K_ = cam->K(); auto K_inv = cam->K_inv();
+double R[3][3], T[3];
+for (int i = 0; i < 3; ++i) {
+    T[i] = T_nk.translation()(i);
+    for (int j = 0; j < 3; ++j) {
+        R[i][j] = T_nk.rotationMatrix()(i,j);
+    }
+}
+Eigen::Vector3d tmpPoint,XYZ_without_Depth; tmpPoint<<ftKey->px(0),ftKey->px(1),1.0;
+XYZ_without_Depth = K_inv*tmpPoint;
+double fac0 = fx*(R[0][0]*XYZ_without_Depth(0)+ R[0][1]*XYZ_without_Depth(1) + R[0][2]*XYZ_without_Depth[2]) +
+              cx
+
+struct TriangulaterSolver
+{
+    TriangulaterSolver(int iter = 50)
+    {
+        m_options.max_num_iterations = iter;
+        m_options.linear_solver_type = ceres::DENSE_QR;
+        /// m_options.trust_region_strategy_type = ceres::DOGLEG;
+        m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
+        /// m_options.minimizer_progress_to_stdout = true;
+        m_bInitParameters = false;
+    }
+
+    bool SolveParameters()
+    {
+        if(keyFrame == true || keyFrame == true)
+            return false;
+
+        ceres::Problem problem;
+        double depthInit = 1.0;
+
+        for(auto &ft: fts) {
+            problem.AddResidualBlock(new TriangulaterPhotometrixResidual(keyFrame,nextFrame,T_nk,ft->px(0),ft->px(1)),
+                                     new ceres::HuberLoss(0.5),depthInit);
+        }
+        problem.SetParameterization(&depthInit,new DepthParameter);
+
+        ceres::Solve(m_options,&problem,&m_summary);
+        return true;
+    }
+
+    bool                               m_bInitParameters;
+    double                             m_EllipsoidParameters[6];
+    std::shared_ptr<cvFrame>           keyFrame,nextFrame;
+    cvMeasure::features_t              fts;
+    Sophus::SE3d                       T_nk;
+    ceres::Solver::Options             m_options;
+    ceres::Solver::Summary             m_summary;
+};
+
+#endif
