@@ -12,8 +12,8 @@ TEST(Triangulate, Triangulate)
 {
     direct_tracker::Tracker tracker;
     cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
-    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
-    //cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
+   // cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
+    cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);

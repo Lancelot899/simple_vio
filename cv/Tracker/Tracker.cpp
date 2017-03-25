@@ -20,63 +20,6 @@
 
 namespace direct_tracker {
 
-
-//class MissTrackingTable {
-//public:
-//	MissTrackingTable() {}
-//
-//	~MissTrackingTable() {}
-//
-//	void push(ceres::ResidualBlockId index) {
-//		if (missTableMutex.try_lock()) {
-//			missTable.push_back(index);
-//			missTableMutex.unlock();
-//		}
-//	}
-//
-//	bool isEmpty() {
-//		missTableMutex.lock_shared();
-//		bool res = missTable.empty();
-//		missTableMutex.unlock();
-//		return res;
-//	}
-//
-//	ceres::ResidualBlockId pop() {
-//		missTableMutex.lock();
-//		ceres::ResidualBlockId index = missTable.back();
-//		missTable.pop_back();
-//		missTableMutex.unlock();
-//		return index;
-//	}
-//
-//private:
-//	std::vector<ceres::ResidualBlockId>    missTable;
-//	boost::shared_mutex                    missTableMutex;
-//};
-
-
-
-//class CERES_EXPORT IterResidualRemove : public ceres::IterationCallback {
-//public:
-//	IterResidualRemove(ceres::Problem &problem, std::shared_ptr<MissTrackingTable> table) : problem_(problem) {
-//		missTrackingTable = table;
-//	}
-//
-//	virtual ~IterResidualRemove() {}
-//
-//	virtual ceres::CallbackReturnType operator()(const ceres::IterationSummary &summary) {
-//		while (!missTrackingTable->isEmpty()) {
-//			ceres::ResidualBlockId index = missTrackingTable->pop();
-//			problem_.RemoveResidualBlock(index);
-//		}
-//	}
-//
-//private:
-//	ceres::Problem &problem_;
-//	std::shared_ptr<MissTrackingTable> missTrackingTable;
-//};
-
-
 class TrackingErr : public ceres::SizedCostFunction<1, 6> {
 public:
     TrackingErr(const std::shared_ptr<Feature> &ft, std::shared_ptr<viFrame> &viframe_i,
@@ -85,7 +28,6 @@ public:
         this->viframe_i = viframe_i;
         this->viframe_j = viframe_j;
         T_SB = viframe_i->getT_BS().inverse();
-        //	myIndex = index++;
     }
 
     virtual bool Evaluate(double const *const *parameters,
@@ -173,18 +115,12 @@ public:
         return true;
     }
 
-    //	static int index;
-
 private:
     std::shared_ptr<Feature> ft;
     std::shared_ptr<viFrame> viframe_i;
     std::shared_ptr<viFrame> viframe_j;
     Sophus::SE3d T_SB;
-    //	std::shared_ptr<MissTrackingTable> missTrackingTable;
-    //	int myIndex;
 };
-
-//int TrackingErr::index = 0;
 
 class CERES_EXPORT SE3Parameterization : public ceres::LocalParameterization {
 public:
@@ -274,7 +210,6 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     options.max_num_iterations = n_iter;
     options.minimizer_type = ceres::TRUST_REGION;
     options.linear_solver_type = ceres::DENSE_QR;
-    //options.minimizer_progress_to_stdout = true;
 
     ceres::Solve(options, &problem, &summary);
     std::cout << summary.BriefReport() << std::endl;
