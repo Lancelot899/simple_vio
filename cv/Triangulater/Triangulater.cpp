@@ -101,7 +101,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 
 		//double factorInit = std::min(width_, height_);
 
-		double initDepth = scale * init_depth + scale_() * T_nk.translation()(2);
+		double initDepth = scale * (init_depth + scale_() * (T_nk.so3() * T_nk.translation())(2));
 		bool depthIsValid = false;
 		auto cam = nextFrame->getCam();
 		Eigen::Vector3d tmpPoint;
@@ -115,7 +115,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 //			else break;
 //			count_loop++;
 //		}
-	//	 std::cout << " and initDepth = " << initDepth << " ";
+		// std::cout << " and initDepth = " << initDepth << " ";
 		problem.AddResidualBlock(
 				new depthErr(nextFrame, keyFrame->getCVFrame()->getIntensityBilinear(u_, v_, ftKey->level), T_nk,
 				             ftKey),
@@ -126,7 +126,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 			newCreatPoint++;
 			ftKey->point->pos_[2] = initDepth;
 		}
-	//	 std::cout << "ResultDepth " << initDepth << "\n";
+		// std::cout << "ResultDepth " << initDepth << "\n";
 	}
 	return newCreatPoint;
 }
