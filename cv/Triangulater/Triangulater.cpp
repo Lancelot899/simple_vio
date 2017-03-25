@@ -91,15 +91,17 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
         }
 
         double factorInit = std::min(width_,height_);
-        double initDepth = factorInit; bool depthIsValid = false;
+        double initDepth = factorInit * 0.1; bool depthIsValid = false;
         auto cam = nextFrame->getCam();
         Eigen::Vector3d tmpPoint;
         int count_loop = 0;
         while (true) {
-            tmpPoint<<ftKey->px(0)*initDepth,ftKey->px(1)*initDepth,initDepth;
-            Eigen::Vector2d px = cam->world2cam(Eigen::Vector3d(T_nk.rotationMatrix()*tmpPoint+T_nk.translation()));
-            if(px(0)<0 || px(1)<0){ initDepth *= 0.1; }
-            else if(px(0)>width_ || px(1)>height_) { initDepth *= 10; }
+            tmpPoint = cam->cam2world(ftKey->px);
+            tmpPoint *= initDepth;
+            Eigen::Vector3d worldPoint = T_nk.rotationMatrix()*tmpPoint+T_nk.translation();
+            Eigen::Vector2d px = cam->world2cam(worldPoint);
+            if(px(0)<0 || px(1)<0){ initDepth *= 0.66; }
+            else if(px(0)>width_ || px(1)>height_) { initDepth *= 1.5; }
             else break;
             count_loop ++;
         }
