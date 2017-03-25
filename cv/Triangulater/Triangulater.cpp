@@ -1,124 +1,134 @@
 #include <ceres/ceres.h>
+
+#include <boost/random.hpp>
 #include "Triangulater.h"
 
 #include "../DataStructure/viFrame.h"
 #include "../DataStructure/cv/cvFrame.h"
 #include "../DataStructure/cv/Feature.h"
 #include "../DataStructure/cv/Point.h"
+#include "util/util.h"
 
 class depthErr : public ceres::SizedCostFunction<1, 1> {
 public:
-    virtual ~depthErr() {}
-    depthErr(std::shared_ptr<viFrame> nextFrame, double I_k,
-             const Sophus::SE3d &T_nk, const cvMeasure::features_t::value_type &f)
-            : T_nk_(nextFrame->getT_BS().inverse() * T_nk * nextFrame->getT_BS()), f_(f) {
-        this->nextFrame = nextFrame;
-        this->I_k = I_k;
-    }
+	virtual ~depthErr() {}
 
-    virtual bool Evaluate(double const* const* parameters,
-                          double* residuals,
-                          double** jacobians) const {
-        double d = **parameters;
-        Eigen::Vector3d P_next = T_nk_ * (d * f_->f);
-        auto &cam = nextFrame->getCam();
-        auto uv = cam->world2cam(P_next);
-        if(uv(0)<0 || uv(0)>=nextFrame->getCVFrame()->getWidth() || uv(1)<0 || uv(1)>=nextFrame->getCVFrame()->getHeight())
-            return false;
+	depthErr(std::shared_ptr<viFrame> nextFrame, double I_k,
+	         const Sophus::SE3d &T_nk, const cvMeasure::features_t::value_type &f)
+			: T_nk_(nextFrame->getT_BS().inverse() * T_nk * nextFrame->getT_BS()), f_(f) {
+		this->nextFrame = nextFrame;
+		this->I_k = I_k;
+	}
 
-        for(int i = 0; i < f_->level; ++i) {
-            uv /= 2.0;
-        }
+	virtual bool Evaluate(double const *const *parameters,
+	                      double *residuals,
+	                      double **jacobians) const {
+		double d = **parameters;
+		Eigen::Vector3d P_next = T_nk_ * (d * f_->f);
+		auto &cam = nextFrame->getCam();
+		auto uv = cam->world2cam(P_next);
+		if (uv(0) < 0 || uv(0) >= nextFrame->getCVFrame()->getWidth() || uv(1) < 0 ||
+		    uv(1) >= nextFrame->getCVFrame()->getHeight())
+			return false;
 
-        *residuals = nextFrame->getCVFrame()->getIntensityBilinear(uv(0), uv(1), f_->level) - I_k;
-        if (jacobians && jacobians[0]) {
-            Eigen::Vector2d grad = nextFrame->getCVFrame()->getGradBilinear(uv(0), uv(1), f_->level);
-            double Ix, Iy;
-            if (f_->type == Feature::EDGELET) {
-                Eigen::Vector2d &dir = f_->grad;
-                Ix = dir(1) * dir(0);
-                Iy = Ix * grad(0) + dir(1) * dir(1) * grad(1);
-                Ix *= grad(1);
-                Ix += dir(0) * dir(0) * grad(0);
-            } else {
-                Ix = grad(0);
-                Iy = grad(1);
-            }
+		for (int i = 0; i < f_->level; ++i) {
+			uv /= 2.0;
+		}
 
-            Eigen::Matrix<double, 1, 3> Jac;
-            Jac(0, 0) = Ix * cam->fx() / P_next(2);
-            Jac(0, 1) = Iy * cam->fy() / P_next(2);
-            Jac(0, 2) = -Ix * cam->fx()  * P_next(0) / P_next(2) / P_next(2) -
-                        Iy * cam->fy() * P_next(1) / P_next(2) / P_next(2);
-            Jac =  Jac * T_nk_.rotationMatrix();
-            jacobians[0][0] = Jac * f_->f;
-        }
+		*residuals = nextFrame->getCVFrame()->getIntensityBilinear(uv(0), uv(1), f_->level) - I_k;
+		if (jacobians && jacobians[0]) {
+			Eigen::Vector2d grad = nextFrame->getCVFrame()->getGradBilinear(uv(0), uv(1), f_->level);
+			double Ix, Iy;
+			if (f_->type == Feature::EDGELET) {
+				Eigen::Vector2d &dir = f_->grad;
+				Ix = dir(1) * dir(0);
+				Iy = Ix * grad(0) + dir(1) * dir(1) * grad(1);
+				Ix *= grad(1);
+				Ix += dir(0) * dir(0) * grad(0);
+			} else {
+				Ix = grad(0);
+				Iy = grad(1);
+			}
 
-    }
+			Eigen::Matrix<double, 1, 3> Jac;
+			Jac(0, 0) = Ix * cam->fx() / P_next(2);
+			Jac(0, 1) = Iy * cam->fy() / P_next(2);
+			Jac(0, 2) = -Ix * cam->fx() * P_next(0) / P_next(2) / P_next(2) -
+			            Iy * cam->fy() * P_next(1) / P_next(2) / P_next(2);
+			Jac = Jac * T_nk_.rotationMatrix();
+			jacobians[0][0] = Jac * f_->f;
+		}
+
+	}
 
 private:
-    const Sophus::SE3d T_nk_;
-    const cvMeasure::features_t::value_type f_;
-    std::shared_ptr<viFrame> nextFrame;
-    double I_k;
+	const Sophus::SE3d T_nk_;
+	const cvMeasure::features_t::value_type f_;
+	std::shared_ptr<viFrame> nextFrame;
+	double I_k;
 };
 
-Triangulater::Triangulater()
-{}
+Triangulater::Triangulater() {}
 
 int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
-                               std::shared_ptr<viFrame> &nextFrame, const Sophus::SE3d &T_nk, int iter)
-{
-    int newCreatPoint = 0;
-    int height_ = keyFrame->getCVFrame()->getHeight();
-    int width_  = keyFrame->getCVFrame()->getWidth();
+                              std::shared_ptr<viFrame> &nextFrame, const Sophus::SE3d &T_nk, int iter) {
+	int newCreatPoint = 0;
+	int height_ = keyFrame->getCVFrame()->getHeight();
+	int width_ = keyFrame->getCVFrame()->getWidth();
 
-    const cvMeasure::features_t& fts = keyFrame->getCVFrame()->getMeasure().fts_;
+	const cvMeasure::features_t &fts = keyFrame->getCVFrame()->getMeasure().fts_;
 
-    ceres::Solver::Options option;
-    option.max_num_iterations = iter;
-    option.minimizer_type = ceres::LINE_SEARCH;
-    option.linear_solver_type = ceres::DENSE_QR;
+	ceres::Solver::Options option;
+	option.max_num_iterations = iter;
+	option.minimizer_type = ceres::LINE_SEARCH;
+	option.linear_solver_type = ceres::DENSE_QR;
 
-    for(auto& ftKey : fts) {
-        ceres::Solver::Summary summary;
-        ceres::Problem problem;
-        if(ftKey->point->pos_[2]!=1) continue;    //! Already had depth
+	boost::mt19937 gen;
+	boost::uniform_real<>dist(0.5, 1.5);
+	boost::variate_generator<boost::mt19937&,boost::uniform_real<>> scale_ (gen, dist);
 
-        double u_ = ftKey->px(0), v_ = ftKey->px(1);
-        for(int level = 0; level<ftKey->level;level++){
-            u_ /= 2.0; v_ /= 2.0;
-        }
 
-        double factorInit = std::min(width_,height_);
-        double initDepth = factorInit * 0.1; bool depthIsValid = false;
-        auto cam = nextFrame->getCam();
-        Eigen::Vector3d tmpPoint;
-        int count_loop = 0;
-        while (true) {
-            tmpPoint = cam->cam2world(ftKey->px);
-            tmpPoint *= initDepth;
-            Eigen::Vector3d worldPoint = T_nk.rotationMatrix()*tmpPoint+T_nk.translation();
-            Eigen::Vector2d px = cam->world2cam(worldPoint);
-            if(px(0)<0 || px(1)<0){ initDepth *= 0.66; }
-            else if(px(0)>width_ || px(1)>height_) { initDepth *= 1.5; }
-            else break;
-            count_loop ++;
-        }
-        std::cout<<"loop = "<<count_loop<<" and initDepth = "<<initDepth<<" ";
-        problem.AddResidualBlock(
-                    new depthErr(nextFrame,keyFrame->getCVFrame()->getIntensityBilinear(u_,v_,ftKey->level),T_nk,ftKey),
-                    nullptr,&initDepth);
-        problem.SetParameterBlockVariable(&initDepth);
-        ceres::Solve(option,&problem,&summary);
-        if(summary.termination_type == ceres::CONVERGENCE)
-        {
-            newCreatPoint++;
-            ftKey->point->pos_[2] = initDepth;
-        }
-         std::cout<<"ResultDepth "<<initDepth<<"\n\n\n";
-    }
-    return newCreatPoint;
+	for (auto &ftKey : fts) {
+		ceres::Solver::Summary summary;
+		ceres::Problem problem;
+		if (ftKey->point->pos_[2] != 1.0) continue;    //! Already had depth
+
+		double u_ = ftKey->px(0), v_ = ftKey->px(1);
+		for (int level = 0; level < ftKey->level; level++) {
+			u_ /= 2.0;
+			v_ /= 2.0;
+		}
+
+		//double factorInit = std::min(width_, height_);
+
+		double initDepth = scale * init_depth + scale_() * T_nk.translation()(2);
+		bool depthIsValid = false;
+		auto cam = nextFrame->getCam();
+		Eigen::Vector3d tmpPoint;
+//		while (true) {
+//			tmpPoint = cam->cam2world(ftKey->px);
+//			tmpPoint *= initDepth;
+//			Eigen::Vector3d worldPoint = T_nk.rotationMatrix() * tmpPoint + T_nk.translation();
+//			Eigen::Vector2d px = cam->world2cam(worldPoint);
+//			if (px(0) < 0 || px(1) < 0) { initDepth *= 0.66; }
+//			else if (px(0) > width_ || px(1) > height_) { initDepth *= 1.5; }
+//			else break;
+//			count_loop++;
+//		}
+	//	 std::cout << " and initDepth = " << initDepth << " ";
+		problem.AddResidualBlock(
+				new depthErr(nextFrame, keyFrame->getCVFrame()->getIntensityBilinear(u_, v_, ftKey->level), T_nk,
+				             ftKey),
+				nullptr, &initDepth);
+		problem.SetParameterBlockVariable(&initDepth);
+		ceres::Solve(option, &problem, &summary);
+		if (summary.termination_type == ceres::CONVERGENCE) {
+			newCreatPoint++;
+			ftKey->point->pos_[2] = initDepth;
+		}
+	//	 std::cout << "ResultDepth " << initDepth << "\n";
+	}
+	return newCreatPoint;
 }
 
 #if 0
@@ -130,53 +140,53 @@ double fx = cam->fx(),  fy = cam->fy(), cx = cam->cx(), cy = cam->cy();
 auto K_ = cam->K(); auto K_inv = cam->K_inv();
 double R[3][3], T[3];
 for (int i = 0; i < 3; ++i) {
-    T[i] = T_nk.translation()(i);
-    for (int j = 0; j < 3; ++j) {
-        R[i][j] = T_nk.rotationMatrix()(i,j);
-    }
+	T[i] = T_nk.translation()(i);
+	for (int j = 0; j < 3; ++j) {
+		R[i][j] = T_nk.rotationMatrix()(i,j);
+	}
 }
 Eigen::Vector3d tmpPoint,XYZ_without_Depth; tmpPoint<<ftKey->px(0),ftKey->px(1),1.0;
 XYZ_without_Depth = K_inv*tmpPoint;
 double fac0 = fx*(R[0][0]*XYZ_without_Depth(0)+ R[0][1]*XYZ_without_Depth(1) + R[0][2]*XYZ_without_Depth[2]) +
-              cx
+			  cx
 
 struct TriangulaterSolver
 {
-    TriangulaterSolver(int iter = 50)
-    {
-        m_options.max_num_iterations = iter;
-        m_options.linear_solver_type = ceres::DENSE_QR;
-        /// m_options.trust_region_strategy_type = ceres::DOGLEG;
-        m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
-        /// m_options.minimizer_progress_to_stdout = true;
-        m_bInitParameters = false;
-    }
+	TriangulaterSolver(int iter = 50)
+	{
+		m_options.max_num_iterations = iter;
+		m_options.linear_solver_type = ceres::DENSE_QR;
+		/// m_options.trust_region_strategy_type = ceres::DOGLEG;
+		m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
+		/// m_options.minimizer_progress_to_stdout = true;
+		m_bInitParameters = false;
+	}
 
-    bool SolveParameters()
-    {
-        if(keyFrame == true || keyFrame == true)
-            return false;
+	bool SolveParameters()
+	{
+		if(keyFrame == true || keyFrame == true)
+			return false;
 
-        ceres::Problem problem;
-        double depthInit = 1.0;
+		ceres::Problem problem;
+		double depthInit = 1.0;
 
-        for(auto &ft: fts) {
-            problem.AddResidualBlock(new TriangulaterPhotometrixResidual(keyFrame,nextFrame,T_nk,ft->px(0),ft->px(1)),
-                                     new ceres::HuberLoss(0.5),depthInit);
-        }
-        problem.SetParameterization(&depthInit,new DepthParameter);
+		for(auto &ft: fts) {
+			problem.AddResidualBlock(new TriangulaterPhotometrixResidual(keyFrame,nextFrame,T_nk,ft->px(0),ft->px(1)),
+									 new ceres::HuberLoss(0.5),depthInit);
+		}
+		problem.SetParameterization(&depthInit,new DepthParameter);
 
-        ceres::Solve(m_options,&problem,&m_summary);
-        return true;
-    }
+		ceres::Solve(m_options,&problem,&m_summary);
+		return true;
+	}
 
-    bool                               m_bInitParameters;
-    double                             m_EllipsoidParameters[6];
-    std::shared_ptr<cvFrame>           keyFrame,nextFrame;
-    cvMeasure::features_t              fts;
-    Sophus::SE3d                       T_nk;
-    ceres::Solver::Options             m_options;
-    ceres::Solver::Summary             m_summary;
+	bool                               m_bInitParameters;
+	double                             m_EllipsoidParameters[6];
+	std::shared_ptr<cvFrame>           keyFrame,nextFrame;
+	cvMeasure::features_t              fts;
+	Sophus::SE3d                       T_nk;
+	ceres::Solver::Options             m_options;
+	ceres::Solver::Summary             m_summary;
 };
 
 #endif
