@@ -15,7 +15,8 @@ public:
     Triangulater();
     ~Triangulater(){}
 
-    bool triangulate(std::shared_ptr<viFrame>&keyFrame, std::shared_ptr<viFrame>&nextFrame, Sophus::SE3d T_nk);
+    int triangulate(std::shared_ptr<viFrame>&keyFrame,
+                     std::shared_ptr<viFrame>&nextFrame, const Sophus::SE3d &T_nk, int iter);
 };
 
 

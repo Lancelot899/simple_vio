@@ -74,6 +74,10 @@ TEST(Tracker, Tracker) {
     std::cout<<Tij.so3().matrix()<<"\n";
     std::cout<<Tij.translation()<<"\n";
 
+	tracker.reProject(viframe_i, viframe_j, Tij);
+
+	GTEST_ASSERT_EQ(viframe_i->getCVFrame()->getMeasure().fts_.size(), viframe_j->getCVFrame()->getMeasure().fts_
+			.size());
 
 	pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
 	pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
@@ -96,7 +100,14 @@ TEST(Tracker, Tracker) {
 	Sophus::SE3d Tij_;
 	GTEST_ASSERT_EQ(Tij_.matrix3x4(), Mij);
 
-	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
+	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij_, 50);
+
+	std::cout << "--rotation:\n" << Tij_.rotationMatrix() << std::endl;
+	std::cout << "--translation:\n" << Tij_.translation() << std::endl;
+
+	tracker.reProject(viframe_i, viframe_j, Tij_);
+	std::cout << "--i fts size: " << viframe_i->getCVFrame()->getMeasure().fts_.size()
+	          << ", i fts size:" << viframe_j->getCVFrame()->getMeasure().fts_.size() << std::endl;
 
     if(isTracked)
         printf("successful!\n");
