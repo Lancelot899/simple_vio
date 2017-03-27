@@ -3,7 +3,7 @@
 #include <opencv2/ts/ts.hpp>
 
 #include "DataStructure/imu/IMUMeasure.h"
-
+#include "IO/imu/IMUIO.h"
 
 #ifndef IMUTYPE_DEF_
 #define IMUTYPE_DEF_
@@ -21,6 +21,9 @@ typedef Eigen::Matrix<double, 6, 1> bias_t;
 
 
 TEST(test_ImuPRE, IMU_PRE) {
-
+	std::string imuDatafile("../testData/mav0/imu0/data.csv");
+	std::string imuParamfile("../testData/mav0/imu0/sensor.yaml");
+	IMUIO imuIO(imuDatafile, imuParamfile);
+	IMUIO::pImuParam imuParam = imuIO.getImuParam();
 
 }
