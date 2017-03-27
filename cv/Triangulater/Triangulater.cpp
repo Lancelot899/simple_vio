@@ -72,8 +72,6 @@ Triangulater::Triangulater() {}
 int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
                               std::shared_ptr<viFrame> &nextFrame, const Sophus::SE3d &T_nk, int iter) {
 	int newCreatPoint = 0;
-	int height_ = keyFrame->getCVFrame()->getHeight();
-	int width_ = keyFrame->getCVFrame()->getWidth();
 
 	const cvMeasure::features_t &fts = keyFrame->getCVFrame()->getMeasure().fts_;
 
@@ -91,7 +89,6 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		ceres::Solver::Summary summary;
 		ceres::Problem problem;
 		double initDepth = scale * (init_depth + scale_() * (T_nk.so3() * T_nk.translation())(2));
-		bool depthIsValid = false;
 		auto cam = nextFrame->getCam();
 		Eigen::Vector2d uv;
 		if(ftKey->isBAed) continue;
