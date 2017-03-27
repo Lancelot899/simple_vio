@@ -172,6 +172,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
         if (uv(0) < width && uv(1) < height && uv(0) > 0 && uv(1) > 0) {
             std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
                                                                      ft->point, uv, ft->point->pos_, ft->level);
+            ft_->isBAed = ft->isBAed;
             viframe_j->getCVFrame()->addFeature(ft_);
             int u = int(uv(0) / cellwidth);
             int v = int(uv(1) / chellheight);
@@ -179,6 +180,10 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
                 viframe_j->getCVFrame()->setCellTrue(u, v);
                 cntCell++;
             }
+            ft->point->n_succeeded_reproj_++;
+        }
+        else {
+            ft->point->n_failed_reproj_++;
         }
     }
 
