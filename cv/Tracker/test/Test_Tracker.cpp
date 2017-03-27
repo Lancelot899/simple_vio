@@ -29,6 +29,7 @@ TEST(Tracker, Tracker) {
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
 
+//#define SHOW_DETECT
 #ifdef SHOW_DETECT
 
     int levelTimes[5] = {1,2,4,8,16};

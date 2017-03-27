@@ -7,7 +7,6 @@
 #include "../DataStructure/cv/cvFrame.h"
 #include "../DataStructure/cv/Feature.h"
 #include "../DataStructure/cv/Point.h"
-#include "util/util.h"
 
 class depthErr : public ceres::SizedCostFunction<1, 1> {
 public:
@@ -91,33 +90,26 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 	for (auto &ftKey : fts) {
 		ceres::Solver::Summary summary;
 		ceres::Problem problem;
-		if (ftKey->point->pos_[2] != 1.0) continue;    //! Already had depth
-
-		double u_ = ftKey->px(0), v_ = ftKey->px(1);
-		for (int level = 0; level < ftKey->level; level++) {
-			u_ /= 2.0;
-			v_ /= 2.0;
-		}
-
-		//double factorInit = std::min(width_, height_);
-
 		double initDepth = scale * (init_depth + scale_() * (T_nk.so3() * T_nk.translation())(2));
 		bool depthIsValid = false;
 		auto cam = nextFrame->getCam();
+		Eigen::Vector2d uv;
+		if(ftKey->isBAed) continue;
+		if (ftKey->point->pos_[2] < 1.000000000001 && ftKey->point->pos_[2] > 0.99999999999) {
+			auto &pos = ftKey->point->pos_;
+			initDepth = pos(2);
+			uv = cam->world2cam(keyFrame->getCVFrame()->getPose() * pos);
+		} else {
+			uv(0) = ftKey->px(0);
+			uv(1) = ftKey->px(1);
+		}
+
+		for (int level = 0; level < ftKey->level; level++)
+			uv /= 2.0;
+
 		Eigen::Vector3d tmpPoint;
-//		while (true) {
-//			tmpPoint = cam->cam2world(ftKey->px);
-//			tmpPoint *= initDepth;
-//			Eigen::Vector3d worldPoint = T_nk.rotationMatrix() * tmpPoint + T_nk.translation();
-//			Eigen::Vector2d px = cam->world2cam(worldPoint);
-//			if (px(0) < 0 || px(1) < 0) { initDepth *= 0.66; }
-//			else if (px(0) > width_ || px(1) > height_) { initDepth *= 1.5; }
-//			else break;
-//			count_loop++;
-//		}
-		// std::cout << " and initDepth = " << initDepth << " ";
 		problem.AddResidualBlock(
-				new depthErr(nextFrame, keyFrame->getCVFrame()->getIntensityBilinear(u_, v_, ftKey->level), T_nk,
+				new depthErr(nextFrame, keyFrame->getCVFrame()->getIntensityBilinear(uv(0), uv(1), ftKey->level), T_nk,
 				             ftKey),
 				nullptr, &initDepth);
 		problem.SetParameterBlockVariable(&initDepth);
@@ -126,7 +118,6 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 			newCreatPoint++;
 			ftKey->point->pos_[2] = initDepth;
 		}
-		// std::cout << "ResultDepth " << initDepth << "\n";
 	}
 	return newCreatPoint;
 }
