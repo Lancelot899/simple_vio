@@ -97,8 +97,9 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		if(ftKey->isBAed) continue;
 		if (ftKey->point->pos_[2] < 1.000000000001 && ftKey->point->pos_[2] > 0.99999999999) {
 			auto &pos = ftKey->point->pos_;
-			initDepth = pos(2);
-			uv = cam->world2cam(keyFrame->getCVFrame()->getPose() * pos);
+			auto pos_ = keyFrame->getCVFrame()->getPose() * pos;
+			initDepth = pos_(2);
+			uv = cam->world2cam(pos_);
 		} else {
 			uv(0) = ftKey->px(0);
 			uv(1) = ftKey->px(1);
@@ -107,77 +108,22 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		for (int level = 0; level < ftKey->level; level++)
 			uv /= 2.0;
 
+		double updateDepth = initDepth;
 		Eigen::Vector3d tmpPoint;
 		problem.AddResidualBlock(
 				new depthErr(nextFrame, keyFrame->getCVFrame()->getIntensityBilinear(uv(0), uv(1), ftKey->level), T_nk,
 				             ftKey),
-				nullptr, &initDepth);
-		problem.SetParameterBlockVariable(&initDepth);
+				nullptr, &updateDepth);
 		ceres::Solve(option, &problem, &summary);
 		if (summary.termination_type == ceres::CONVERGENCE) {
 			newCreatPoint++;
-			ftKey->point->pos_[2] = initDepth;
+			if(ftKey->point->pos_[2] < 1.000000000001 && ftKey->point->pos_[2] > 0.99999999999)
+				ftKey->point->pos_ *= updateDepth;
+			else {
+				double ratio = updateDepth / initDepth;
+				ftKey->point->pos_ *= ratio;
+			}
 		}
 	}
 	return newCreatPoint;
 }
-
-#if 0
-/// select a depth init which make sence
-///
-double depthMin = 0, depthMax = 0;
-auto cam = keyFrame->getCam();
-double fx = cam->fx(),  fy = cam->fy(), cx = cam->cx(), cy = cam->cy();
-auto K_ = cam->K(); auto K_inv = cam->K_inv();
-double R[3][3], T[3];
-for (int i = 0; i < 3; ++i) {
-	T[i] = T_nk.translation()(i);
-	for (int j = 0; j < 3; ++j) {
-		R[i][j] = T_nk.rotationMatrix()(i,j);
-	}
-}
-Eigen::Vector3d tmpPoint,XYZ_without_Depth; tmpPoint<<ftKey->px(0),ftKey->px(1),1.0;
-XYZ_without_Depth = K_inv*tmpPoint;
-double fac0 = fx*(R[0][0]*XYZ_without_Depth(0)+ R[0][1]*XYZ_without_Depth(1) + R[0][2]*XYZ_without_Depth[2]) +
-			  cx
-
-struct TriangulaterSolver
-{
-	TriangulaterSolver(int iter = 50)
-	{
-		m_options.max_num_iterations = iter;
-		m_options.linear_solver_type = ceres::DENSE_QR;
-		/// m_options.trust_region_strategy_type = ceres::DOGLEG;
-		m_options.dogleg_type = ceres::SUBSPACE_DOGLEG;
-		/// m_options.minimizer_progress_to_stdout = true;
-		m_bInitParameters = false;
-	}
-
-	bool SolveParameters()
-	{
-		if(keyFrame == true || keyFrame == true)
-			return false;
-
-		ceres::Problem problem;
-		double depthInit = 1.0;
-
-		for(auto &ft: fts) {
-			problem.AddResidualBlock(new TriangulaterPhotometrixResidual(keyFrame,nextFrame,T_nk,ft->px(0),ft->px(1)),
-									 new ceres::HuberLoss(0.5),depthInit);
-		}
-		problem.SetParameterization(&depthInit,new DepthParameter);
-
-		ceres::Solve(m_options,&problem,&m_summary);
-		return true;
-	}
-
-	bool                               m_bInitParameters;
-	double                             m_EllipsoidParameters[6];
-	std::shared_ptr<cvFrame>           keyFrame,nextFrame;
-	cvMeasure::features_t              fts;
-	Sophus::SE3d                       T_nk;
-	ceres::Solver::Options             m_options;
-	ceres::Solver::Summary             m_summary;
-};
-
-#endif
