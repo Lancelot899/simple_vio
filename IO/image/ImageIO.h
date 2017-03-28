@@ -5,26 +5,32 @@
 #include <string.h>
 #include <opencv2/opencv.hpp>
 #include "../IOBase.h"
+#include "ThirdParty/okvis_time/include/Time.hpp"
 
-namespace IO {
+class AbstractCamera;
 
-}
-typedef std::deque<std::pair<double, std::string>> ImageIOData;
+typedef std::deque<std::pair<okvis::Time, std::string>> ImageIOData;
 
 class ImageIO : public IOBase<ImageIOData>
 {
 public:
-    ImageIO(std::string &imagefile,std::string cameraParamFile,std::string dataDirectory_);
+    ImageIO(std::string &imagefile, std::string dataDirectory_);
+	ImageIO(std::string &imagefile, std::string dataDirectory_,
+	        std::shared_ptr<AbstractCamera> cam);
+
+	~ImageIO() {}
+
     std::string popName();
-    int parseParamFile(std::string ParamFile);
     cv::Mat  popImage();
-    std::pair<double, cv::Mat> popImageAndTimestamp();
+    std::pair<okvis::Time, cv::Mat> popImageAndTimestamp();
 
 private:
     ImageIOData       imageDeque;
     std::string       dataDirectory;
-    double            distortion_coefficients[4];
-    double            intrinsics[4];
+//    double            distortion_coefficients[4];
+//    double            intrinsics[4];
+	bool isUndistortion;
+	std::shared_ptr<AbstractCamera> cam_;
 };
 
 
