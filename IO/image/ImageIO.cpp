@@ -7,7 +7,7 @@
 
 #include "ImageIO.h"
 
-ImageIO::ImageIO(std::string &imagefile)
+ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirectory(dataDirectory_)
 {
     assert(!imagefile.empty());
     double timestamp = 0.0;
@@ -19,10 +19,10 @@ ImageIO::ImageIO(std::string &imagefile)
         exit(-1);
     }
 
-    getline(imgData_file,totalLine);
+    std::getline(imgData_file,totalLine);
     while (!imgData_file.eof()){
         if(totalLine[0]=='#') {
-            getline(imgData_file,totalLine);
+            std::getline(imgData_file,totalLine);
             continue;
         }
 
@@ -37,16 +37,12 @@ ImageIO::ImageIO(std::string &imagefile)
         fileName = totalLine.substr(currentPos+1,totalLine.size());
 
         imageDeque.push_back(fileName);
-        getline(imgData_file,totalLine);
+        std::getline(imgData_file,totalLine);
     };
-
-//        timestampDeque.push_back(timeStamp);;
-//        imageDeque.push_back(imageName);
-//    };
 
 }
 
-std::string ImageIO::pop()
+std::string ImageIO::popName()
 {
     std::string data;
     if(imageDeque.empty())
@@ -55,4 +51,18 @@ std::string ImageIO::pop()
     data = imageDeque.front();
     imageDeque.pop_front();
     return data;
+}
+
+cv::Mat ImageIO::popImage()
+{
+    std::string data;
+    if(imageDeque.empty())
+        return cv::Mat();
+
+    data = imageDeque.front();
+    imageDeque.pop_front();
+    data = dataDirectory + data;
+    cv::Mat image = cv::imread(data,0);
+    if(image.empty()) std::cout<<data<<"!\n";
+    return image;
 }
