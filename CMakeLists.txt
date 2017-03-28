@@ -129,6 +129,9 @@ set(SOURCE_FILES
         IO/imu/test/Test_IMUIO.cpp
         IO/imu/IMUIO.cpp
         IO/imu/IMUIO.h
+        IO/image/ImageIO.h
+        IO/image/ImageIO.cpp
+        IO/image/test/Test_ImageIO.cpp
         IO/camera/test/Test_CameraIO.cpp
         IO/camera/CameraIO.cpp
         IO/camera/CameraIO.h
