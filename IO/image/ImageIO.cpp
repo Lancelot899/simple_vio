@@ -23,6 +23,7 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
     while (!imgData_file.eof()){
         if(totalLine[0]=='#') {
             std::getline(imgData_file,totalLine);
+            std::cout<< totalLine << std::endl;
             continue;
         }
 
@@ -35,7 +36,7 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
 
 //        timestamp = atoll(totalLine.substr(0,currentPos).c_str());
         fileName = totalLine.substr(currentPos+1,totalLine.size());
-
+        std::cout << totalLine  << fileName << std::endl;
         imageDeque.push_back(fileName);
         std::getline(imgData_file,totalLine);
     };
@@ -63,6 +64,6 @@ cv::Mat ImageIO::popImage()
     imageDeque.pop_front();
     data = dataDirectory + data;
     cv::Mat image = cv::imread(data,0);
-    if(image.empty()) std::cout<<data<<"!\n";
+   // if(image.empty()) std::cout<<data<<"!\n";
     return image;
 }
