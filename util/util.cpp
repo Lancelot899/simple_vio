@@ -124,7 +124,7 @@ cv::Mat Undistort(const cv::Mat& src, std::shared_ptr<AbstractCamera> cam) {
     cv::undistort(src, dst, K, distCoeffs);
 
     return dst;
-};
+}
 
 
 double scale = 1.0;

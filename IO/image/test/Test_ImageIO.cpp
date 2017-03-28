@@ -5,18 +5,19 @@
 
 TEST(TESTIMAGEIO,TESTIMAGEIO){
     std::cout<<"Enter TestImageIO"<<std::endl;
-    std::string imageFile = "../testData/mav0/cam0/data.txt";
-    ImageIO imageTest(imageFile,"../testData/mav0/cam0/data/");
+    std::string imageFile = "../testData/mav0/cam0/data.csv";
+    std::string camParamfile ="../testData/mav0/cam0/sensor.yaml";
+    ImageIO imageTest(imageFile,camParamfile,"../testData/mav0/cam0/data/");
 
-    cv::Mat image = imageTest.popImage();
+    std::pair<double, cv::Mat> data;
     char key = 0;
-    std::cout<<"TestImageIO start while\n";
     while (key != 27) {
+        data = imageTest.popImageAndTimestamp();
+        cv::Mat image = data.second;
         if(!image.empty()){
             cv::imshow("image",image);
             key = cv::waitKey();
         }
-        image = imageTest.popImage();
     }
     std::cout<<"End of TestImageIO\n";
 

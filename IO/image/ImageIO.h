@@ -6,20 +6,25 @@
 #include <opencv2/opencv.hpp>
 #include "../IOBase.h"
 
+namespace IO {
 
-typedef std::deque<std::string> ImageIOData;
+}
+typedef std::deque<std::pair<double, std::string>> ImageIOData;
 
 class ImageIO : public IOBase<ImageIOData>
 {
 public:
-    ImageIO(std::string &imagefile,std::string dataDirectory_);
+    ImageIO(std::string &imagefile,std::string cameraParamFile,std::string dataDirectory_);
     std::string popName();
+    int parseParamFile(std::string ParamFile);
     cv::Mat  popImage();
+    std::pair<double, cv::Mat> popImageAndTimestamp();
 
 private:
     ImageIOData       imageDeque;
-    ImageIOData       timestampDeque;
     std::string       dataDirectory;
+    double            distortion_coefficients[4];
+    double            intrinsics[4];
 };
 
 
