@@ -11,7 +11,6 @@
 ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirectory(dataDirectory_)
 {
     assert(!imagefile.empty());
-    double timestamp = 0.0;
     std::string fileName;
     std::string totalLine;
     std::ifstream imgData_file(imagefile.c_str());
@@ -33,8 +32,20 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
             std::cout<<"No , !!!\n\n\n";
             break;
         }
-        timestamp = atoll(totalLine.substr(0,currentPos).c_str());
+
+	    std::string s = totalLine.substr(0,currentPos).c_str();
+
+	    std::string nanoseconds = s.substr(s.size() - 9, 9);
+	    std::string seconds = s.substr(0, s.size() - 9);
+
         fileName = totalLine.substr(currentPos+1,totalLine.size());
+	    int sec = 0;
+	    int nsec = 0;
+	    sscanf(seconds.c_str(), "%d", &sec);
+	    sscanf(nanoseconds.c_str(), "%d", &nsec);
+	    okvis::Time timestamp(sec, nsec);
+
+
         imageDeque.push_back(std::make_pair(timestamp,fileName));
 
         imgData_file>>totalLine;
@@ -68,8 +79,19 @@ ImageIO::ImageIO(std::string &imagefile,
 			std::cout<<"No , !!!\n\n\n";
 			break;
 		}
-		timestamp = atoll(totalLine.substr(0,currentPos).c_str());
+
+		std::string s = totalLine.substr(0,currentPos).c_str();
+
+		std::string nanoseconds = s.substr(s.size() - 9, 9);
+		std::string seconds = s.substr(0, s.size() - 9);
+
 		fileName = totalLine.substr(currentPos+1,totalLine.size());
+		int sec = 0;
+		int nsec = 0;
+		sscanf(seconds.c_str(), "%d", &sec);
+		sscanf(nanoseconds.c_str(), "%d", &nsec);
+		okvis::Time timestamp(sec, nsec);
+
 		imageDeque.push_back(std::make_pair(timestamp,fileName));
 
 		imgData_file>>totalLine;
@@ -113,13 +135,13 @@ cv::Mat ImageIO::popImage()
     return undistorionImage;
 }
 
-std::pair<double, cv::Mat> ImageIO::popImageAndTimestamp()
+std::pair<okvis::Time, cv::Mat> ImageIO::popImageAndTimestamp()
 {
     std::string data;
     if(imageDeque.empty())
-        return std::pair<double, cv::Mat>();
+        return std::pair<okvis::Time, cv::Mat>();
 
-    double timeStamp = imageDeque.front().first;
+	okvis::Time& timeStamp = imageDeque.front().first;
     data = imageDeque.front().second;
     imageDeque.pop_front();
     data = dataDirectory + data;
@@ -127,7 +149,7 @@ std::pair<double, cv::Mat> ImageIO::popImageAndTimestamp()
 
     if(image.empty()) {
         std::cout<<data<<" is empty!\n";
-        return std::pair<double, cv::Mat>();
+        return std::pair<okvis::Time, cv::Mat>();
     }
 
 
