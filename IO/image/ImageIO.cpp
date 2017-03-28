@@ -19,11 +19,10 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
         exit(-1);
     }
 
-    std::getline(imgData_file,totalLine);
+    imgData_file>>totalLine;
     while (!imgData_file.eof()){
         if(totalLine[0]=='#') {
-            std::getline(imgData_file,totalLine);
-            std::cout<< totalLine << std::endl;
+            imgData_file>>totalLine;
             continue;
         }
 
@@ -34,12 +33,11 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
             break;
         }
 
-//        timestamp = atoll(totalLine.substr(0,currentPos).c_str());
         fileName = totalLine.substr(currentPos+1,totalLine.size());
-        std::cout << totalLine  << fileName << std::endl;
         imageDeque.push_back(fileName);
-        std::getline(imgData_file,totalLine);
-    };
+
+        imgData_file>>totalLine;
+    }
 
 }
 
