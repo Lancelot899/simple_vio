@@ -5,7 +5,7 @@
 
 TEST(TESTIMAGEIO,TESTIMAGEIO){
     std::cout<<"Enter TestImageIO"<<std::endl;
-    std::string imageFile = "../testData/mav0/cam0/data.csv";
+    std::string imageFile = "../testData/mav0/cam0/data.txt";
     ImageIO imageTest(imageFile,"../testData/mav0/cam0/data/");
 
     cv::Mat image = imageTest.popImage();
