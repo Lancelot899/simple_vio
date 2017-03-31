@@ -18,7 +18,7 @@ TEST(Detector, Detector) {
     feature_detection::Detector detector(pic.cols, pic.rows, 25, IMG_LEVEL);
     feature_detection::features_t fts;
 
-//#define SHOW_FEATURE
+// #define SHOW_FEATURE
 #ifdef SHOW_FEATURE
 
     double t = (double)cvGetTickCount();
