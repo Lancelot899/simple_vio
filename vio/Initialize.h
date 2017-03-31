@@ -25,11 +25,12 @@ public:
                std::shared_ptr<direct_tracker::Tracker>& tracker);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
-    std::vector<std::shared_ptr<viFrame>>* getInitialViframe() {
-        if(isInitialed)
-            return &VecFrames;
-
-        return nullptr;
+    bool getInitialViframe(std::vector<std::shared_ptr<viFrame>>* *pVec) {
+        if(isInitialed) {
+            *pVec = &VecFrames;
+            return true;
+        }
+        return false;
     }
 
     bool init(std::shared_ptr<ImuParameters> &imuParam, int n_iter = 30);
