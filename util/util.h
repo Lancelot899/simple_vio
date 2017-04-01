@@ -9,6 +9,7 @@
 
 extern const double EPS;
 extern const double PI;
+#define DEBUG_VIO printf("file[%s], line[%d]\n",__FILE__, __LINE__)
 
 class AbstractCamera;
 

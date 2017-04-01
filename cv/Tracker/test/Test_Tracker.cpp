@@ -103,12 +103,12 @@ TEST(Tracker, Tracker) {
 
 	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij_, 50);
 
-	std::cout << "--rotation:\n" << Tij_.rotationMatrix() << std::endl;
-	std::cout << "--translation:\n" << Tij_.translation() << std::endl;
+//	std::cout << "--rotation:\n" << Tij_.rotationMatrix() << std::endl;
+//	std::cout << "--translation:\n" << Tij_.translation() << std::endl;
 
 	tracker.reProject(viframe_i, viframe_j, Tij_);
-	std::cout << "--i fts size: " << viframe_i->getCVFrame()->getMeasure().fts_.size()
-	          << ", i fts size:" << viframe_j->getCVFrame()->getMeasure().fts_.size() << std::endl;
+//	std::cout << "--i fts size: " << viframe_i->getCVFrame()->getMeasure().fts_.size()
+//	          << ", i fts size:" << viframe_j->getCVFrame()->getMeasure().fts_.size() << std::endl;
 
     if(isTracked)
         printf("successful!\n");

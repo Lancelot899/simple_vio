@@ -15,10 +15,10 @@ TEST(TESTIMAGEIO,TESTIMAGEIO){
         cv::Mat image = data.second;
         if(!image.empty()){
             cv::imshow("image",image);
-	        std::cout << data.first << std::endl;
+//            std::cout <<"Timestamp = "<< data.first << std::endl;
             key = cv::waitKey();
         }
     }
-    std::cout<<"End of TestImageIO\n";
+//    std::cout<<"End of TestImageIO\n";
 
 }

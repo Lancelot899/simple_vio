@@ -21,16 +21,14 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     okvis::Time& time = t_start;
     okvis::Time& end = t_end;
 
-    assert(imuMeasurements.front()->timeStamp<=time);
+    assert(imuMeasurements.front()->timeStamp <= time);
     if (!(imuMeasurements.back()->timeStamp >= end))
         return -1;
-
 
     std::vector<double> VecDt;
     std::vector<Sophus::SO3d, Eigen::aligned_allocator<Sophus::SO3d>>        VecRotation;
     std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d>>  VecRightJac;
     std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>  VecAcc;
-
     const Eigen::Vector3d gbias = speedAndBiases.segment<3>(3);
     const Eigen::Vector3d abias = speedAndBiases.segment<3>(6);
     Sophus::SO3d D_rotation(Eigen::Quaternion<double>(1, 0, 0, 0));
