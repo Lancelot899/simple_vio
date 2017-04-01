@@ -35,8 +35,8 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
 
 	    std::string s = totalLine.substr(0,currentPos).c_str();
 
-	    std::string nanoseconds = s.substr(s.size() - 9, 9);
-	    std::string seconds = s.substr(0, s.size() - 9);
+        std::string nanoseconds = s.substr(s.size() - 9, 9);
+        std::string seconds = s.substr(0, s.size() - 9);
 
         fileName = totalLine.substr(currentPos+1,totalLine.size());
 	    int sec = 0;
@@ -56,7 +56,7 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
 ImageIO::ImageIO(std::string &imagefile,
                  std::string dataDirectory_,
                  std::shared_ptr<AbstractCamera> cam) : dataDirectory(dataDirectory_) {
-	assert(!imagefile.empty());
+    assert(!imagefile.empty());
 	double timestamp = 0.0;
 	std::string fileName;
 	std::string totalLine;
@@ -80,16 +80,17 @@ ImageIO::ImageIO(std::string &imagefile,
 			break;
 		}
 
-		std::string s = totalLine.substr(0,currentPos).c_str();
+        std::string s = totalLine.substr(0,currentPos);
 
-		std::string nanoseconds = s.substr(s.size() - 9, 9);
-		std::string seconds = s.substr(0, s.size() - 9);
+        std::string nanoseconds = s.substr(s.size() - 9, 9);
+        std::string seconds = s.substr(0, s.size() - 9);
 
-		fileName = totalLine.substr(currentPos+1,totalLine.size());
+        fileName = totalLine.substr(currentPos+1,totalLine.size());
 		int sec = 0;
 		int nsec = 0;
 		sscanf(seconds.c_str(), "%d", &sec);
 		sscanf(nanoseconds.c_str(), "%d", &nsec);
+//        std::cout<<"sec = " <<sec<<", nsec = "<<nsec<<"\n";
 		okvis::Time timestamp(sec, nsec);
 
 		imageDeque.push_back(std::make_pair(timestamp,fileName));
@@ -98,6 +99,7 @@ ImageIO::ImageIO(std::string &imagefile,
 	}
 	isUndistortion = true;
 	cam_ = cam;
+//    printf("exit ImageIO construct!\n");
 }
 
 

@@ -7,6 +7,7 @@
 
 #include "IMUIO.h"
 
+#include "util/util.h"
 
 void inline readData(char *buffer, const char *name, double *val) {
     char *p = buffer;
@@ -136,7 +137,7 @@ IMUIO::IMUIO(std::string &imufile, std::string &imuParamfile) {
         i++;
         std::string line;
         if(!std::getline(imu_file, line)) {
-            std::cout << "imu file is read over!" << std::endl;
+            std::cout << "imu file is read over! i = " <<i<< std::endl;
             break;
         }
 
@@ -175,11 +176,15 @@ IMUIO::IMUIO(std::string &imufile, std::string &imuParamfile) {
 
 IMUIO::dataDeque_t IMUIO::pop(okvis::Time &start, okvis::Time &end) {
     dataDeque_t imuDeque;
-    std::shared_ptr<IMUMeasure>& pImuMeasure = imuMeasureDeque.front();
+    std::shared_ptr<IMUMeasure> pImuMeasure = imuMeasureDeque.front();
     if(pImuMeasure->measurement.timeStamp > end)
         return imuDeque;
 
-    while(pImuMeasure->measurement.timeStamp < start) imuMeasureDeque.pop_front();
+    while(pImuMeasure->measurement.timeStamp < start){
+        imuMeasureDeque.pop_front();
+        pImuMeasure = imuMeasureDeque.front();
+    }
+
     auto it = std::find_if(imuMeasureDeque.begin(), imuMeasureDeque.end(), [&](std::shared_ptr<IMUMeasure>& ptr) {
             ptr->measurement.timeStamp > end;
             return true;

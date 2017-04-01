@@ -10,6 +10,8 @@
 
 #include "IMU/IMU.h"
 
+#include "util/util.h"
+
 #ifndef IMUTYPE_DEF_
 #define IMUTYPE_DEF_
 
@@ -37,19 +39,22 @@ TEST(test_ImuPRE, IMU_PRE) {
 	std::string imageFile = "../testData/mav0/cam0/data.csv";
 	ImageIO imageIO(imageFile, "../testData/mav0/cam0/data/", cam);
 
-	auto time_image1 = imageIO.popImageAndTimestamp();
-	time_image1 = imageIO.popImageAndTimestamp();
-	time_image1 = imageIO.popImageAndTimestamp();
-	time_image1 = imageIO.popImageAndTimestamp();
-	auto time_image2 = imageIO.popImageAndTimestamp();
+    auto time_image1 = imageIO.popImageAndTimestamp();
+    time_image1 = imageIO.popImageAndTimestamp();
+    time_image1 = imageIO.popImageAndTimestamp();
+    time_image1 = imageIO.popImageAndTimestamp();
+    auto time_image2 = imageIO.popImageAndTimestamp();
 
-	std::shared_ptr<cvFrame> cvframe1 = std::make_shared<cvFrame>(cam, time_image1.second);
-	std::shared_ptr<cvFrame> cvframe2 = std::make_shared<cvFrame>(cam, time_image1.second);
+    std::shared_ptr<cvFrame> cvframe1 = std::make_shared<cvFrame>(cam, time_image1.second);
+    std::shared_ptr<cvFrame> cvframe2 = std::make_shared<cvFrame>(cam, time_image2.second);
+    IMUIO::dataDeque_t imuData = imuIO.pop(time_image1.first, time_image2.first);
 
-	IMUIO::dataDeque_t imuData = imuIO.pop(time_image1.first, time_image2.first);
-	auto imuparam = imuIO.getImuParam();
-	auto imu = std::make_shared<IMU>();
-	Sophus::SE3d T_WS;
-	SpeedAndBias speedAndBiases;
-	imu->propagation(imuData, *imuparam, T_WS, speedAndBiases, time_image1.first, time_image2.first, nullptr, nullptr);
+    auto imuparam = imuIO.getImuParam();
+    auto imu = std::make_shared<IMU>();
+
+    Sophus::SE3d T_WS;
+    SpeedAndBias speedAndBiases;
+    std::cout<<"1>>"<<time_image1.first<<" "<<imuData.front()->timeStamp<<"\n";
+//    imu->propagation(imuData, *imuparam, T_WS, speedAndBiases, time_image1.first, time_image2.first, nullptr, nullptr);
+    printf("End of test_ImuPRE_IMU_PRE_Test\n");
 }
