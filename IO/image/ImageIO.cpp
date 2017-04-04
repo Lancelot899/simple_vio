@@ -45,7 +45,6 @@ ImageIO::ImageIO(std::string &imagefile, std::string dataDirectory_):dataDirecto
 	    sscanf(nanoseconds.c_str(), "%d", &nsec);
 	    okvis::Time timestamp(sec, nsec);
 
-
         imageDeque.push_back(std::make_pair(timestamp,fileName));
 
         imgData_file>>totalLine;
@@ -143,7 +142,7 @@ std::pair<okvis::Time, cv::Mat> ImageIO::popImageAndTimestamp()
     if(imageDeque.empty())
         return std::pair<okvis::Time, cv::Mat>();
 
-	okvis::Time& timeStamp = imageDeque.front().first;
+    okvis::Time timeStamp = imageDeque.front().first;
     data = imageDeque.front().second;
     imageDeque.pop_front();
     data = dataDirectory + data;
@@ -158,6 +157,6 @@ std::pair<okvis::Time, cv::Mat> ImageIO::popImageAndTimestamp()
 	if(!isUndistortion)
 		return std::make_pair(timeStamp, image);
 
-	cv::Mat undistorionImage = Undistort(image, cam_);
+    cv::Mat undistorionImage = Undistort(image, cam_);
     return std::make_pair(timeStamp,undistorionImage);
 }
