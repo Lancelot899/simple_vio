@@ -54,7 +54,7 @@ TEST(test_ImuPRE, IMU_PRE) {
 
     Sophus::SE3d T_WS;
     SpeedAndBias speedAndBiases;
-    std::cout<<"1>>"<<time_image1.first<<" "<<imuData.front()->timeStamp<<"\n";
+//    std::cout<<"1>>"<<time_image1.first<<" "<<imuData.front()->timeStamp<<"\n";
 //    imu->propagation(imuData, *imuparam, T_WS, speedAndBiases, time_image1.first, time_image2.first, nullptr, nullptr);
     printf("End of test_ImuPRE_IMU_PRE_Test\n");
 }
