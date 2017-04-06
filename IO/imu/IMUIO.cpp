@@ -186,14 +186,24 @@ IMUIO::dataDeque_t IMUIO::pop(okvis::Time &start, okvis::Time &end) {
     }
 
     auto it = std::find_if(imuMeasureDeque.begin(), imuMeasureDeque.end(), [&](std::shared_ptr<IMUMeasure>& ptr) {
-            ptr->measurement.timeStamp > end;
-            return true;
+            if(ptr->measurement.timeStamp >= end)
+                return true;
+	        return false;
 });
 
     if(it != imuMeasureDeque.end())
         it++;
 
-    std::move(imuMeasureDeque.begin(), it, imuDeque.begin());
+    int cnt= 0;
+    for(auto it_ = imuMeasureDeque.begin(); it_ != it; ++it_) {
+        imuDeque.push_back(*it_);
+    }
+
+    while(cnt) {
+        imuMeasureDeque.pop_front();
+        cnt--;
+    }
+
     return imuDeque;
 }
 

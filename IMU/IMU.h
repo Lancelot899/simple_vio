@@ -8,8 +8,7 @@ class IMUImpl;
 
 class viFrame;
 
-class IMU
-{
+class IMU {
 public:
     typedef std::shared_ptr<viFrame> pViFrame;
 

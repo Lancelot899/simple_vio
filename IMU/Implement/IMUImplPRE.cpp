@@ -21,9 +21,13 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     okvis::Time& time = t_start;
     okvis::Time& end = t_end;
 
+   // std::cout << "time:" << time << " "<< end << std::endl;
+
     assert(imuMeasurements.front()->timeStamp <= time);
     if (!(imuMeasurements.back()->timeStamp >= end))
         return -1;
+
+    std::cout << time << end << std::endl;
 
     std::vector<double> VecDt;
     std::vector<Sophus::SO3d, Eigen::aligned_allocator<Sophus::SO3d>>        VecRotation;
