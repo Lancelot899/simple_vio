@@ -22,9 +22,11 @@ IMU::IMU(IntegalType type)
     switch(type) {
     case OKVIS_INTEGRATION:
         impl = std::make_shared<IMUImplOKVIS>();
+//            printf("okvis!\n");
         break;
     case PRE_INTEGRATION:
         impl = std::make_shared<IMUImplPRE>();
+//            printf("preIntegation !\n");
         break;
     }
 
