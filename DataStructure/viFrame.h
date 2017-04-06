@@ -42,6 +42,8 @@ public:
     const cam_t& getCam();
     const okvis::Time &getTimeStamp();
 
+    static int ID;
+
 private:
     int                      id;
     std::shared_ptr<cvFrame> cvframe;

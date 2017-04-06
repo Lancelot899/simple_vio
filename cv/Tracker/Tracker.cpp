@@ -168,7 +168,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     int chellheight = viframe_j->getCVFrame()->getHeight() / detectCellHeight;
     int cntCell = 0;
     for (auto &ft : fts) {
-        Eigen::Vector2d uv = viframe_j->getCam()->world2cam(ft->point->pos_);
+        Eigen::Vector2d uv = viframe_j->getCam()->world2cam(viframe_j->getCVFrame()->getPose() * ft->point->pos_);
         if (uv(0) < width && uv(1) < height && uv(0) > 0 && uv(1) > 0) {
             std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
                                                                      ft->point, uv, ft->point->pos_, ft->level);

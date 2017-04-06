@@ -19,10 +19,13 @@ namespace direct_tracker {
     class Tracker;
 }
 
+class Triangulater;
+
 class Initialize {
 public:
     Initialize(std::shared_ptr<feature_detection::Detector>& detector,
-               std::shared_ptr<direct_tracker::Tracker>& tracker);
+               std::shared_ptr<direct_tracker::Tracker>& tracker,
+               std::shared_ptr<Triangulater> &triangulater);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
     bool getInitialViframe(std::vector<std::shared_ptr<viFrame>>* *pVec) {
@@ -45,6 +48,7 @@ private:
     std::vector<std::shared_ptr<viFrame>> VecFrames;
     bool isInitialed;
     std::vector<std::shared_ptr<imuFactor>> VecImuFactor;
+    std::shared_ptr<Triangulater> triangulater;
 };
 
 

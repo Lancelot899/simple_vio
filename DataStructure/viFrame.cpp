@@ -36,6 +36,8 @@ viFrame::pose_t viFrame::getT_BS() {
     return cvframe->getCam()->getT_BS();
 }
 
+int viFrame::ID = 0;
+
 viFrame::pose_t viFrame::getPose() {
     return  cvframe->getCam()->getT_BS() * cvframe->getPose();
 }
