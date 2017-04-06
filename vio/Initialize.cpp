@@ -6,26 +6,41 @@
 #include "Implement/InitialImpl.h"
 #include "DataStructure/cv/cvFrame.h"
 #include "cv/FeatureDetector/Detector.h"
+#include "DataStructure/imu/imuFactor.h"
+#include "cv/Tracker/Tracker.h"
+#include "cv/Triangulater/Triangulater.h"
 
 Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector,
-                       std::shared_ptr<direct_tracker::Tracker>& tracker) {
+                       std::shared_ptr<direct_tracker::Tracker>& tracker,
+                       std::shared_ptr<Triangulater> &triangulater) {
     impl_ = std::make_shared<InitialImpl>();
     isInitialed = false;
     this->detector = detector;
     this->tracker = tracker;
+    this->triangulater = triangulater;
 }
 
 void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
-    std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(0, cvframe);
+    std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(viFrame::ID++, cvframe);
     Sophus::SE3d ie;
     cvframe->setPose(ie);
     feature_detection::features_t features;
     detector->detect(cvframe, cvframe->getMeasure().measurement.imgPyr, features);
     cvframe->cvData.fts_.swap(features);
+    VecFrames.push_back(firstFrame);
 }
 
 void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
-
+    Sophus::SE3d T = imufactor->getPoseFac();
+    std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe);
+    tracker->Tracking(VecFrames.back(), viframe, T);
+    triangulater->triangulate(VecFrames.back(), viframe, T, 30);
+    tracker->reProject(VecFrames.back(), viframe, T);
+    VecFrames.push_back(viframe);
+    feature_detection::features_t features;
+    detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
+    for(auto &feat : features)
+        viframe->getCVFrame()->cvData.fts_.push_back(feat);
 }
 
 bool Initialize::init(std::shared_ptr<ImuParameters> &imuParam, int n_iter) {
