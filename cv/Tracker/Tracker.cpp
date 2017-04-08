@@ -40,7 +40,9 @@ public:
         }
 
         Sophus::SO3d R_ji = Sophus::SO3d::exp(so3);
-        const Eigen::Vector3d &p = ft->point->pos_;
+        ft->point->pos_mutex.lock_shared();
+        const Eigen::Vector3d p = ft->point->pos_;
+        ft->point->pos_mutex.unlock_shared();
         Eigen::Vector3d pi = viframe_i->getCVFrame()->getPose() * p;
         if (pi(2) > 0.0000000001) {
             Eigen::Vector3d pj = T_SB * (R_ji * (viframe_j->getT_BS() * pi) + trans_ji);
@@ -168,10 +170,13 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
     int chellheight = viframe_j->getCVFrame()->getHeight() / detectCellHeight;
     int cntCell = 0;
     for (auto &ft : fts) {
-        Eigen::Vector2d uv = viframe_j->getCam()->world2cam(viframe_j->getCVFrame()->getPose() * ft->point->pos_);
+        ft->point->pos_mutex.lock_shared();
+        Eigen::Vector3d pos = ft->point->pos_;
+        ft->point->pos_mutex.unlock_shared();
+        Eigen::Vector2d uv = viframe_j->getCam()->world2cam(viframe_j->getCVFrame()->getPose() * pos);
         if (uv(0) < width && uv(1) < height && uv(0) > 0 && uv(1) > 0) {
             std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
-                                                                     ft->point, uv, ft->point->pos_, ft->level);
+                                                                     ft->point, uv, pos, ft->level);
             ft_->isBAed = ft->isBAed;
             viframe_j->getCVFrame()->addFeature(ft_);
             int u = int(uv(0) / cellwidth);

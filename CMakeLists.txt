@@ -62,7 +62,7 @@ FIND_PACKAGE(Ceres REQUIRED QUIET)
 #    SET(CERES_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/include)
 #    SET(CERES_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/ceres-solver/build/lib/libceres.a)
 #endif()
-
+FIND_PACKAGE(QGLViewer REQUIRED QUIET)
 FIND_PACKAGE(OpenCV REQUIRED QUIET)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS thread system regex)
 FIND_PACKAGE(BLAS REQUIRED QUIET)
@@ -81,7 +81,23 @@ INCLUDE_DIRECTORIES(
         ${CERES_INCLUDE_DIRS}
         ${G2O_INCLUDE_DIRS}
 )
-include_directories("/usr/local/include/g2o/")
+
+if(Qt4_FOUND)
+    INCLUDE(${QT_USE_FILE})
+
+    QT4_WRAP_CPP(UI_SOURCES sphereScene.h MainWidget.h)
+
+    INCLUDE_DIRECTORIES(${QT_INCLUDES})
+    SET(MY_QT_LIBRARIES ${QT_LIBRARIES})
+endif()
+
+if(Qt5_FOUND)
+    QT5_WRAP_CPP(UI_SOURCES sphereScene.h MainWidget.h)
+
+    INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS} ${Qt5Xml_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS})
+    SET(MY_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
+endif()
+
 
 LIST(APPEND LINK_LIBS
         ${OpenCV_LIBS}
@@ -184,6 +200,7 @@ set(SOURCE_FILES
         cv/Triangulater/Triangulater.cpp
         cv/Triangulater/test/Test_Triangulater.cpp
         DataStructure/cv/test/Test_cvFrame.cpp
+        vio/test/Test_initial.cpp
         )
 
 

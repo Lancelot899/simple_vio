@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <boost/noncopyable.hpp>
+#include <boost/thread/pthread/shared_mutex.hpp>
 
 #include "util/setting.h"
 #include "DataStructure/Measurements.h"
@@ -88,14 +89,14 @@ public:
     int getSensorID();
     const cam_t& getCam();
     const cov_t& getCovariance();
-    const pose_t& getPose();
+    pose_t getPose();
     void setPose(pose_t &pose);
     void setCovariance(cov_t& Cov);
     bool isKeyframe();
     void setKey();
     void cancelKeyframe();
     int getPublishTimestamp();
-    const position_t& pos();
+    const position_t pos();
     const Pic_t&  getPicture();
     double getIntensity(int u, int v, int level = 0);
     double getIntensityBilinear(double u, double v, int level = 0);
@@ -116,14 +117,15 @@ public:
     static int         frame_counter_;         //!< Counts the number of created frames. Used to set the unique id.
 
 private:
-    cvMeasure          cvData;
-    pose_t             pose_;                                                            //!< Transform frame from world.
-    cov_t              Cov_;                                                             //!< Covariance.
-    cam_t              cam_;                                                             //!< Camera model.
-    bool               is_keyframe_;                                                     //!< Was this frames selected as keyframe?
-    int                last_published_ts_;                                               //!< Timestamp of last publishing.
+    cvMeasure           cvData;
+    pose_t              pose_;                                               //!< Transform frame from world.
+    boost::shared_mutex pose_mutex;
+    cov_t               Cov_;                                                //!< Covariance.
+    cam_t               cam_;                                                //!< Camera model.
+    bool               is_keyframe_;                                         //!< Was this frames selected askeyframe?
+    int                 last_published_ts_;                                  //!< Timestamp of last publishing.
     bool occupy[detectCellWidth * detectCellHeight * detectHeightGrid * detectWidthGrid];  //!< whether cell is occupy by features
-    bool cell[detectCellWidth * detectCellHeight];
+    bool cell[detectCellWidth * detectCellHeight];                           //!< whether the big cell is occupied
 };
 
 typedef std::shared_ptr<cvFrame> cvframePtr_t;

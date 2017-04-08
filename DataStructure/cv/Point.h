@@ -4,6 +4,7 @@
 #include <list>
 #include <Eigen/Dense>
 #include <boost/noncopyable.hpp>
+#include "boost/thread/shared_mutex.hpp"
 
 #include "util/util.h"
 
@@ -25,6 +26,7 @@ public:
     static int                             point_counter_;           //!< Counts the number of created points. Used to set the unique id.
     int                                    id_;                      //!< Unique ID of the point.
     Eigen::Vector3d                        pos_;                     //!< 3d pos of the point in the world coordinate frame.
+    boost::shared_mutex                    pos_mutex;
     Eigen::Vector3d                        normal_;                  //!< Surface normal at point.
     Eigen::Matrix3d                        normal_information_;      //!< Inverse covariance matrix of normal estimation.
     bool                                   normal_set_;              //!< Flag whether the surface normal was estimated or not.
@@ -54,7 +56,7 @@ public:
     std::shared_ptr<Feature> findFrameRef(std::shared_ptr<cvFrame>& frame);
 
     /// Get Frame with similar viewpoint.
-    bool getCloseViewObs(const Eigen::Vector3d& pos, std::shared_ptr<Feature>& obs) const;
+    bool getCloseViewObs(const Eigen::Vector3d& pos, std::shared_ptr<Feature>& obs);
 
     /// Get number of observations.
     inline size_t nRefs() const { return obs_.size(); }
