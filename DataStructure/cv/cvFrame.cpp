@@ -203,12 +203,17 @@ const cvFrame::cov_t &cvFrame::getCovariance() {
     return Cov_;
 }
 
-const pose_t &cvFrame::getPose() {
+pose_t cvFrame::getPose() {
+    pose_mutex.lock_shared();
+    auto pose = pose_;
+    pose_mutex.unlock_shared();
     return pose_;
 }
 
 void cvFrame::setPose(pose_t &pose) {
+    pose_mutex.lock();
     pose_ = pose;
+    pose_mutex.unlock();
 }
 
 void cvFrame::setCovariance(cvFrame::cov_t &Cov) {
@@ -231,7 +236,10 @@ int cvFrame::getPublishTimestamp() {
     return last_published_ts_;
 }
 
-const cvFrame::position_t &cvFrame::pos() {
-    return pose_.translation();
+const cvFrame::position_t cvFrame::pos() {
+    pose_mutex.lock_shared();
+    auto position = pose_.translation();
+    pose_mutex.unlock_shared();
+    return position;
 }
 

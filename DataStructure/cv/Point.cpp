@@ -62,18 +62,24 @@ void Point::initNormal() {
     const std::shared_ptr<Feature>& ftr = obs_.back();
     assert(ftr->frame != NULL);
     normal_ = ftr->frame->getPose().so3().inverse().matrix() * (-ftr->f);
+    pos_mutex.lock_shared();
     normal_information_ = DiagonalMatrix<double,3,3>(pow(20 / (pos_ - ftr->frame->pos()).norm(), 2), 1.0, 1.0);
+    pos_mutex.unlock_shared();
     normal_set_ = true;
 }
 
-bool Point::getCloseViewObs(const Vector3d& framepos, std::shared_ptr<Feature> &ftr) const {
+bool Point::getCloseViewObs(const Vector3d& framepos, std::shared_ptr<Feature> &ftr) {
     // TODO: get frame with same point of view AND same pyramid level!
+    pos_mutex.lock_shared();
     Vector3d obs_dir(framepos - pos_);
+    pos_mutex.unlock_shared();
     obs_dir.normalize();
     auto min_it = obs_.begin();
     double min_cos_angle = 0;
     for(auto it = obs_.begin(), ite=obs_.end(); it != ite; ++it) {
+        pos_mutex.lock_shared();
         Vector3d dir((*it)->frame->getPose().translation() - pos_); dir.normalize();
+        pos_mutex.unlock_shared();
         double cos_angle = obs_dir.dot(dir);
         if(cos_angle > min_cos_angle) {
             min_cos_angle = cos_angle;
@@ -88,55 +94,59 @@ bool Point::getCloseViewObs(const Vector3d& framepos, std::shared_ptr<Feature> &
 
 
 void Point::optimize(const size_t n_iter) {
-    Vector3d old_point = pos_;
-    double chi2 = 0.0;
-    Matrix3d A;
-    Vector3d b;
-
-    for(size_t i=0; i<n_iter; i++) {
-        A.setZero();
-        b.setZero();
-        double new_chi2 = 0.0;
-
-        // compute residuals
-        for(auto it=obs_.begin(); it!=obs_.end(); ++it) {
-            Matrix23d J;
-            const Vector3d p_in_f((*it)->frame->getPose() * pos_);
-            Point::jacobian_xyz2uv(p_in_f, (*it)->frame->getPose().so3().matrix(), J);
-            const Vector2d e(project2d((*it)->f) - project2d(p_in_f));
-
-            if((*it)->type == Feature::EDGELET) {
-                float err_edge = (*it)->grad.transpose() * e;
-                new_chi2 += err_edge * err_edge;
-                A.noalias() += J.transpose()*(*it)->grad * (*it)->grad.transpose() * J;
-                b.noalias() -= J.transpose() *(*it)->grad * err_edge;
-            }
-
-            else {
-                new_chi2 += e.squaredNorm();
-                A.noalias() += J.transpose() * J;
-                b.noalias() -= J.transpose() * e;
-            }
-
-        }
-
-        // solve linear system
-        const Vector3d dp(A.ldlt().solve(b));
-
-        // check if error increased
-        if((i > 0 && new_chi2 > chi2) || (bool) std::isnan((double)dp[0])) {
-            pos_ = old_point; // roll-back
-            break;
-        }
-
-        // update the model
-        Vector3d new_point = pos_ + dp;
-        old_point = pos_;
-        pos_ = new_point;
-        chi2 = new_chi2;
-
-        // stop when converged
-        if(norm_max(dp) <= EPS)
-            break;
-    }
+//    pos_mutex.lock_shared();
+//    Vector3d old_point = pos_;
+//    pos_mutex.lock_shared();
+//    double chi2 = 0.0;
+//    Matrix3d A;
+//    Vector3d b;
+//
+//    for(size_t i=0; i<n_iter; i++) {
+//        A.setZero();
+//        b.setZero();
+//        double new_chi2 = 0.0;
+//
+//        // compute residuals
+//        for(auto it=obs_.begin(); it!=obs_.end(); ++it) {
+//            Matrix23d J;
+//            pos_mutex.lock_shared();
+//            const Vector3d p_in_f((*it)->frame->getPose() * pos_);
+//            pos_mutex.unlock_shared();
+//            Point::jacobian_xyz2uv(p_in_f, (*it)->frame->getPose().so3().matrix(), J);
+//            const Vector2d e(project2d((*it)->f) - project2d(p_in_f));
+//
+//            if((*it)->type == Feature::EDGELET) {
+//                float err_edge = (*it)->grad.transpose() * e;
+//                new_chi2 += err_edge * err_edge;
+//                A.noalias() += J.transpose()*(*it)->grad * (*it)->grad.transpose() * J;
+//                b.noalias() -= J.transpose() *(*it)->grad * err_edge;
+//            }
+//
+//            else {
+//                new_chi2 += e.squaredNorm();
+//                A.noalias() += J.transpose() * J;
+//                b.noalias() -= J.transpose() * e;
+//            }
+//
+//        }
+//
+//        // solve linear system
+//        const Vector3d dp(A.ldlt().solve(b));
+//
+//        // check if error increased
+//        if((i > 0 && new_chi2 > chi2) || (bool) std::isnan((double)dp[0])) {
+//            pos_ = old_point; // roll-back
+//            break;
+//        }
+//
+//        // update the model
+//        Vector3d new_point = pos_ + dp;
+//        old_point = pos_;
+//        pos_ = new_point;
+//        chi2 = new_chi2;
+//
+//        // stop when converged
+//        if(norm_max(dp) <= EPS)
+//            break;
+//    }
 }

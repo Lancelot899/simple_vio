@@ -21,9 +21,12 @@ bool Matcher::findMatchDirect(std::shared_ptr<Point> &pt,
                                              halfpatch_size_+2, ref_ftr_->level))
         return false;
 
+    pt->pos_mutex.lock_shared();
+    double norm = (ref_ftr_->frame->pos() - pt->pos_).norm();
+    pt->pos_mutex.unlock_shared();
     this->getWarpMatrixAffine(ref_ftr_->frame->getCam(), cur_frame->getCam(),
                               ref_ftr_->px, ref_ftr_->f,
-                              (ref_ftr_->frame->pos() - pt->pos_).norm(),
+                              norm,
                                cur_frame->getPose() * ref_ftr_->frame->getPose().inverse(),
                                ref_ftr_->level, A_cur_ref_);
     search_level_ = getBestSearchLevel(A_cur_ref_, IMG_LEVEL - 1);

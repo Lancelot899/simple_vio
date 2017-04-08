@@ -92,8 +92,10 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		auto cam = nextFrame->getCam();
 		Eigen::Vector2d uv;
 		if(ftKey->isBAed) continue;
-		if (ftKey->point->pos_[2] < 1.000000000001 && ftKey->point->pos_[2] > 0.99999999999) {
-			auto &pos = ftKey->point->pos_;
+		ftKey->point->pos_mutex.lock_shared();
+		Eigen::Vector3d pos = ftKey->point->pos_;
+		ftKey->point->pos_mutex.unlock_shared();
+		if (pos[2] < 1.000000000001 && pos[2] > 0.99999999999) {
 			auto pos_ = keyFrame->getCVFrame()->getPose() * pos;
 			initDepth = pos_(2);
 			uv = cam->world2cam(pos_);
@@ -114,12 +116,14 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		ceres::Solve(option, &problem, &summary);
 		if (summary.termination_type == ceres::CONVERGENCE) {
 			newCreatPoint++;
+			ftKey->point->pos_mutex.lock();
 			if(ftKey->point->pos_[2] < 1.000000000001 && ftKey->point->pos_[2] > 0.99999999999)
 				ftKey->point->pos_ *= updateDepth;
 			else {
 				double ratio = updateDepth / initDepth;
 				ftKey->point->pos_ *= ratio;
 			}
+			ftKey->point->pos_mutex.unlock();
 		}
 	}
 	return newCreatPoint;
