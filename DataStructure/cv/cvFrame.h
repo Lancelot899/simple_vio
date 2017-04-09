@@ -80,7 +80,7 @@ public:
     typedef Eigen::Vector2d             grad_t;
 
 public:
-    cvFrame(const std::shared_ptr<AbstractCamera>& cam, Pic_t &pic);
+    cvFrame(const std::shared_ptr<AbstractCamera>& cam, Pic_t &pic, okvis::Time time = okvis::Time());
     ~cvFrame();
     const std::shared_ptr<Feature>& addFeature(const std::shared_ptr<Feature>& ft);
 

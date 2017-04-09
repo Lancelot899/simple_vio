@@ -19,7 +19,8 @@ public:
 	        std::shared_ptr<AbstractCamera> cam);
 
 	~ImageIO() {}
-
+	int width();
+	int height();
     std::string popName();
     cv::Mat  popImage();
     std::pair<okvis::Time, cv::Mat> popImageAndTimestamp();

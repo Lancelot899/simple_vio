@@ -61,8 +61,9 @@ public:
                   double tau_, double g_, Eigen::Vector3d a0_, int rate_):
         T_BS(T_BS_),a_max(a_max_),g_max(g_max_),sigma_g_c(sigma_g_c_),sigma_bg(sigma_bg_),
         sigma_a_c(sigma_a_c_),sigma_ba(sigma_ba_),sigma_gw_c(sigma_gw_c_),
-        sigma_aw_c(sigma_aw_c_),tau(tau_),g(g_),a0(a0_),rate(rate_)
-    {}
+        sigma_aw_c(sigma_aw_c_),tau(tau_),a0(a0_),rate(rate_) {
+        g = Eigen::Vector3d(0, 0, g_);
+    }
 
     IMUMeasure::Transformation T_BS; ///< Transformation from Body frame to IMU (sensor frame S).
     double a_max;  ///< Accelerometer saturation. [m/s^2]
@@ -73,8 +74,8 @@ public:
     double sigma_ba;  ///< Initial accelerometer bias
     double sigma_gw_c; ///< Gyroscope drift noise density.
     double sigma_aw_c; ///< Accelerometer drift noise density.
-    double tau;  ///< Reversion time constant of accerometer bias. [s]
-    double g;    ///< Earth acceleration.
+    double tau;           ///< Reversion time constant of accerometer bias. [s]
+    Eigen::Vector3d g;    ///< Earth acceleration.
     Eigen::Vector3d a0;  ///< Mean of the prior accelerometer bias.
     int rate;  ///< IMU rate in Hz.
 };

@@ -208,13 +208,13 @@ int IMUImplPRE::error(const pViFrame &frame_i, const pViFrame &frame_j, Error_t 
     double dt = (frame_j->getCVFrame()->getTimestamp() - frame_i->getCVFrame()->getTimestamp()).toSec();
 
     err.block<3, 1>(3, 0) = frame_i->getPose().so3().inverse().matrix()
-            * (spbs_j.block<3, 1>(0, 0) - spbs_i.block<3, 1>(0, 0) - Eigen::Vector3d(0, 0, imuParam->g) * dt)
+            * (spbs_j.block<3, 1>(0, 0) - spbs_i.block<3, 1>(0, 0) -  imuParam->g * dt)
             - (speedFac + JBias.block<3, 3>(6, 0) * dBias.block<3, 1>(0, 0)
             + JBias.block<3, 3>(3, 0) * dBias.block<3, 1>(3, 0));
 
     err.block<3, 1>(6, 0) = frame_i->getPose().so3().inverse().matrix() *
                             (frame_j->getPose().translation() - frame_i->getPose().translation()
-                            - frame_i->getSpeedAndBias().block<3, 1>(0, 0) * dt - 0.5 * Eigen::Vector3d(0, 0, imuParam->g) * dt * dt)
+                            - frame_i->getSpeedAndBias().block<3, 1>(0, 0) * dt - 0.5 *  imuParam->g * dt * dt)
                             - (poseFac.translation() + JBias.block<3, 3>(12, 0) * dBias.block<3, 1>(0, 0)
                                + JBias.block<3, 3>(9, 0) * dBias.block<3, 1>(3, 0));
 
@@ -244,7 +244,7 @@ int IMUImplPRE::Jacobian(const Error_t &err, const pViFrame &frame_i, jacobian_t
     const Eigen::Matrix3d        Rj_inv     = frame_j->getPose().so3().inverse().matrix();
     const Eigen::Matrix3d        Ri         = frame_i->getPose().so3().matrix();
     const Eigen::Matrix3d        Rj         = frame_j->getPose().so3().matrix();
-    const Eigen::Vector3d        g          = Eigen::Vector3d(0, 0, imuParam->g);
+    const Eigen::Vector3d&        g         = imuParam->g;
 
 
     jacobian_i.block<3, 3>(0, 0) = -rightJacobian(err).inverse() * Rj_inv * Ri;

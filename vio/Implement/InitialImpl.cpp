@@ -96,8 +96,9 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
 
     //! estimate scale and gravity; refine bias_a, scale, gravity
     double scale = 1.0;
+    double G = imuParam->g.norm();
     Eigen::Vector3d cP_B = dynamic_cast<VIOPinholeCamera*>(VecFrames[0]->cvframe->getCam().get())->getT_BS().inverse().translation();
-    Eigen::Vector3d g_w = imuParam->g * Eigen::Vector3d(0, 0, -1);
+    Eigen::Vector3d g_w = imuParam->g;
     Eigen::MatrixXd A(3 * (size - 2), 4);
     Eigen::MatrixXd B(3 * (size - 2), 1);
     Eigen::MatrixXd C(3 * (size - 2), 6);
@@ -147,8 +148,10 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
                 + R1_wb.matrix() * VecImuFactor[i]->getJBias().block<3, 3>(3, 0) * dt12 * dt23
                 - R1_wb.matrix() * VecImuFactor[i - 1]->getJBias().block<3, 3>(9, 0) * dt23;
 
-        C(3 * i - 3, 1) = 0.5 * imuParam->g * (dt12 * dt12 * dt23 + dt23 * dt23 * dt12);
-        C(3 * i - 3, 2) = 0.5 * imuParam->g /*dt_ij^2 */ ;
+
+
+        C(3 * i - 3, 1) = 0.5 * G * (dt12 * dt12 * dt23 + dt23 * dt23 * dt12);
+        C(3 * i - 3, 2) = 0.5 * G /*dt_ij^2 */ ;
         D.block<3, 1>(3 * i - 3, 0) = (R2_wc.matrix() - R1_wc.matrix()) * cP_B * dt23
                 - (R3_wc.matrix() - R2_wc.matrix()) * cP_B * dt12
                 + R2_wb * VecImuFactor[i]->getPoseFac().translation() * dt12
@@ -172,7 +175,8 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
     }
 
     Eigen::Matrix<double, 6, 1> s_dxy_ba = C.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(D);
-    g_what = (R_WI * Sophus::SO3d::exp(Eigen::Vector3d(s_dxy_ba(1, 0), s_dxy_ba(2, 0), 0))) * Eigen::Vector3d(0, 0, 1) * imuParam->g;
+    g_what = (R_WI * Sophus::SO3d::exp(Eigen::Vector3d(s_dxy_ba(1, 0), s_dxy_ba(2, 0), 0))) * imuParam->g;
+    imuParam->g = g_what;
 
     {  //! estimate velocity
         Eigen::Vector3d p1 = VecFrames[0]->cvframe->getPose().translation();
@@ -196,9 +200,10 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
             const IMUMeasure::Transformation &deltaPose = VecImuFactor[i]->deltaPose;
             const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias();
 
-            V_wb[i-1] = (  s_g(0,0)*p2 - s_g(0,0)*p1 + 0.5*R_WI.matrix()*g_I_hat*imuParam->g*dt12*dt12*delta_theta
-                         -  R1_wb.matrix()*(deltaPose.translation()+facJac.block<3, 3>(9, 0)*s_dxy_ba.block<3,1>(3,0))
-                         - (R1_wc.matrix() - R2_wc.matrix())*cP_B - 0.5*imuParam->g*dt12*dt12*(R_WI*Eigen::Vector3d(0, 0, -1))    ) / dt12;
+	        VecFrames[i - 1]->spbs.block<3, 1>(0 ,0) = (s_g(0,0)*p2 - s_g(0,0)*p1
+	                                                    + 0.5*R_WI.matrix() * g_I_hat*G*dt12*dt12*delta_theta
+                         -  (R1_wb *(deltaPose.translation()+facJac.block<3, 3>(9, 0)*s_dxy_ba.block<3,1>(3,0)))
+                         - (R1_wc.matrix() - R2_wc.matrix())*cP_B - 0.5 * (R_WI * imuParam->g) * dt12 * dt12) / dt12;
 
         }
     }

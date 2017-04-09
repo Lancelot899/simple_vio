@@ -102,13 +102,13 @@ bool cvFrame::getGrad(int u, int v, cvFrame::grad_t&  out, int level) {
     return true;
 }
 
-cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic) {
+cvFrame::cvFrame(const std::shared_ptr<AbstractCamera> &cam, Pic_t &pic, okvis::Time time) {
     cam_ = cam;
     //pose_ = Sophus::SE3d::exp(Eigen::Matrix<double, 6, 1>::Zero());
     cvData.measurement.pic = pic;
     int rows = pic.rows;
     int cols = pic.cols;
-
+    cvData.timeStamp = time;
     // 341 = 1 + 4 + 16 + 64 + 256 !>> cell's numbel for each level
     // for a point(u,v) in cell(on the l level): (u,v,l) , occupy[(4^l-1)/3 + v*2^l + u]
     memset(occupy, 0, sizeof(bool) * detectCellWidth * detectCellHeight * detectHeightGrid * detectWidthGrid);
