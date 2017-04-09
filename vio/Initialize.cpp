@@ -12,12 +12,14 @@
 
 Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector,
                        std::shared_ptr<direct_tracker::Tracker>& tracker,
-                       std::shared_ptr<Triangulater> &triangulater) {
+                       std::shared_ptr<Triangulater> &triangulater,
+                       std::shared_ptr<IMU> &imu) {
     impl_ = std::make_shared<InitialImpl>();
     isInitialed = false;
     this->detector = detector;
     this->tracker = tracker;
     this->triangulater = triangulater;
+	this->imu  = imu;
 }
 
 void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {

@@ -25,7 +25,8 @@ class Initialize {
 public:
     Initialize(std::shared_ptr<feature_detection::Detector>& detector,
                std::shared_ptr<direct_tracker::Tracker>& tracker,
-               std::shared_ptr<Triangulater> &triangulater);
+               std::shared_ptr<Triangulater> &triangulater,
+               std::shared_ptr<IMU> &imu);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
     bool getInitialViframe(std::vector<std::shared_ptr<viFrame>>* *pVec) {
@@ -46,6 +47,7 @@ private:
     std::shared_ptr<direct_tracker::Tracker> tracker;
     std::shared_ptr<InitialImpl> impl_;
     std::vector<std::shared_ptr<viFrame>> VecFrames;
+    std::shared_ptr<IMU> imu;
     bool isInitialed;
     std::vector<std::shared_ptr<imuFactor>> VecImuFactor;
     std::shared_ptr<Triangulater> triangulater;
