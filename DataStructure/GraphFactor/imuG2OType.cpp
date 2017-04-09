@@ -77,10 +77,10 @@ void viPREEdge::computeError() {
     _error.segment<3>(0) = Sophus::SO3d::log(_measurement.rotation *
                                                      Sophus::SO3d::exp(JBias.block<3, 3>(0, 0) * dbias_g) *
                                                     v1.orient.inverse() * v2.orient);
-    _error.segment<3>(3) = v1.orient.inverse() * (v2.speed - v1.speed - imuParam->g * Eigen::Vector3d(0, 0, 1) * dt)
+    _error.segment<3>(3) = v1.orient.inverse() * (v2.speed - v1.speed - imuParam->g * dt)
                             - (_measurement.dSpeed + JBias.block<3, 3>(6, 0) * dbias_g
                                                          + JBias.block<3, 3>(3, 0) * dbias_a);
-    _error.segment<3>(6) = v1.orient.inverse() * (v2.pos - v1.pos - v1.speed * dt - 0.5 * imuParam->g * Eigen::Vector3d(0, 0, 1)* dt * dt)
+    _error.segment<3>(6) = v1.orient.inverse() * (v2.pos - v1.pos - v1.speed * dt - 0.5 * imuParam->g * dt * dt)
                             - (_measurement.translation + JBias.block<3, 3>(12, 0) * dbias_g
                                                                      +  JBias.block<3, 3>(9, 0) * dbias_a);
 }
@@ -103,7 +103,7 @@ void viPREEdge::linearizeOplus() {
                                             * rightJacobian(JBias.block<3, 3>(0, 0) * dbias_g) * JBias.block<3, 3>(0, 0);
     _jacobianOplusXj.block<3, 3>(0, 12) = Eigen::Matrix3d::Zero();
 
-    _jacobianOplusXi.block<3, 3>(3, 0) = Sophus::SO3d::hat(v1.orient.inverse() * (v2.speed - v1.speed - imuParam->g * Eigen::Vector3d(0, 0, 1) * dt));
+    _jacobianOplusXi.block<3, 3>(3, 0) = Sophus::SO3d::hat(v1.orient.inverse() * (v2.speed - v1.speed - imuParam->g  * dt));
     _jacobianOplusXj.block<3, 3>(3, 0) = Eigen::Matrix3d::Zero();
     _jacobianOplusXi.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
     _jacobianOplusXj.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
@@ -115,7 +115,7 @@ void viPREEdge::linearizeOplus() {
     _jacobianOplusXj.block<3, 3>(3, 12) = -JBias.block<3, 3>(3, 0);
 
     _jacobianOplusXi.block<3, 3>(6, 0) = Sophus::SO3d::hat(v1.orient.inverse() *
-                                                           (v2.pos - v1.pos - v1.speed * dt - 0.5 * imuParam->g * Eigen::Vector3d(0, 0, 1) * dt * dt));
+                                                           (v2.pos - v1.pos - v1.speed * dt - 0.5 * imuParam->g  * dt * dt));
     _jacobianOplusXj.block<3, 3>(6, 0)  = Eigen::Matrix3d::Zero();
     _jacobianOplusXi.block<3, 3>(6, 3)  = -Eigen::Matrix3d::Identity();
     _jacobianOplusXj.block<3, 3>(6, 3)  = (v1.orient.inverse() * v2.orient).matrix();

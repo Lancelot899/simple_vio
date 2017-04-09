@@ -9,10 +9,11 @@
 #include "IO/camera/CameraIO.h"
 #include "IO/image/ImageIO.h"
 #include "IO/imu/IMUIO.h"
-#include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/imu/imuFactor.h"
-#include "IMU/IMU.h"
 #include "DataStructure/cv/Point.h"
+#include "cv/Tracker/Tracker.h"
+#include "cv/FeatureDetector/Detector.h"
+#include "cv/Triangulater/Triangulater.h"
 
 class drPoint {
 public:
@@ -81,7 +82,19 @@ void testInitial(int argc, char **argv) {
 	ImageIO imageIO(imageFile, "../testData/mav0/cam0/data/", cam);
 	Viewer viewer;
 
+	std::shared_ptr<feature_detection::Detector>detector
+			= std::make_shared<feature_detection::Detector>(752, 480, 25, IMG_LEVEL);
+	std::shared_ptr<direct_tracker::Tracker> tracker = std::make_shared<direct_tracker::Tracker>();
+	std::shared_ptr<Triangulater> triangulater = std::make_shared<Triangulater>();
 
+	Initialize initer(detector, tracker, triangulater);
+	auto tmImg = imageIO.popImageAndTimestamp();
+	std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(tmImg.second, cam, tmImg.first);
+	initer.setFirstFrame(firstFrame);
+	for(int i = 0; i < 10; ++i) {
+		tmImg = imageIO.popImageAndTimestamp();
+		//initer.pushcvFrame();
+	}
 
 	viewer.show();
 	app.exec();

@@ -206,6 +206,7 @@ set(SOURCE_FILES
         cv/Triangulater/test/Test_Triangulater.cpp
         DataStructure/cv/test/Test_cvFrame.cpp
         vio/test/Test_initial.cpp
+        vio/test/Test_initial.h
         )
 
 

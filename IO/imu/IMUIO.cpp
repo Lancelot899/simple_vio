@@ -137,7 +137,6 @@ IMUIO::IMUIO(std::string &imufile, std::string &imuParamfile) {
         i++;
         std::string line;
         if(!std::getline(imu_file, line)) {
-            std::cout << "imu file is read over! i = " <<i<< std::endl;
             break;
         }
 

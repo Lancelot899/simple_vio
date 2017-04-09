@@ -170,11 +170,10 @@ int IMUImplOKVIS::propagation(const ImuMeasureDeque &imuMeasurements,
             break;
     }
 
-    const Eigen::Vector3d g_W = imuParams.g * Eigen::Vector3d(0, 0, 6371009).normalized();
+    Eigen::Vector3d g_W = imuParams.g;
     T_WS = Sophus::SE3d(q_WS_0*Delta_q, r_0+speedAndBiases.head<3>()*Delta_t
-                        + C_WS_0*(acc_doubleintegral)
-                        - 0.5*g_W*Delta_t*Delta_t);
-    speedAndBiases.head<3>() += C_WS_0*(acc_integral)-g_W*Delta_t;
+                        + C_WS_0*(acc_doubleintegral) - 0.5 * g_W * Delta_t * Delta_t);
+    speedAndBiases.head<3>() += C_WS_0 * (acc_integral)- g_W * Delta_t;
 
     if(jacobian) {
         assert(jacobian->cols() == 15 && jacobian->rows() == 15);
