@@ -1,9 +1,11 @@
 #include "imuFactor.h"
 #include "DataStructure/viFrame.h"
 
-imuFactor::imuFactor()
-{
-
+imuFactor::imuFactor(const IMUMeasure::Transformation& pose,
+        const FacJBias_t &jbias, const speed_t &speed) {
+    deltaPose = pose;
+    deltaSpeed = speed;
+    JBias = jbias;
 }
 
 void imuFactor::makeConncect(const connection_t &from, const connection_t &to) {

@@ -21,7 +21,8 @@ public:
     typedef Eigen::Matrix<double, 6, 1>    bias_t;      ///< b_g, b_a
 
 public:
-    imuFactor();
+    imuFactor(const IMUMeasure::Transformation& pose,
+              const FacJBias_t &jbias, const speed_t &speed);
     bool checkConnect(const connection_t &from, const connection_t &to);
     void makeConncect(const connection_t &from, const connection_t &to);
     const IMUMeasure::Transformation& getPoseFac() {
@@ -41,6 +42,7 @@ private:
     IMUMeasure::Transformation   deltaPose;
     speed_t                      deltaSpeed;
     FacJBias_t                   JBias;
+    IMUMeasure::covariance_t     var;
     connection_t                 from;
     connection_t                 to;
 };

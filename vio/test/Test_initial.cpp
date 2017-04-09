@@ -86,14 +86,24 @@ void testInitial(int argc, char **argv) {
 			= std::make_shared<feature_detection::Detector>(752, 480, 25, IMG_LEVEL);
 	std::shared_ptr<direct_tracker::Tracker> tracker = std::make_shared<direct_tracker::Tracker>();
 	std::shared_ptr<Triangulater> triangulater = std::make_shared<Triangulater>();
+	std::shared_ptr<IMU> imu = std::make_shared<IMU>();
 
-	Initialize initer(detector, tracker, triangulater);
+	Initialize initer(detector, tracker, triangulater, imu);
 	auto tmImg = imageIO.popImageAndTimestamp();
+	std::pair<okvis::Time, cv::Mat> tmImgNext;
 	std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(tmImg.second, cam, tmImg.first);
 	initer.setFirstFrame(firstFrame);
 	for(int i = 0; i < 10; ++i) {
-		tmImg = imageIO.popImageAndTimestamp();
-		//initer.pushcvFrame();
+		tmImgNext = imageIO.popImageAndTimestamp();
+		std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(tmImgNext.second, cam, tmImgNext.first);
+		auto imuMeasure = imuIO.pop(tmImg.first, tmImgNext.first);
+		Sophus::SE3d T;
+		IMUMeasure::SpeedAndBias spbs;
+		IMUMeasure::covariance_t var;
+		IMUMeasure::jacobian_t jac;
+		imu->propagation(imuMeasure, *imuParam, T, spbs, tmImg.first, tmImgNext.first, &var, &jac);
+		imuFactor imufact(T, , spbs.block<3, 1>(0, 0));
+		initer.pushcvFrame(frame, );
 	}
 
 	viewer.show();
