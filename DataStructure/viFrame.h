@@ -30,7 +30,7 @@ public:
     }
 
 
-
+    void updatePose(Sophus::SE3d &pose);
     pose_t getT_BS();
     pose_t getPose();
     const std::shared_ptr<cvFrame>& getCVFrame();

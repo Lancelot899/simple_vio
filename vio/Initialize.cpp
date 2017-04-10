@@ -37,12 +37,16 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe);
     if(!tracker->Tracking(VecFrames.back(), viframe, T))
 	    return;
-    if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
+	//std::cout << T.matrix3x4() << std::endl;
+    T = VecFrames.back()->getPose() * T;
+	viframe->updatePose(T);
+	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
 		    triangulater->triangulate(VecFrames.back(), viframe, T, 30))
 	    return;
 
     tracker->reProject(VecFrames.back(), viframe, T);
-    feature_detection::features_t features;
+
+	feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
     for(auto &feat : features)
         viframe->getCVFrame()->cvData.fts_.push_back(feat);

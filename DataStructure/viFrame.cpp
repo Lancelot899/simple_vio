@@ -1,5 +1,4 @@
 #include "viFrame.h"
-#include "imu/IMUMeasure.h"
 #include "cv/cvFrame.h"
 
 #ifndef IMUTYPE_DEF_
@@ -17,6 +16,10 @@ typedef Eigen::Matrix<double, 6, 1> bias_t;
 #endif // IMUTYPE_DEF_
 
 
+void viFrame::updatePose(Sophus::SE3d &pose) {
+    auto se3 = getT_BS().inverse() * pose;
+    cvframe->setPose(se3);
+}
 
 viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe) {
     this->id = id;
