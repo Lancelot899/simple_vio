@@ -27,8 +27,6 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
     if (!(imuMeasurements.back()->timeStamp >= end))
         return -1;
 
-    std::cout << time << end << std::endl;
-
     std::vector<double> VecDt;
     std::vector<Sophus::SO3d, Eigen::aligned_allocator<Sophus::SO3d>>        VecRotation;
     std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d>>  VecRightJac;

@@ -29,12 +29,12 @@ public:
                std::shared_ptr<IMU> &imu);
     void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
     void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
-    bool getInitialViframe(std::vector<std::shared_ptr<viFrame>>* *pVec) {
-        if(isInitialed) {
-            *pVec = &VecFrames;
-            return true;
-        }
-        return false;
+    std::vector<std::shared_ptr<viFrame>>& getInitialViframe() {
+        return VecFrames;
+    }
+
+    std::vector<std::shared_ptr<imuFactor>>& getInitialImuFactor() {
+        return VecImuFactor;
     }
 
     bool init(std::shared_ptr<ImuParameters> &imuParam, int n_iter = 30);

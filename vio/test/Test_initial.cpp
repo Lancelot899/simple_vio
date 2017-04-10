@@ -14,6 +14,8 @@
 #include "cv/Tracker/Tracker.h"
 #include "cv/FeatureDetector/Detector.h"
 #include "cv/Triangulater/Triangulater.h"
+#include "DataStructure/cv/Feature.h"
+
 
 class drPoint {
 public:
@@ -33,11 +35,12 @@ class drPose {
 public:
 	drPose(Sophus::SE3d pose_) : pose(pose_) {}
 	void draw() {
+		std::cout << pose.matrix3x4() << "\n\n";
 		Eigen::Matrix3d rot = pose.so3().matrix();
 		Eigen::Vector3d p1 = pose.translation();
-		Eigen::Vector3d p2 = p1 + rot.block<3, 1>(0, 1);
-		Eigen::Vector3d p3 = p1 + rot.block<3, 1>(0, 2);
-		p1 += rot.block<3, 1>(0, 0);
+		Eigen::Vector3d p2 = p1 + rot.block<3, 1>(0, 1) / 10.0;
+		Eigen::Vector3d p3 = p1 + rot.block<3, 1>(0, 2) / 10.0;
+		p1 += rot.block<3, 1>(0, 0) / 10.0;
 		glColor3d(0, 0, 1);
 		glVertex3d(p1[0], p1[1], p1[2]);
 		glColor3d(1, 0, 1);
@@ -53,7 +56,18 @@ class Viewer : public QGLViewer {
 public:
 	Viewer() {}
 	~Viewer() {}
-	virtual void draw() {}
+	virtual void draw() {
+		glBegin(GL_POINTS);
+		for(auto &point : drPoints)
+			point.draw();
+		glEnd();
+
+		glBegin(GL_TRIANGLES);
+		for(auto &tri : drPoses)
+			tri.draw();
+		glEnd();
+	}
+
 	virtual void animate() {}
 	void pushPoint(std::shared_ptr<Point> point) {
 		drPoints.push_back(drPoint(point));
@@ -98,14 +112,22 @@ void testInitial(int argc, char **argv) {
         std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, tmImgNext.second, tmImgNext.first);
 		auto imuMeasure = imuIO.pop(tmImg.first, tmImgNext.first);
 		Sophus::SE3d T;
-		IMUMeasure::SpeedAndBias spbs;
+		IMUMeasure::SpeedAndBias spbs = IMUMeasure::SpeedAndBias::Zero();
 		IMUMeasure::covariance_t var;
         var.resize(9,9);
 		IMUMeasure::jacobian_t jac;
         jac.resize(15,3);
 		imu->propagation(imuMeasure, *imuParam, T, spbs, tmImg.first, tmImgNext.first, &var, &jac);
-//		imuFactor imufact(T, , spbs.block<3, 1>(0, 0));
-//		initer.pushcvFrame(frame, );
+		std::shared_ptr<imuFactor> imufact = std::make_shared<imuFactor>(T, jac, spbs.block<3, 1>(0, 0), var);
+		initer.pushcvFrame(frame, imufact);
+	}
+	initer.init(imuParam);
+	std::vector<std::shared_ptr<viFrame>> viframes = initer.getInitialViframe();
+	for(auto &viframe : viframes) {
+		viewer.pushPose(viframe);
+		const cvMeasure::features_t &fts = viframe->getCVFrame()->getMeasure().fts_;
+		for(cvMeasure::features_t::const_iterator it = fts.begin(); it != fts.end(); ++it)
+			viewer.pushPoint((*it)->point);
 	}
 
 	viewer.show();

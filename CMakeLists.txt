@@ -98,6 +98,33 @@ if(Qt5_FOUND)
     SET(MY_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 endif()
 
+FIND_LIBRARY(GFLAGS_LIB
+        NAMES flags libgflags.so
+        PATH
+        /usr/lib/x86_64-linux-gnu
+        /usr/lib
+        /usr/local/lib
+        )
+
+FIND_LIBRARY(GL_LIB
+        NAMES GL gl
+        PATH
+        /usr/lib/x86_64-linux-gnu
+        /usr/lib
+        /usr/local/lib
+        )
+
+FIND_LIBRARY(
+        GLU_LIB
+        NAMES glu GLu GlU GLU
+        PATH
+        /usr/lib/x86_64-linux-gnu
+        /opt/local/lib
+        /usr/lib
+        /usr/local/lib
+)
+
+
 
 LIST(APPEND LINK_LIBS
         ${OpenCV_LIBS}
@@ -115,6 +142,10 @@ LIST(APPEND LINK_LIBS
         ${GLU_LIB}
         ${GL_LIB}
         ${QGLVIEWER_LIBRARY_RELEASE}
+        ${GLEW_LIBRARY}
+        ${GLU_LIB}
+        ${GL_LIB}
+        ${OPENGL_LIBRARY}
         )
 
 LIST(APPEND LINK_LIBS

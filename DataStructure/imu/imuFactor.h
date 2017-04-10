@@ -22,7 +22,7 @@ public:
 
 public:
     imuFactor(const IMUMeasure::Transformation& pose,
-              const FacJBias_t &jbias, const speed_t &speed);
+              const FacJBias_t &jbias, const speed_t &speed, const IMUMeasure::covariance_t &var);
     bool checkConnect(const connection_t &from, const connection_t &to);
     void makeConncect(const connection_t &from, const connection_t &to);
     const IMUMeasure::Transformation& getPoseFac() {
