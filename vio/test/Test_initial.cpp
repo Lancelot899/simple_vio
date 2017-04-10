@@ -40,7 +40,7 @@ public:
 		Eigen::Vector3d p1 = pose.translation();
 		Eigen::Vector3d p2 = p1 + rot.block<3, 1>(0, 1) / 10.0;
 		Eigen::Vector3d p3 = p1 + rot.block<3, 1>(0, 2) / 10.0;
-		p1 += rot.block<3, 1>(0, 0) / 10.0;
+		Eigen::Vector3d p4 = p1 + rot.block<3, 1>(0, 0) / 10.0;
 		glColor3d(0, 0, 1);
 		glVertex3d(p1[0], p1[1], p1[2]);
 		glColor3d(1, 0, 1);
