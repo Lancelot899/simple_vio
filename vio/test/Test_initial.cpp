@@ -1,7 +1,7 @@
 //
 // Created by lancelot on 4/6/17.
 //
-#include <qt4/QtGui/QApplication>
+#include <QApplication>
 #include <QGLViewer/qglviewer.h>
 
 #include "../Initialize.h"
@@ -91,19 +91,21 @@ void testInitial(int argc, char **argv) {
 	Initialize initer(detector, tracker, triangulater, imu);
 	auto tmImg = imageIO.popImageAndTimestamp();
 	std::pair<okvis::Time, cv::Mat> tmImgNext;
-	std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(tmImg.second, cam, tmImg.first);
+    std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(cam, tmImg.second, tmImg.first);
 	initer.setFirstFrame(firstFrame);
 	for(int i = 0; i < 10; ++i) {
 		tmImgNext = imageIO.popImageAndTimestamp();
-		std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(tmImgNext.second, cam, tmImgNext.first);
+        std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, tmImgNext.second, tmImgNext.first);
 		auto imuMeasure = imuIO.pop(tmImg.first, tmImgNext.first);
 		Sophus::SE3d T;
 		IMUMeasure::SpeedAndBias spbs;
 		IMUMeasure::covariance_t var;
+        var.resize(9,9);
 		IMUMeasure::jacobian_t jac;
+        jac.resize(15,3);
 		imu->propagation(imuMeasure, *imuParam, T, spbs, tmImg.first, tmImgNext.first, &var, &jac);
-		imuFactor imufact(T, , spbs.block<3, 1>(0, 0));
-		initer.pushcvFrame(frame, );
+//		imuFactor imufact(T, , spbs.block<3, 1>(0, 0));
+//		initer.pushcvFrame(frame, );
 	}
 
 	viewer.show();
