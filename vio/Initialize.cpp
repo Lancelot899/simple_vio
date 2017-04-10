@@ -35,14 +35,19 @@ void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
 void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
     Sophus::SE3d T = imufactor->getPoseFac();
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe);
-    tracker->Tracking(VecFrames.back(), viframe, T);
-    triangulater->triangulate(VecFrames.back(), viframe, T, 30);
+    if(!tracker->Tracking(VecFrames.back(), viframe, T))
+	    return;
+    if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
+		    triangulater->triangulate(VecFrames.back(), viframe, T, 30))
+	    return;
+
     tracker->reProject(VecFrames.back(), viframe, T);
-    VecFrames.push_back(viframe);
     feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
     for(auto &feat : features)
         viframe->getCVFrame()->cvData.fts_.push_back(feat);
+	VecFrames.push_back(viframe);
+	VecImuFactor.push_back(imufactor);
 }
 
 bool Initialize::init(std::shared_ptr<ImuParameters> &imuParam, int n_iter) {

@@ -207,4 +207,7 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
 
         }
     }
+
+    return true;
+
 }
