@@ -14,6 +14,6 @@
 #define detectWidthGrid   4
 #define detectHeightGrid  4
 
-
+extern int widowSize;
 
 #endif // SETTING_H
