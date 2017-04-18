@@ -2,13 +2,6 @@
 // Created by lancelot on 4/12/17.
 //
 
-#include <Eigen/Core>
-#include <g2o/core/block_solver.h>
-#include <g2o/core/optimization_algorithm_dogleg.h>
-#include <g2o/solvers/dense/linear_solver_dense.h>
-#include <g2o/solvers/cholmod/linear_solver_cholmod.h>
-
-
 #include "system.h"
 #include "IMU/IMU.h"
 #include "IO/imu/IMUIO.h"
@@ -61,16 +54,8 @@ bool system::runBA() {
 		return false;
 
 	assert(keyFrames.size() == imuFactors.size() + 1);
+	
 
-	typedef g2o::BlockSolver<g2o::BlockSolverTraits<15, 15>> Block15_15;
-	typedef g2o::BlockSolver<g2o::BlockSolverTraits<15, 3>> Block6_3;
-
-	Block::LinearSolverType* linearSolver15_15 = new g2o::LinearSolverCholmod<Block15_15::PoseMatrixType>();
-	Block* solver_ptr15_15 = new Block15_15 (linearSolver);
-	g2o::OptimizationAlgorithmDogleg* solver15_15 = new g2o::OptimizationAlgorithmLevenberg (solver_ptr15_15);
-
-	g2o::SparseOptimizer optimizer;
-	optimizer.setAlgorithm (solver15_15);
 
 }
 

@@ -16,4 +16,7 @@
 
 extern int widowSize;
 
+
+#define SIMPLE_BA         0x000000001
+
 #endif // SETTING_H
