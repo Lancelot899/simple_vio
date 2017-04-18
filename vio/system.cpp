@@ -13,18 +13,16 @@
 #include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/viFrame.h"
 #include "DataStructure/imu/imuFactor.h"
-#include "cv/FeatureDetector"
-#include "cv/Triangulater"
-#include "cv/Tracker"
+#include "cv/FeatureDetector/Detector.h"
+#include "cv/Triangulater/Triangulater.h"
+#include "cv/Tracker/Tracker.h"
 #include "util/util.h"
 #include "util/setting.h"
-#include "DataStructure/GraphFactor/imuG2OType.h"
-
 
 
 system::system(std::string &imuDatafile, std::string &imuParamfile, std::string &camDatafile, std::string &camParamfile,
                std::string &imageFile, std::string &dataDirectory,  const int img_width, const int img_height) {
-	std::shared_ptr<CameraIO> camIO = std::make_pair<CameraIO>(camDatafile, camParamfile);
+	std::shared_ptr<CameraIO> camIO = std::make_shared<CameraIO>(camDatafile, camParamfile);
 	cam = camIO->getCamera();
 	BARunning = false;
 	BAResult = true;
@@ -32,7 +30,7 @@ system::system(std::string &imuDatafile, std::string &imuParamfile, std::string 
 	imuIO = std::make_shared<IMUIO>(imuDatafile, imuParamfile);
 	detector = std::make_shared<feature_detection::Detector>(img_width, img_width, 25, IMG_LEVEL);
 	tracker = std::make_shared<direct_tracker::Tracker>();
-	triangulate = std::make_shared<Triangulater>();
+	triangulater = std::make_shared<Triangulater>();
 	imu = std::make_shared<IMU>();
 	initialier = std::make_shared<Initialize>(detector, tracker, triangulater, imu);
 	BAThread = std::thread(&system::workLoop, this);
@@ -54,7 +52,7 @@ bool system::runBA() {
 		return false;
 
 	assert(keyFrames.size() == imuFactors.size() + 1);
-	
+
 
 
 }

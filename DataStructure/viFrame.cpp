@@ -45,7 +45,7 @@ viFrame::pose_t viFrame::getPose() {
     return  cvframe->getCam()->getT_BS() * cvframe->getPose();
 }
 
-const cvframePtr_t &viFrame::getCVFrame() {
+cvframePtr_t &viFrame::getCVFrame() {
     return cvframe;
 }
 

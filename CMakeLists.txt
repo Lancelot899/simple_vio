@@ -25,8 +25,6 @@ FIND_PACKAGE(SuiteSparse)
 EXECUTE_PROCESS(COMMAND sudo apt-get install libeigen3-dev)
 FIND_PACKAGE(Eigen)
 
-#g2o
-FIND_PACKAGE(G2O REQUIRED QUIET)
 
 FIND_LIBRARY(GFLAGS_LIB
         NAMES flags libgflags.so
@@ -79,7 +77,6 @@ INCLUDE_DIRECTORIES(
         ${GLOG_INCLUDE_DIRS}
         ${EIGEN_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
-        ${G2O_INCLUDE_DIRS}
         ${QGLVIEWER_INCLUDE_DIR}
 )
 
@@ -148,10 +145,6 @@ LIST(APPEND LINK_LIBS
         ${OPENGL_LIBRARY}
         )
 
-LIST(APPEND LINK_LIBS
-        ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CHOLMOD} ${G2O_SOLVER_CSPARSE} ${G2O_SOLVER_DENSE}
-        ${G2O_SOLVER_PCG} ${G2O_TYPES_SBA} ${G2O_TYPES_SLAM3D} cholmod cxsparse
-        )
 
 set(SOURCE_FILES
         cv/FeatureDetector/AbstractDetector.cpp
@@ -209,8 +202,6 @@ set(SOURCE_FILES
         main.cpp
         cv/FeatureDetector/test/Test_fast.cpp
         cv/FeatureDetector/test/Test_edge.cpp
-        DataStructure/GraphFactor/imuG2OType.h
-        DataStructure/GraphFactor/imuG2OType.cpp
         cv/FeatureDetector/FastDetector.cpp
         cv/FeatureDetector/FastDetector.h
         cv/FeatureDetector/EdgeDetector.cpp
@@ -238,6 +229,14 @@ set(SOURCE_FILES
         DataStructure/cv/test/Test_cvFrame.cpp
         vio/test/Test_initial.cpp
         vio/test/Test_initial.h
+        vio/system.h
+        vio/system.cpp
+        vio/BA/BundleAdjustemt.h
+        vio/BA/BundleAdjustemt.cpp
+        vio/BA/Implement/BABase.h
+        vio/BA/Implement/BABase.cpp
+        vio/BA/Implement/SimpleBA.h
+        vio/BA/Implement/SimpleBA.cpp
         )
 
 

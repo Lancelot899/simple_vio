@@ -5,6 +5,11 @@
 #ifndef SIMPLE_VIO_BABASE_H
 #define SIMPLE_VIO_BABASE_H
 
+#include <memory>
+#include <vector>
+
+class viFrame;
+class imuFactor;
 
 class BABase {
 public:
