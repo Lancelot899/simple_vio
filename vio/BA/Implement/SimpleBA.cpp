@@ -116,59 +116,56 @@ bool IMUErr::Evaluate(double const *const *parameters,
 
 	if(jacobians) {
 		if(jacobians[0]) {
-			Eigen::Matrix<double, 9, 15> _jacobianOplusXi;
-			_jacobianOplusXi.block<3, 3>(0, 0) = -rightJacobian(Err.segment<3>(0))
+			Eigen::Matrix<double, 9, 15> JacXi;
+			JacXi.block<3, 3>(0, 0) = -rightJacobian(Err.segment<3>(0))
 			                                     * (Rj.inverse() * Ri).matrix();
-			_jacobianOplusXi.block<3, 3>(0, 3) = _jacobianOplusXi.block<3, 3>(0, 6)
-					= _jacobianOplusXi.block<3, 3>(0, 9)
-					= _jacobianOplusXi.block<3, 3>(0, 12)
-					= Eigen::Matrix3d::Zero();
-			_jacobianOplusXi.block<3, 3>(3, 0) = Sophus::SO3d::hat(Ri.inverse() * (vj - vi - imuParam->g * dt));
-			_jacobianOplusXi.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXi.block<3, 3>(3, 6) = -Ri.inverse().matrix();
-			_jacobianOplusXi.block<3, 3>(3, 9)  = Eigen::Matrix3d::Zero();
-			_jacobianOplusXi.block<3, 3>(3, 12) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXi.block<3, 3>(6, 0) = Sophus::SO3d::hat(Ri.inverse() * (pj - pi - vi * dt - 0.5 * imuParam->g  * dt * dt));
-			_jacobianOplusXi.block<3, 3>(6, 3)  = -Eigen::Matrix3d::Identity();
-			_jacobianOplusXi.block<3, 3>(6, 6)  = -Ri.inverse().matrix() * dt;
-			_jacobianOplusXi.block<3, 3>(6, 9)  = Eigen::Matrix3d::Zero();
-			_jacobianOplusXi.block<3, 3>(6, 12) = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(0, 3) = JacXi.block<3, 3>(0, 6) = JacXi.block<3, 3>(0, 9) = JacXi.block<3, 3>(0, 12) = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(3, 0) = Sophus::SO3d::hat(Ri.inverse() * (vj - vi - imuParam->g * dt));
+			JacXi.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(3, 6) = -Ri.inverse().matrix();
+			JacXi.block<3, 3>(3, 9)  = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(3, 12) = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(6, 0) = Sophus::SO3d::hat(Ri.inverse() * (pj - pi - vi * dt - 0.5 * imuParam->g  * dt * dt));
+			JacXi.block<3, 3>(6, 3)  = -Eigen::Matrix3d::Identity();
+			JacXi.block<3, 3>(6, 6)  = -Ri.inverse().matrix() * dt;
+			JacXi.block<3, 3>(6, 9)  = Eigen::Matrix3d::Zero();
+			JacXi.block<3, 3>(6, 12) = Eigen::Matrix3d::Zero();
 
-			_jacobianOplusXi = L * _jacobianOplusXi;
+			JacXi = L * JacXi;
 
 			int k = 0;
 			for(int i = 0; i < 9; ++i) {
 				for(int j = 0; j < 15; ++j)
-					jacobians[0][k++] = _jacobianOplusXi(i, j);
+					jacobians[0][k++] = JacXi(i, j);
 			}
 		}
 
 		if(jacobians[1]) {
-			Eigen::Matrix<double, 9, 15> _jacobianOplusXj;
+			Eigen::Matrix<double, 9, 15> JacXj;
 
-			_jacobianOplusXj.block<3, 3>(0, 0) = rightJacobian(Err.segment<3>(0));
-			_jacobianOplusXj.block<3, 3>(0, 3) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(0, 6) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(0, 9) = -rightJacobian(Err.segment<3>(0)) * Sophus::SO3d::exp(Err.segment<3>(0)).inverse().matrix()
+			JacXj.block<3, 3>(0, 0) = rightJacobian(Err.segment<3>(0));
+			JacXj.block<3, 3>(0, 3) = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(0, 6) = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(0, 9) = -rightJacobian(Err.segment<3>(0)) * Sophus::SO3d::exp(Err.segment<3>(0)).inverse().matrix()
 			                                     * rightJacobian(JBias.block<3, 3>(0, 0) * dbias_g) * JBias.block<3, 3>(0, 0);
-			_jacobianOplusXj.block<3, 3>(0, 12) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(3, 0) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(3, 6) = Ri.inverse().matrix();
-			_jacobianOplusXj.block<3, 3>(3, 9)  = -JBias.block<3, 3>(6, 0);
-			_jacobianOplusXj.block<3, 3>(3, 12) = -JBias.block<3, 3>(3, 0);
-			_jacobianOplusXj.block<3, 3>(6, 0)  = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(6, 3)  = (Ri.inverse() * Rj).matrix();
-			_jacobianOplusXj.block<3, 3>(6, 6)  = Eigen::Matrix3d::Zero();
-			_jacobianOplusXj.block<3, 3>(6, 9)  = -JBias.block<3, 3>(12, 0);
-			_jacobianOplusXj.block<3, 3>(6, 12) = -JBias.block<3, 3>(9, 0);
+			JacXj.block<3, 3>(0, 12) = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(3, 0) = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(3, 3) = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(3, 6) = Ri.inverse().matrix();
+			JacXj.block<3, 3>(3, 9)  = -JBias.block<3, 3>(6, 0);
+			JacXj.block<3, 3>(3, 12) = -JBias.block<3, 3>(3, 0);
+			JacXj.block<3, 3>(6, 0)  = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(6, 3)  = (Ri.inverse() * Rj).matrix();
+			JacXj.block<3, 3>(6, 6)  = Eigen::Matrix3d::Zero();
+			JacXj.block<3, 3>(6, 9)  = -JBias.block<3, 3>(12, 0);
+			JacXj.block<3, 3>(6, 12) = -JBias.block<3, 3>(9, 0);
 
-			_jacobianOplusXj = L * _jacobianOplusXj;
+			JacXj = L * JacXj;
 
 			int k = 0;
 			for(int i = 0; i < 9; ++i) {
 				for(int j = 0; j < 15; ++j)
-					jacobians[1][k++] = _jacobianOplusXj(i, j);
+					jacobians[1][k++] = JacXj(i, j);
 			}
 		}
 	}
