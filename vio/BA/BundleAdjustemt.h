@@ -11,12 +11,15 @@
 class BABase;
 class viFrame;
 class imuFactor;
+class Point;
 
 class BundleAdjustemt {
 public:
 	BundleAdjustemt(int type);
 	~BundleAdjustemt() {}
-	bool run(std::vector<std::shared_ptr<viFrame>> &viframes, std::vector<std::shared_ptr<imuFactor>> &imufactors);
+	bool run(std::vector<std::shared_ptr<viFrame>> &viframes,
+	         std::vector<std::shared_ptr<Point>> &points,
+	         std::vector<std::shared_ptr<imuFactor>> &imufactors);
 
 private:
 	std::shared_ptr<BABase> impl;
