@@ -11,26 +11,26 @@
 #include "DataStructure/cv/Point.h"
 #include "DataStructure/cv/Feature.h"
 
-class CERES_EXPORT SO3Parameterization : public ceres::LocalParameterization {
+class CERES_EXPORT VioPose : public ceres::LocalParameterization {
 public:
-	virtual ~SO3Parameterization() {}
+	virtual ~VioPose() {}
 	virtual bool Plus(const double* x,
 	                  const double* delta,
 	                  double* x_plus_delta) const;
 	virtual bool ComputeJacobian(const double* x,
 	                             double* jacobian) const;
-	virtual int GlobalSize() const { return 3; }
-	virtual int LocalSize() const { return 3; }
+	virtual int GlobalSize() const { return 15; }
+	virtual int LocalSize() const { return 15; }
 };
 
-bool SO3Parameterization::ComputeJacobian(const double *x, double *jacobian) const {
-	ceres::MatrixRef(jacobian, 3, 3) = ceres::Matrix::Identity(3, 3);
+bool VioPose::ComputeJacobian(const double *x, double *jacobian) const {
+	ceres::MatrixRef(jacobian, 15, 15) = ceres::Matrix::Identity(15, 15);
 	return true;
 }
 
-bool SO3Parameterization::Plus(const double* x,
-                               const double* delta,
-                               double* x_plus_delta) const {
+bool VioPose::Plus(const double* x,
+                   const double* delta,
+                   double* x_plus_delta) const {
 	Eigen::Vector3d origin_x, delta_x;
 	for(int i = 0; i < 3; ++i) {
 		origin_x(i) = x[i];
@@ -42,6 +42,7 @@ bool SO3Parameterization::Plus(const double* x,
 	Eigen::Matrix<double, 3, 1> x_plus_delta_lie = (R * delta_R).log();
 
 	for(int i = 0; i < 3; ++i) x_plus_delta[i] = x_plus_delta_lie(i, 0);
+	for(int i = 3; i < 15; ++i) x_plus_delta[i] = x[i] + delta[i];
 	return true;
 }
 
@@ -167,7 +168,7 @@ bool IMUErr::Evaluate(double const *const *parameters,
 			int k = 0;
 			for(int i = 0; i < 9; ++i) {
 				for(int j = 0; j < 15; ++j)
-					jacobians[0][k++] = _jacobianOplusXj(i, j);
+					jacobians[1][k++] = _jacobianOplusXj(i, j);
 			}
 		}
 	}
@@ -263,6 +264,45 @@ SimpleBA::SimpleBA() {
 SimpleBA::~SimpleBA() {}
 
 bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
+                   std::vector<std::shared_ptr<Point>> &points,
                    std::vector <std::shared_ptr<imuFactor>> &imufactors) {
+	size_t poseNum = viframes.size();
+	if(poseNum < widowSize)
+		return false;
+
+	double *poseData = (double *)malloc(sizeof(double) * poseNum * 15);
+	for(size_t i = 0; i < poseNum; ++i) {
+		auto pose = viframes[i]->getCVFrame()->getPose();
+		Eigen::Vector3d phi = pose.so3().log();
+		memcpy(poseData + i * 15, phi.data(), sizeof(double) * 3);
+		memcpy(poseData + i * 15 + 3, pose.translation().data(), sizeof(double) * 3);
+		memcpy(poseData + i * 15 + 6, viframes[i]->getSpeedAndBias().data(), sizeof(double) * 9);
+	}
+
+	ceres::Problem problem;
+
+	{
+		size_t i = 0;
+		for (i; i < imufactors.size(); ++i) {
+			ceres::CostFunction *costFun = new IMUErr(imufactors[i], viframes[i], viframes[i + 1]);
+			problem.AddResidualBlock(costFun, new ceres::HuberLoss(0.5), poseData + i * 15, poseData + i * 15 + 15);
+			problem.SetParameterization(poseData + i * 15, new VioPose());
+		}
+
+		problem.SetParameterization(poseData + i * 15, new VioPose());
+
+	}
+
+	for(size_t i = 0; i < points.size(); ++i) {
+
+	}
+
+
+
+	ceres::Solver::Options options;
+	ceres::Solver::Summary summary;
+
+
+	free(poseData);
 
 }

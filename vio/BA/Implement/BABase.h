@@ -10,12 +10,14 @@
 
 class viFrame;
 class imuFactor;
+class Point;
 
 class BABase {
 public:
 	BABase() {}
 	virtual ~BABase() {}
 	virtual  bool run(std::vector<std::shared_ptr<viFrame>> &viframes,
+	                  std::vector<std::shared_ptr<Point>> &points,
 	                  std::vector<std::shared_ptr<imuFactor>> &imufactors) = 0;
 
 };

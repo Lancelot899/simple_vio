@@ -12,6 +12,7 @@ public:
 	SimpleBA();
 	~SimpleBA();
 	bool run(std::vector<std::shared_ptr<viFrame>> &viframes,
+	         std::vector<std::shared_ptr<Point>> &points,
 	         std::vector<std::shared_ptr<imuFactor>> &imufactors);
 
 };
