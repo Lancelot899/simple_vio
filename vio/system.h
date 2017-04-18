@@ -40,7 +40,7 @@ private:
 	std::shared_ptr<Initialize> initialier;
 	std::shared_ptr<feature_detection::Detector> detector;
 	std::shared_ptr<direct_tracker::Tracker> tracker;
-	std::shared_ptr<Triangulater> triangulate;
+	std::shared_ptr<Triangulater> triangulater;
 	std::shared_ptr<IMU> imu;
 	std::shared_ptr<ImageIO> imgIO;
 	std::shared_ptr<IMUIO> imuIO;

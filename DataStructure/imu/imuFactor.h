@@ -37,6 +37,10 @@ public:
         return JBias;
     }
 
+	const IMUMeasure::covariance_t &getVar() {
+		return var;
+	}
+
 private:
     int                          id;
     IMUMeasure::Transformation   deltaPose;
