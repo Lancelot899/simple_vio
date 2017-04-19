@@ -318,7 +318,6 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 	}
 
 	ceres::Solver::Options options;
-	options.gradient_tolerance = 1e-16;
 	options.dynamic_sparsity = true;
 	options.max_num_iterations = iter_;
 	options.sparse_linear_algebra_library_type = ceres::SUITE_SPARSE;
@@ -328,11 +327,28 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 	options.minimizer_progress_to_stdout = true;
 	options.dogleg_type = ceres::SUBSPACE_DOGLEG;
 
-
 	ceres::Solver::Summary summary;
 	Solve(options, &problem, &summary);
 	std::cout << summary.BriefReport() << std::endl;
 
+	bool res = true;
+	if(res = (summary.termination_type == ceres::CONVERGENCE)) {
+		for(size_t i = 0; i < poseNum; ++i) {
+			Eigen::Map<Eigen::Vector3d> phi(poseData + i * 15);
+			Sophus::SO3d R = Sophus::SO3d::exp(phi);
+			Eigen::Map<Eigen::Vector3d> trans(poseData + i * 15 + 3);
+			Sophus::SE3d T(R, trans);
+			viframes[i]->getCVFrame()->setPose(T);
+			Eigen::Map<IMUMeasure::SpeedAndBias> spbs(poseData + i * 15 + 6);
+			viframes[i]->getSpeedAndBias() = spbs;
+		}
+
+		for(auto &data : copy_points)
+			data->point->pos_ = data->pos_;
+
+	}
+
 	free(poseData);
 
+	return res;
 }
