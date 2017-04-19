@@ -49,7 +49,7 @@ cvframePtr_t &viFrame::getCVFrame() {
     return cvframe;
 }
 
-const IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias() {
+IMUMeasure::SpeedAndBias &viFrame::getSpeedAndBias() {
     return spbs;
 }
 

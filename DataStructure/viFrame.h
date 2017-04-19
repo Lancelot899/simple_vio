@@ -34,7 +34,7 @@ public:
     pose_t getT_BS();
     pose_t getPose();
     std::shared_ptr<cvFrame>& getCVFrame();
-    const IMUMeasure::SpeedAndBias &getSpeedAndBias();
+    IMUMeasure::SpeedAndBias &getSpeedAndBias();
     const ImuParam& getImuParam() {
         return imuParam;
     }
