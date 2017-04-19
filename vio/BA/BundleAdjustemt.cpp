@@ -15,7 +15,7 @@ BundleAdjustemt::BundleAdjustemt(int type) {
 }
 
 bool BundleAdjustemt::run(std::vector<std::shared_ptr<viFrame>> &viframes,
-                          std::vector<std::shared_ptr<Point>> &points,
-                          std::vector<std::shared_ptr<imuFactor>> &imufactors) {
-	return impl->run(viframes, points, imufactors);
+                          BundleAdjustemt::obsModeType &obsModes,
+                          std::vector<std::shared_ptr<imuFactor>> &imufactors, int iter_) {
+	return impl->run(viframes, obsModes, imufactors, iter_);
 }

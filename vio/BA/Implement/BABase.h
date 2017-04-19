@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include "../BundleAdjustemt.h"
 
 class viFrame;
 class imuFactor;
@@ -17,8 +18,8 @@ public:
 	BABase() {}
 	virtual ~BABase() {}
 	virtual  bool run(std::vector<std::shared_ptr<viFrame>> &viframes,
-	                  std::vector<std::shared_ptr<Point>> &points,
-	                  std::vector<std::shared_ptr<imuFactor>> &imufactors) = 0;
+	                  typename BundleAdjustemt::obsModeType &obsModes,
+	                  std::vector<std::shared_ptr<imuFactor>> &imufactors, int iter_) = 0;
 
 };
 
