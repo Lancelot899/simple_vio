@@ -81,7 +81,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 	option.linear_solver_type = ceres::DENSE_QR;
 
 	boost::mt19937 gen;
-	boost::uniform_real<>dist(0.5, 1.5);
+	boost::uniform_real<>dist(0.9, 1.1);
 	boost::variate_generator<boost::mt19937&,boost::uniform_real<>> scale_ (gen, dist);
 
 

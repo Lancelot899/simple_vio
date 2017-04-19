@@ -237,6 +237,8 @@ set(SOURCE_FILES
         vio/BA/Implement/BABase.cpp
         vio/BA/Implement/SimpleBA.h
         vio/BA/Implement/SimpleBA.cpp
+        vio/BA/Implement/test/Test_SimpleBA.h
+        vio/BA/Implement/test/Test_SimpleBA.cpp
         )
 
 

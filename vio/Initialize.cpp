@@ -22,8 +22,8 @@ Initialize::Initialize(std::shared_ptr<feature_detection::Detector>& detector,
 	this->imu  = imu;
 }
 
-void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
-    std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(viFrame::ID++, cvframe);
+void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<ImuParameters> imuParam) {
+    std::shared_ptr<viFrame> firstFrame = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
     Sophus::SE3d ie;
     cvframe->setPose(ie);
     feature_detection::features_t features;
@@ -32,9 +32,11 @@ void Initialize::setFirstFrame(std::shared_ptr<cvFrame> &cvframe) {
     VecFrames.push_back(firstFrame);
 }
 
-void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor) {
+void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
+                             std::shared_ptr<imuFactor> &imufactor,
+                             std::shared_ptr<ImuParameters> imuParam) {
     Sophus::SE3d T = imufactor->getPoseFac();
-    std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe);
+    std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
     if(!tracker->Tracking(VecFrames.back(), viframe, T))
 	    return;
 	//std::cout << T.matrix3x4() << std::endl;

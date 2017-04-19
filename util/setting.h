@@ -13,6 +13,7 @@
 #define detectCellHeight  4
 #define detectWidthGrid   4
 #define detectHeightGrid  4
+#define Gravity           9.78
 
 extern int widowSize;
 

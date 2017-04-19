@@ -9,6 +9,8 @@
 #include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/imu/imuFactor.h"
 #include "util/util.h"
+#include "DataStructure/cv/Point.h"
+#include "DataStructure/cv/Feature.h"
 
 class gbiasErr : public ceres::SizedCostFunction<3, 3> {
 public:
@@ -94,8 +96,11 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
 
     Eigen::Map<Eigen::Vector3d> gbias(gbias_);
 
+    for(size_t i = 0; i < VecFrames.size(); ++i)
+        VecFrames[i]->getSpeedAndBias().block<3, 1>(3, 0);
+
     //! estimate scale and gravity; refine bias_a, scale, gravity
-    double scale = 1.0;
+
     double G = imuParam->g.norm();
     Eigen::Vector3d cP_B = dynamic_cast<VIOPinholeCamera*>(VecFrames[0]->cvframe->getCam().get())->getT_BS().inverse().translation();
     Eigen::Vector3d g_w = imuParam->g;
@@ -177,6 +182,17 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
     Eigen::Matrix<double, 6, 1> s_dxy_ba = C.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(D);
     g_what = (R_WI * Sophus::SO3d::exp(Eigen::Vector3d(s_dxy_ba(1, 0), s_dxy_ba(2, 0), 0))) * imuParam->g;
     imuParam->g = g_what;
+
+    scale = s_dxy_ba(0, 0);
+    std::set<std::shared_ptr<Point>> points;
+    for(size_t i = 0; i < VecFrames.size(); ++i) {
+        VecFrames[i]->spbs.block<3, 1>(6, 0) = s_dxy_ba.block<3, 1>(3, 0);
+        for(auto &ft : VecFrames[i]->getCVFrame()->getMeasure().fts_) {
+            auto res = points.insert(ft->point);
+            if(res.second)
+                ft->point->pos_ = scale * ft->point->pos_;
+        }
+    }
 
     {  //! estimate velocity
         Eigen::Vector3d p1 = VecFrames[0]->cvframe->getPose().translation();
