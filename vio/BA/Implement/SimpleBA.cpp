@@ -10,6 +10,7 @@
 #include "DataStructure/imu/imuFactor.h"
 #include "DataStructure/cv/Point.h"
 #include "DataStructure/cv/Feature.h"
+#include "../BundleAdjustemt.h"
 
 class CERES_EXPORT VioPose : public ceres::LocalParameterization {
 public:
@@ -175,7 +176,7 @@ bool IMUErr::Evaluate(double const *const *parameters,
 
 class PnPErr : public ceres::SizedCostFunction<2, 6, 3> {
 public:
-	PnPErr(std::shared_ptr<viFrame> &viframe, std::shared_ptr<Point> &point);
+	PnPErr(std::shared_ptr<viFrame> &viframe,  std::shared_ptr<Feature> &ft);
 
 	virtual bool Evaluate(double const* const* parameters,
 	                      double* residuals,
@@ -183,14 +184,12 @@ public:
 private:
 	std::shared_ptr<viFrame> viframe;
 	std::shared_ptr<Feature> ft;
-	std::shared_ptr<Point> point;
 	Sophus::SE3d T_SB;
 };
 
-PnPErr::PnPErr(std::shared_ptr<viFrame> &viframe, std::shared_ptr<Point> &point) {
+PnPErr::PnPErr(std::shared_ptr<viFrame> &viframe, std::shared_ptr<Feature> &ft) {
 	this->viframe = viframe;
-	this->point = point;
-	ft = point->findFrameRef(viframe->getCVFrame());
+	this->ft = ft;
 	T_SB = viframe->getT_BS().inverse();
 }
 
@@ -261,8 +260,8 @@ SimpleBA::SimpleBA() {
 SimpleBA::~SimpleBA() {}
 
 bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
-                   std::vector<std::shared_ptr<Point>> &points,
-                   std::vector <std::shared_ptr<imuFactor>> &imufactors) {
+                   typename BundleAdjustemt::obsModeType &obsModes,
+                   std::vector <std::shared_ptr<imuFactor>> &imufactors, int iter_) {
 	size_t poseNum = viframes.size();
 	if(poseNum < widowSize)
 		return false;
@@ -276,6 +275,8 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 		memcpy(poseData + i * 15 + 6, viframes[i]->getSpeedAndBias().data(), sizeof(double) * 9);
 	}
 
+	std::map<std::shared_ptr<cvFrame>, int> memTabel;
+
 	ceres::Problem problem;
 
 	{
@@ -284,21 +285,53 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 			ceres::CostFunction *costFun = new IMUErr(imufactors[i], viframes[i], viframes[i + 1]);
 			problem.AddResidualBlock(costFun, new ceres::HuberLoss(0.5), poseData + i * 15, poseData + i * 15 + 15);
 			problem.SetParameterization(poseData + i * 15, new VioPose());
-		}
+			memTabel.insert(std::make_pair(viframes[i]->getCVFrame(), i * 15));
+        }
 
 		problem.SetParameterization(poseData + i * 15, new VioPose());
+		memTabel.insert(std::make_pair(viframes[i]->getCVFrame(), i));
 
 	}
 
-	for(size_t i = 0; i < points.size(); ++i) {
+	std::list<std::shared_ptr<SimpleBA::CopyPoint>> copy_points;
 
+	for(auto it = obsModes.begin(); it != obsModes.end(); ++it) {
+		if(it->first->last_projected_kf_id_ == viframes[poseNum -1]->ID) {
+			auto pt = std::make_shared<SimpleBA::CopyPoint>();
+			pt->point = it->first;
+			pt->pos_ = it->first->pos_;
+			for(auto &ft : it->second) {
+				int i = memTabel.find(ft->frame)->second;
+				ceres::CostFunction *costFun = new PnPErr(viframes[i], ft);
+				problem.AddResidualBlock(costFun, new ceres::HuberLoss(0.5), poseData + i * 15, pt->pos_.data());
+				copy_points.push_back(pt);
+			}
+		}
+
+		else {
+			for(auto &ft : it->second) {
+				int i = memTabel.find(ft->frame)->second;
+				ceres::CostFunction *costFun = new PnPErr(viframes[i], ft);
+				problem.AddResidualBlock(costFun, new ceres::HuberLoss(0.5), poseData + i * 15, it->first->pos_.data());
+			}
+		}
 	}
-
-
 
 	ceres::Solver::Options options;
-	ceres::Solver::Summary summary;
+	options.gradient_tolerance = 1e-16;
+	options.dynamic_sparsity = true;
+	options.max_num_iterations = iter_;
+	options.sparse_linear_algebra_library_type = ceres::SUITE_SPARSE;
+	options.minimizer_type = ceres::TRUST_REGION;
+	options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
+	options.trust_region_strategy_type = ceres::DOGLEG;
+	options.minimizer_progress_to_stdout = true;
+	options.dogleg_type = ceres::SUBSPACE_DOGLEG;
 
+
+	ceres::Solver::Summary summary;
+	Solve(options, &problem, &summary);
+	std::cout << summary.BriefReport() << std::endl;
 
 	free(poseData);
 
