@@ -21,9 +21,10 @@ void viFrame::updatePose(Sophus::SE3d &pose) {
     cvframe->setPose(se3);
 }
 
-viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe) {
+viFrame::viFrame(int id, std::shared_ptr<cvFrame>& cvframe, ImuParam param) {
     this->id = id;
     this->cvframe = cvframe;
+    this->imuParam = param;
     spbs.setZero();
 }
 

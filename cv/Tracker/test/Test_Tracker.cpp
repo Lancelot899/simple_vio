@@ -9,6 +9,7 @@
 #include "IO/camera/CameraIO.h"
 #include "cv/FeatureDetector/Detector.h"
 #include "DataStructure/cv/Feature.h"
+#include "DataStructure/imu/IMUMeasure.h"
 
 TEST(Tracker, Tracker) {
 
@@ -56,10 +57,11 @@ TEST(Tracker, Tracker) {
 
 #endif //
 
-    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i);
+	auto imuParam = std::make_shared<ImuParameters>();
+    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i, imuParam);
 
     std::shared_ptr<cvFrame> cvframe_j = std::make_shared<cvFrame>(cam, pic_j);
-    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j);
+    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j, imuParam);
 
     Eigen::Matrix<double, 3, 4> Mij;
     Mij << 1, 0, 0, 0 , 0, 1, 0, 0, 0, 0, 1, 0;
@@ -93,10 +95,10 @@ TEST(Tracker, Tracker) {
 		cvframe_i->addFeature(ft);
 
 
-	viframe_i = std::make_shared<viFrame>(1, cvframe_i);
+	viframe_i = std::make_shared<viFrame>(1, cvframe_i, imuParam);
 
 	cvframe_j = std::make_shared<cvFrame>(cam, pic_j);
-	viframe_j = std::make_shared<viFrame>(2, cvframe_j);
+	viframe_j = std::make_shared<viFrame>(2, cvframe_j, imuParam);
 
 	Sophus::SE3d Tij_;
 	GTEST_ASSERT_EQ(Tij_.matrix3x4(), Mij);

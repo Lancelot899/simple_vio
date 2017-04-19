@@ -29,8 +29,9 @@ TEST(Triangulate, Triangulate)
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
 
-    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i);
-    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j);
+    auto imuParam = std::make_shared<ImuParameters>();
+    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i, imuParam);
+    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j, imuParam);
 
     Sophus::SE3d Tij;
     bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);

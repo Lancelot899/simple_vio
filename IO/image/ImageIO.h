@@ -24,6 +24,9 @@ public:
     std::string popName();
     cv::Mat  popImage();
     std::pair<okvis::Time, cv::Mat> popImageAndTimestamp();
+	bool isEmpty() {
+
+	}
 
 private:
     ImageIOData       imageDeque;

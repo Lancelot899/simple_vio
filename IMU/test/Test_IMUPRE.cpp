@@ -53,8 +53,8 @@ TEST(test_ImuPRE, IMU_PRE) {
 		cvframe1->addFeature(ft);
     std::shared_ptr<cvFrame> cvframe2 = std::make_shared<cvFrame>(cam, time_image2.second);
 
-	std::shared_ptr<viFrame> viframe1 = std::make_shared<viFrame>(1, cvframe1);
-	std::shared_ptr<viFrame> viframe2 = std::make_shared<viFrame>(2, cvframe2);
+	std::shared_ptr<viFrame> viframe1 = std::make_shared<viFrame>(1, cvframe1, imuParam);
+	std::shared_ptr<viFrame> viframe2 = std::make_shared<viFrame>(2, cvframe2, imuParam);
 
 	direct_tracker::Tracker tracker;
 
