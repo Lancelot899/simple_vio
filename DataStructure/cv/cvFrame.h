@@ -105,7 +105,7 @@ public:
     double getGradNorm(int u, int v, int level = 0);
     int getWidth(int level = 0);
     int getHeight(int level = 0);
-    const cvMeasure& getMeasure();
+    cvMeasure& getMeasure();
     bool checkOccupy(int u,int v);
     void setCellTrue(int u, int v);
     bool checkCell(int u, int v) {

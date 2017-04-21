@@ -88,7 +88,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 	for (auto &ftKey : fts) {
 		ceres::Solver::Summary summary;
 		ceres::Problem problem;
-		double initDepth = scale * (init_depth + scale_() * (T_nk.so3() * T_nk.translation())(2));
+		double initDepth = scale * (init_depth + scale_() * std::abs((T_nk.so3() * T_nk.translation())(2)));
 		auto cam = nextFrame->getCam();
 		Eigen::Vector2d uv;
 		if(ftKey->isBAed) continue;
@@ -114,6 +114,9 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 				             ftKey),
 				nullptr, &updateDepth);
 		ceres::Solve(option, &problem, &summary);
+		if(updateDepth < 0.00000000001)
+			continue;
+
 		if (summary.termination_type == ceres::CONVERGENCE) {
 			newCreatPoint++;
 			ftKey->point->pos_mutex.lock();
