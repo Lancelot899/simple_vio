@@ -60,12 +60,14 @@ private:
 class Viewer : public QGLViewer {
 public:
 	Viewer() {
-		//glDisable(GL_LIGHT0);
+		glPointSize(1000);
+		glEnable(GL_LIGHT0);
 	}
 
 	~Viewer() {}
 	virtual void draw() {
 		glBegin(GL_POINTS);
+
 		for(auto &point : drPoints)
 			point.draw();
 		glEnd();

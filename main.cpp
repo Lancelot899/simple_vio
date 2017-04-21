@@ -3,7 +3,7 @@
 #include "glog/logging.h"
 
 /// Run all the tests that were declared with TEST()
-#define TEST_INITIAL
+#define TEST_BA
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

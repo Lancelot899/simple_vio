@@ -23,6 +23,7 @@ public:
 	void draw() {
 		glColor3d(0.3, 0.6, 0.9);
 		point->pos_mutex.lock_shared();
+		//std::cout << point->pos_[2] << std::endl;
 		glVertex3d(point->pos_[0] * 100, point->pos_[1] * 100, point->pos_[2] * 100);
 		point->pos_mutex.unlock_shared();
 	}

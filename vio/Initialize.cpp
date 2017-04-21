@@ -36,6 +36,7 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
                              std::shared_ptr<imuFactor> &imufactor,
                              std::shared_ptr<ImuParameters> imuParam) {
     Sophus::SE3d T = imufactor->getPoseFac();
+	//std::cout << T.matrix3x4() << std::endl;
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
     if(!tracker->Tracking(VecFrames.back(), viframe, T))
 	    return;
@@ -50,6 +51,7 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
 
 	feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
+	//std::cout << "new feature : " << features.size() << std::endl;
     for(auto &feat : features)
         viframe->getCVFrame()->cvData.fts_.push_back(feat);
 	VecFrames.push_back(viframe);
