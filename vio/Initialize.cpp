@@ -47,7 +47,7 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
 		    triangulater->triangulate(VecFrames.back(), viframe, T, 30))
 	    return;
 
-    tracker->reProject(VecFrames.back(), viframe, T);
+    tracker->reProject(VecFrames.back(), viframe);
 
 	feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
