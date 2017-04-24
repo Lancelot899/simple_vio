@@ -76,8 +76,10 @@ TEST(Tracker, Tracker) {
         printf("\t--failed!\n");
     std::cout<<Tij.so3().matrix()<<"\n";
     std::cout<<Tij.translation()<<"\n";
+	Sophus::SE3d se3 = viframe_i->getT_BS().inverse() * viframe_i->getPose() * Tij;
+	viframe_j->getCVFrame()->setPose(se3);
 
-	tracker.reProject(viframe_i, viframe_j, Tij);
+	tracker.reProject(viframe_i, viframe_j);
 
 	GTEST_ASSERT_EQ(viframe_i->getCVFrame()->getMeasure().fts_.size(), viframe_j->getCVFrame()->getMeasure().fts_
 			.size());
@@ -108,7 +110,7 @@ TEST(Tracker, Tracker) {
 //	std::cout << "--rotation:\n" << Tij_.rotationMatrix() << std::endl;
 //	std::cout << "--translation:\n" << Tij_.translation() << std::endl;
 
-	tracker.reProject(viframe_i, viframe_j, Tij_);
+	tracker.reProject(viframe_i, viframe_j);
 //	std::cout << "--i fts size: " << viframe_i->getCVFrame()->getMeasure().fts_.size()
 //	          << ", i fts size:" << viframe_j->getCVFrame()->getMeasure().fts_.size() << std::endl;
 

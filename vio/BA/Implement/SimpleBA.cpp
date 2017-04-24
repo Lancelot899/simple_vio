@@ -104,7 +104,7 @@ bool IMUErr::Evaluate(double const *const *parameters,
 
 	Eigen::Matrix<double, 9, 1> Err;
 	Err.block<3, 1>(0, 0) = Sophus::SO3d::log((T_ij.so3() * Sophus::SO3d::exp(JBias.block<3, 3>(0, 0)
-	                                          * dbias_g)).inverse() * (Ri.inverse() * Rj));
+	                                           * dbias_g)).inverse() * (Ri.inverse() * Rj));
 
 	Err.block<3, 1>(6, 0) = Ri.inverse() * (vj - vi - imuParam->g * dt)
 	                         - (imufactor->getSpeedFac() + JBias.block<3, 3>(6, 0) * dbias_g

@@ -21,7 +21,7 @@
 
 const std::vector<Eigen::Vector2i>& trackModel(int mode = 0);
 extern int widowSize;
-
+extern double initVar;
 
 #define SIMPLE_BA         0x000000001
 

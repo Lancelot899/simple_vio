@@ -1,6 +1,7 @@
 #include "setting.h"
 
 int widowSize = 7;
+double initVar = 1.0;
 
 const std::vector<Eigen::Vector2i>& trackModel(int mode) {
 	static std::vector<Eigen::Vector2i> model0(8);
