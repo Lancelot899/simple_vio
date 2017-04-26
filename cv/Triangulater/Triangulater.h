@@ -16,7 +16,8 @@ public:
     ~Triangulater(){}
 
     int triangulate(std::shared_ptr<viFrame>&keyFrame,
-                     std::shared_ptr<viFrame>&nextFrame, const Sophus::SE3d &T_nk, int iter = 0);
+                    std::shared_ptr<viFrame>&nextFrame, const Sophus::SE3d &T_nk,
+                    Eigen::Matrix<double, 6, 6>&infomation,int iter = 0);
 };
 
 
