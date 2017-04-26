@@ -31,7 +31,7 @@ public:
     Eigen::Vector3d                        pos_;                     //!< 3d pos of the point in the world coordinate frame.
     boost::shared_mutex                    pos_mutex;
     double                                  normal_information_;      //!< Inverse covariance.
-    boost::shared_mutex                    inforMutex;
+    boost::shared_mutex                    infoMutex;
     std::list<std::shared_ptr<Feature>>    obs_;                     //!< References to keyframes which observe the point.
     boost::shared_mutex                    obsMutex;
     std::atomic_int                        last_projected_kf_id_;    //!< Flag for the reprojection: don't reproject a pt twice.

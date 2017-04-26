@@ -98,10 +98,10 @@ public:
 												Iy = grad(1);
 											}
 											Eigen::Matrix<double, 1, 3> Jac;
-											Jac(0, 0) = Ix * cam->fx() / pj(2);
-											Jac(0, 1) = Iy * cam->fy() / pj(2);
-											Jac(0, 2) = -Ix * cam->fx() * pj(0) / pj(2) / pj(2) -
-											            Iy * cam->fy() * pj(1) / pj(2) / pj(2);
+											Jac(0, 0) = Ix * cam->fx(ft->level) / pj(2);
+											Jac(0, 1) = Iy * cam->fy(ft->level) / pj(2);
+											Jac(0, 2) = -Ix * cam->fx(ft->level) * pj(0) / pj(2) / pj(2) -
+											            Iy * cam->fy(ft->level) * pj(1) / pj(2) / pj(2);
 											Jac = sqrt_info * w * Jac * T_Si.rotationMatrix();
 											jacobians[0][3] = Jac(0, 0);
 											jacobians[0][4] = Jac(0, 1);
@@ -221,10 +221,10 @@ public:
 			}
 
 			Eigen::Matrix<double, 1, 3> Jac;
-			Jac(0, 0) = Ix * cam->fx() / P_next(2);
-			Jac(0, 1) = Iy * cam->fy() / P_next(2);
-			Jac(0, 2) = -Ix * cam->fx() * P_next(0) / P_next(2) / P_next(2) -
-			            Iy * cam->fy() * P_next(1) / P_next(2) / P_next(2);
+			Jac(0, 0) = Ix * cam->fx(f_->level) / P_next(2);
+			Jac(0, 1) = Iy * cam->fy(f_->level) / P_next(2);
+			Jac(0, 2) = -Ix * cam->fx(f_->level) * P_next(0) / P_next(2) / P_next(2) -
+			            Iy * cam->fy(f_->level) * P_next(1) / P_next(2) / P_next(2);
 			Jac = Jac * nextFrame->getCVFrame()->getPose().rotationMatrix();
 			jacobians[0][0] = Jac * normPoint;
 		}
@@ -310,7 +310,6 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 							goto PROJECTFAILED;
 						}
 
-						Eigen::Vector2d uv = viframe_i->getCam()->world2cam(Pj);
 						Eigen::Matrix<double, 1, 6> Jac;
 						Jac.block<1, 3>(0, 0) = normPoint.transpose() *
 						                        Sophus::SO3d::hat(pose.so3().inverse() * (Pj - pose.translation()));
@@ -484,6 +483,9 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		Eigen::Vector3d pj = T_ij_.so3().inverse() * T_ij_ * ft->point->pos_;
 		Eigen::Vector3d normP = ft->point->pos_ / ft->point->pos_(2);
 		ft->point->pos_mutex.unlock_shared();
+		if(pj(2) < 0.000000001 || std::isinf(pj(2)))
+			continue;
+
 		Eigen::Matrix<double, 1, 6> Jac;
 		Jac.block<1, 3>(0, 0) = normP.transpose() * Sophus::SO3d::hat(pj);
 		Jac.block<1, 3>(0, 3) = normP.transpose();

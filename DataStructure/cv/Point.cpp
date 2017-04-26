@@ -36,15 +36,15 @@ double Point::getDepthInformation() {
 
 double Point::updateDepth(double depth, double information) {
     pos_mutex.lock_shared();
-    inforMutex.lock_shared();
+    infoMutex.lock_shared();
     double depthNew = (normal_information_ + depth / pos_[2] * information) / (normal_information_ + information);
     double newInfo = normal_information_ + information;
-    inforMutex.unlock_shared();
+	infoMutex.unlock_shared();
     pos_mutex.unlock_shared();
 
-    inforMutex.lock();
+	infoMutex.lock();
     normal_information_ = newInfo;
-    inforMutex.unlock();
+	infoMutex.unlock();
 
     pos_mutex.lock();
     pos_ = depthNew * pos_;
