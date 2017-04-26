@@ -17,9 +17,6 @@ PinholeCamera::PinholeCamera(double width, double height,
         use_optimization_(false) {
     d_[0] = d0; d_[1] = d1; d_[2] = d2; d_[3] = d3; d_[4] = d4;
 
-    fx_ = new double[IMG_LEVEL]; fy_ = new double[IMG_LEVEL];
-    cx_ = new double[IMG_LEVEL]; cy_ = new double[IMG_LEVEL];
-
     fx_[0] = fx, fy_[0] = fy, cx_[0] = cx, cy_[0] = cy;
     cvK_[0] = (cv::Mat_<double>(3, 3) << fx_[0], 0.0, cx_[0], 0.0, fy_[0], cy_[0], 0.0, 0.0, 1.0);
     cvD_ = (cv::Mat_<double>(1, 5) << d_[0], d_[1], d_[2], d_[3], d_[4]);
@@ -40,10 +37,7 @@ PinholeCamera::PinholeCamera(double width, double height,
 
 }
 
-PinholeCamera::~PinholeCamera() {
-    delete []fx_; delete []fy_;
-    delete []cx_; delete []cy_;
-}
+PinholeCamera::~PinholeCamera() {}
 
 Vector3d PinholeCamera::cam2world(const double& u, const double& v) const {
     Vector3d xyz;
