@@ -44,7 +44,7 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
     T = VecFrames.back()->getPose() * T;
 	viframe->updatePose(T);
 	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
-		    triangulater->triangulate(VecFrames.back(), viframe, T, 30))
+            triangulater->triangulate(VecFrames.back(), viframe, T, 30))
 	    return;
 
     tracker->reProject(VecFrames.back(), viframe);

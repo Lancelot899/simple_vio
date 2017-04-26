@@ -131,7 +131,7 @@ cv::Mat Undistort(const cv::Mat& src, std::shared_ptr<AbstractCamera> cam) {
 
 double scale = 1.0;
 double init_depth(double num) {
-    const static const_depth = 1.0;
+    const static double const_depth = 1.0;
     static boost::mt19937 gen;
     static boost::uniform_real<>dist(0.9, 1.1);
     static boost::variate_generator<boost::mt19937&,boost::uniform_real<>> scale_ (gen, dist);
