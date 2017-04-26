@@ -16,8 +16,10 @@ namespace direct_tracker {
     class Tracker {
     public:
         Tracker();
-        bool Tracking(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j, Sophus::SE3d &T_ji, int n_iter = 30);
-        int  reProject(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j, Sophus::SE3d &T_ji);
+        bool Tracking(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j,
+                      Sophus::SE3d &Tij, Eigen::Matrix<double, 6, 6>& infomation, int n_iter = 30);
+        int  reProject(std::shared_ptr<viFrame>&viframe_i, std::shared_ptr<viFrame>&viframe_j,
+                       Sophus::SE3d &Tij, Eigen::Matrix<double, 6, 6>& infomation);
     private:
 
     };

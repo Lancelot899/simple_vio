@@ -1,6 +1,6 @@
 #include "cvFrame.h"
 
-const cvMeasure& cvFrame::getMeasure() {
+cvMeasure& cvFrame::getMeasure() {
     return cvData;
 }
 

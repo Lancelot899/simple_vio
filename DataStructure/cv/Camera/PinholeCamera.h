@@ -6,7 +6,7 @@
 #define SIMPLE_VIO_PINHOLECAMERA_H
 
 #include "AbstractCamera.h"
-
+#include "util/setting.h"
 
 class PinholeCamera : public AbstractCamera {
 public:
@@ -29,36 +29,38 @@ public:
     Eigen::Vector2d world2camUV(const Eigen::Vector2d& uv) const;
 
     Eigen::Vector2d focal_length() const {
-        return Eigen::Vector2d(fx_, fy_);
+        return Eigen::Vector2d(fx_[0], fy_[0]);
     }
 
     virtual double errorMultiplier2() const {
-        return fabs(fx_);
+        return fabs(fx_[0]);
     }
 
     virtual double errorMultiplier() const {
-        return fabs(4.0*fx_*fy_);
+        return fabs(4.0*fx_[0]*fy_[0]);
     }
 
-    const Eigen::Matrix3d K() const { return K_; }
-    const Eigen::Matrix3d K_inv() const { return K_inv_; }
-    virtual double fx() const { return fx_; }
-    virtual double fy() const { return fy_; }
-    virtual double cx() const { return cx_; }
-    virtual double cy() const { return cy_; }
+    const Eigen::Matrix3d K(int level) const { return K_[level]; }
+    const Eigen::Matrix3d K_inv(int level) const { return K_inv_[level]; }
+    virtual double fx(int level) const { return fx_[level]; }
+    virtual double fy(int level) const { return fy_[level]; }
+    virtual double cx(int level) const { return cx_[level]; }
+    virtual double cy(int level) const { return cy_[level]; }
     virtual double d(int i) const { return d_[i]; }
     void undistortImage(const cv::Mat& raw, cv::Mat& rectified);
 
 private:
-    const double fx_, fy_;
-    const double cx_, cy_;
+    double fx_[IMG_LEVEL];
+    double fy_[IMG_LEVEL];
+    double cx_[IMG_LEVEL];
+    double cy_[IMG_LEVEL];
     bool distortion_;             //!< is it pure pinhole model or has it radial distortion?
     double d_[5];                 //!< distortion parameters, see http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
-    cv::Mat cvK_, cvD_;
+    cv::Mat cvK_[IMG_LEVEL], cvD_;
     cv::Mat undist_map1_, undist_map2_;
     bool use_optimization_;
-    Eigen::Matrix3d K_;
-    Eigen::Matrix3d K_inv_;
+    Eigen::Matrix3d K_[IMG_LEVEL];
+    Eigen::Matrix3d K_inv_[IMG_LEVEL];
 
 };
 

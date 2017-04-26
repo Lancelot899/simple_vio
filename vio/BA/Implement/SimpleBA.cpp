@@ -89,6 +89,7 @@ bool IMUErr::Evaluate(double const *const *parameters,
 
 
 	auto imuParam = viframe_i->getImuParam();
+
 	const Eigen::Vector3d &vi = posei.block<3, 1>(6, 0);
 	const Eigen::Vector3d &vj = posej.block<3, 1>(6, 0);
 	const Eigen::Vector3d &pi = posei.block<3, 1>(3, 0);
@@ -100,9 +101,11 @@ bool IMUErr::Evaluate(double const *const *parameters,
 	Sophus::SO3d Rj = Sophus::SO3d::exp(posej.block<3, 1>(0, 0));
 	imuFactor::FacJBias_t JBias = imufactor->getJBias();
 	const Sophus::SE3d& T_ij = imufactor->getPoseFac();
+
 	Eigen::Matrix<double, 9, 1> Err;
-	Err.block<3, 1>(0, 0) = Sophus::SO3d::log((T_ij.so3() * Sophus::SO3d::exp(JBias.block<3, 3>(0, 0) * dbias_g)).inverse()
-	                                          * (Ri.inverse() * Rj));
+	Err.block<3, 1>(0, 0) = Sophus::SO3d::log((T_ij.so3() * Sophus::SO3d::exp(JBias.block<3, 3>(0, 0)
+	                                           * dbias_g)).inverse() * (Ri.inverse() * Rj));
+
 	Err.block<3, 1>(6, 0) = Ri.inverse() * (vj - vi - imuParam->g * dt)
 	                         - (imufactor->getSpeedFac() + JBias.block<3, 3>(6, 0) * dbias_g
 	                                                   + JBias.block<3, 3>(3, 0) * dbias_a);
@@ -174,7 +177,7 @@ bool IMUErr::Evaluate(double const *const *parameters,
 	return true;
 }
 
-class PnPErr : public ceres::SizedCostFunction<2, 6, 3> {
+class PnPErr : public ceres::SizedCostFunction<2, 15, 3> {
 public:
 	PnPErr(std::shared_ptr<viFrame> &viframe,  std::shared_ptr<Feature> &ft);
 
@@ -222,6 +225,7 @@ bool PnPErr::Evaluate(double const *const *parameters,
 		K(1, 2) = - pi(1) * K(1, 1) / pi(2);
 
 		if(jacobians[0]) {
+			memset(jacobians[0], 0, sizeof(double) * 30);
 			Eigen::Matrix3d dedphiR = T_SB.rotationMatrix() * R.matrix() * Sophus::SO3d::hat(p);
 			Eigen::Matrix3d dedtR = -T_SB.rotationMatrix();
 
@@ -234,7 +238,7 @@ bool PnPErr::Evaluate(double const *const *parameters,
 					jacobians[0][k + 3] = dedt(i, j);
 					k++;
 				}
-				k += 3;
+				k += 9;
 			}
 		}
 
@@ -276,7 +280,6 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 	}
 
 	std::map<std::shared_ptr<cvFrame>, int> memTabel;
-
 	ceres::Problem problem;
 
 	{
@@ -285,17 +288,19 @@ bool SimpleBA::run(std::vector <std::shared_ptr<viFrame>> &viframes,
 			ceres::CostFunction *costFun = new IMUErr(imufactors[i], viframes[i], viframes[i + 1]);
 			problem.AddResidualBlock(costFun, new ceres::HuberLoss(0.5), poseData + i * 15, poseData + i * 15 + 15);
 			problem.SetParameterization(poseData + i * 15, new VioPose());
-			memTabel.insert(std::make_pair(viframes[i]->getCVFrame(), i * 15));
+			memTabel.insert(std::make_pair(viframes[i]->getCVFrame(), i));
         }
 
 		problem.SetParameterization(poseData + i * 15, new VioPose());
 		memTabel.insert(std::make_pair(viframes[i]->getCVFrame(), i));
-
 	}
 
 	std::list<std::shared_ptr<SimpleBA::CopyPoint>> copy_points;
 
 	for(auto it = obsModes.begin(); it != obsModes.end(); ++it) {
+		if(it->second.size() < 3)
+			continue;
+
 		if(it->first->last_projected_kf_id_ == viframes[poseNum -1]->ID) {
 			auto pt = std::make_shared<SimpleBA::CopyPoint>();
 			pt->point = it->first;

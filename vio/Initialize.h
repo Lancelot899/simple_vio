@@ -20,6 +20,7 @@ namespace direct_tracker {
 }
 
 class Triangulater;
+class ImuParameters;
 
 class Initialize {
 public:
@@ -27,8 +28,8 @@ public:
                std::shared_ptr<direct_tracker::Tracker>& tracker,
                std::shared_ptr<Triangulater> &triangulater,
                std::shared_ptr<IMU> &imu);
-    void setFirstFrame(std::shared_ptr<cvFrame> &cvframe);
-    void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor);
+    void setFirstFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<ImuParameters> imuParam);
+    void pushcvFrame(std::shared_ptr<cvFrame> &cvframe, std::shared_ptr<imuFactor> &imufactor, std::shared_ptr<ImuParameters> imuParam);
     std::vector<std::shared_ptr<viFrame>>& getInitialViframe() {
         return VecFrames;
     }

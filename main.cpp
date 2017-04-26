@@ -3,7 +3,7 @@
 #include "glog/logging.h"
 
 /// Run all the tests that were declared with TEST()
-#define TEST_INITIAL
+#define TEST_ALL
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
@@ -16,7 +16,12 @@ int main(int argc, char **argv) {
   #include "vio/test/Test_initial.h"
 		testInitial(argc, argv);
   #else
+    #ifdef TEST_BA
+	#include "vio/BA/Implement/test/Test_SimpleBA.h"
+      testBA(argc, argv);
+	#else
 
+    #endif // TEST_BA
   #endif //TEST_INITIAL
 
 #endif //TEST_ALL

@@ -17,6 +17,7 @@ class Point;
 class ImageIO;
 class IMUIO;
 class AbstractCamera;
+class BundleAdjustemt;
 
 class system {
 public:
@@ -38,6 +39,7 @@ private:
 private:
 	int id;
 	std::shared_ptr<Initialize> initialier;
+	std::shared_ptr<BundleAdjustemt> BA;
 	std::shared_ptr<feature_detection::Detector> detector;
 	std::shared_ptr<direct_tracker::Tracker> tracker;
 	std::shared_ptr<Triangulater> triangulater;
@@ -45,8 +47,7 @@ private:
 	std::shared_ptr<ImageIO> imgIO;
 	std::shared_ptr<IMUIO> imuIO;
 	std::shared_ptr<AbstractCamera> cam;
-
-	std::vector<std::shared_ptr<Point>> keyPoints;
+	std::shared_ptr<ImuParameters> imuParam;
 	std::vector<std::shared_ptr<viFrame>> keyFrames;
 	std::vector<std::shared_ptr<imuFactor>> imuFactors;
 	std::thread BAThread;

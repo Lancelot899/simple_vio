@@ -1,6 +1,9 @@
 #ifndef SETTING_H
 #define SETTING_H
 
+#include <Eigen/Dense>
+#include <vector>
+
 #define IMG_LEVEL                         5
 #define IMUMEASURE_BETWEEN_FRAME_MAX      100
 
@@ -13,9 +16,13 @@
 #define detectCellHeight  4
 #define detectWidthGrid   4
 #define detectHeightGrid  4
+#define Gravity           9.78
+#define IuminanceErr      30
+#define initDepthInfo     0.5
 
+const std::vector<Eigen::Vector2i>& trackModel(int mode = 0);
 extern int widowSize;
-
+extern double initVar;
 
 #define SIMPLE_BA         0x000000001
 

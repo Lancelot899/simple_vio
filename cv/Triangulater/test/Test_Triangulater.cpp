@@ -29,11 +29,13 @@ TEST(Triangulate, Triangulate)
     for(auto &ft : fts)
         cvframe_i->addFeature(ft);
 
-    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i);
-    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j);
+    auto imuParam = std::make_shared<ImuParameters>();
+    std::shared_ptr<viFrame> viframe_i = std::make_shared<viFrame>(1, cvframe_i, imuParam);
+    std::shared_ptr<viFrame> viframe_j = std::make_shared<viFrame>(2, cvframe_j, imuParam);
 
     Sophus::SE3d Tij;
-    bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
+    Eigen::Matrix<double, 6, 6> info;
+    bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, info, 50);
     if(isTracked)
         printf("\t--pre Tracking successful!\n\n");
     else
@@ -42,7 +44,7 @@ TEST(Triangulate, Triangulate)
     printf("pre Tracking was finished! Now begin Triangulate: \n\n");
 
     Triangulater triangula;
-    int count = triangula.triangulate(viframe_i,viframe_j,Tij,30);
+    int count = triangula.triangulate(viframe_i,viframe_j,Tij,info, 30);
     printf("add %d points' depth!\n",count);
 
 }

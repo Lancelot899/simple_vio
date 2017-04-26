@@ -8,6 +8,7 @@
 #include "IMUIO.h"
 
 #include "util/util.h"
+#include "util/setting.h"
 
 void inline readData(char *buffer, const char *name, double *val) {
     char *p = buffer;
@@ -125,6 +126,7 @@ IMUIO::IMUIO(std::string &imufile, std::string &imuParamfile) {
     Sophus::SE3d seTbs(mTbs);
 
     imuParam->T_BS = seTbs;
+    imuParam->g = Eigen::Vector3d(0, 0, Gravity);
 
     std::ifstream imu_file(imufile);
     if(!imu_file.good()) {

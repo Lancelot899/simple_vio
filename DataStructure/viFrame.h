@@ -23,7 +23,7 @@ public:
     typedef std::shared_ptr<AbstractCamera>   cam_t;
 
 public:
-    viFrame(int id, std::shared_ptr<cvFrame>& cvframe);
+    viFrame(int id, std::shared_ptr<cvFrame>& cvframe, ImuParam param);
     ~viFrame();
     int getID() {
         return id;

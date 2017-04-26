@@ -210,7 +210,6 @@ set(SOURCE_FILES
         DataStructure/cv/Camera/PinholeCamera.h
         DataStructure/cv/Camera/VIOPinholeCamera.cpp
         DataStructure/cv/Camera/VIOPinholeCamera.h
-        cv/Matcher/Matcher.cpp cv/Matcher/Matcher.h
         vio/Initialize.cpp
         vio/Initialize.h
         vio/Implement/InitialImpl.cpp
@@ -237,6 +236,8 @@ set(SOURCE_FILES
         vio/BA/Implement/BABase.cpp
         vio/BA/Implement/SimpleBA.h
         vio/BA/Implement/SimpleBA.cpp
+        vio/BA/Implement/test/Test_SimpleBA.h
+        vio/BA/Implement/test/Test_SimpleBA.cpp
         )
 
 
