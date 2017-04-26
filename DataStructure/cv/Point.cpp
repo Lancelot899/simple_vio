@@ -28,9 +28,9 @@ Point::Point(const Vector3d& pos, std::shared_ptr<Feature> &ftr) :
 Point::~Point() {}
 
 double Point::getDepthInformation() {
-    inforMutex.lock_shared();
+    infoMutex.lock_shared();
     double info = normal_information_;
-    inforMutex.unlock_shared();
+    infoMutex.unlock_shared();
     return info;
 }
 
