@@ -30,7 +30,7 @@ public:
     int                                    id_;                      //!< Unique ID of the point.
     Eigen::Vector3d                        pos_;                     //!< 3d pos of the point in the world coordinate frame.
     boost::shared_mutex                    pos_mutex;
-    double                                  normal_information_;      //!< Inverse covariance.
+    double                                 normal_information_;      //!< Inverse covariance.
     boost::shared_mutex                    infoMutex;
     std::list<std::shared_ptr<Feature>>    obs_;                     //!< References to keyframes which observe the point.
     boost::shared_mutex                    obsMutex;

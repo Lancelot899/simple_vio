@@ -36,6 +36,7 @@ public:
 	                      double **jacobians) const {
 		if (ft->isProjected == false) {
 			*residuals = 0;
+			printf("projected failed!\n");
 			if (jacobians && jacobians[0])
 				memset(jacobians[0], 0, sizeof(double) * 6);
 			return true;
@@ -111,8 +112,8 @@ public:
 											jacobians[0][1] = Jac(0, 1);
 											jacobians[0][2] = Jac(0, 2);
 										}
+										return true;
 									}
-									return true;
 								}
 							}
 						}
@@ -124,7 +125,7 @@ public:
 		ft->isProjected = false;
 		if (jacobians && jacobians[0])
 			memset(jacobians[0], 0, sizeof(double) * 6);
-		return true;
+		return false;
 	}
 
 private:
@@ -182,7 +183,7 @@ public:
 	virtual ~depthErr() {}
 
 	depthErr(std::shared_ptr<viFrame> nextFrame, double I_k,
-	         const cvMeasure::features_t::value_type &f) : f_(f) {
+	         const cvMeasure::features_t::value_type &f, Sophus::SE3d &pose_) : f_(f), pose(pose_) {
 		this->nextFrame = nextFrame;
 		this->I_k = I_k;
 		f_->point->pos_mutex.lock_shared();
@@ -194,7 +195,7 @@ public:
 	                      double *residuals,
 	                      double **jacobians) const {
 		double d = **parameters;
-		Eigen::Vector3d P_next = nextFrame->getCVFrame()->getPose() * (d * normPoint);
+		Eigen::Vector3d P_next = pose * (d * normPoint);
 		auto &cam = nextFrame->getCam();
 		auto uv = cam->world2cam(P_next);
 		if (uv(0) < 0 || uv(0) >= nextFrame->getCVFrame()->getWidth() || uv(1) < 0 ||
@@ -225,7 +226,7 @@ public:
 			Jac(0, 1) = Iy * cam->fy(f_->level) / P_next(2);
 			Jac(0, 2) = -Ix * cam->fx(f_->level) * P_next(0) / P_next(2) / P_next(2) -
 			            Iy * cam->fy(f_->level) * P_next(1) / P_next(2) / P_next(2);
-			Jac = Jac * nextFrame->getCVFrame()->getPose().rotationMatrix();
+			Jac = Jac * pose.rotationMatrix();
 			jacobians[0][0] = Jac * normPoint;
 		}
 
@@ -236,6 +237,7 @@ private:
 	Eigen::Vector3d normPoint;
 	std::shared_ptr<viFrame> nextFrame;
 	double I_k;
+	Sophus::SE3d &pose;
 };
 
 
@@ -247,7 +249,6 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	int cellwidth = viframe_j->getCVFrame()->getWidth() / detectCellWidth;
 	int chellheight = viframe_j->getCVFrame()->getHeight() / detectCellHeight;
 	Sophus::SE3d _SPose_j = viframe_i->getT_BS().inverse() * viframe_i->getPose() * Tij;
-	viframe_j->getCVFrame()->setPose(_SPose_j);
 	int cntCell = 0;
 	std::list<cvMeasure::features_t::iterator> toErase;
 
@@ -256,27 +257,32 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		ft->point->pos_mutex.lock_shared();
 		Eigen::Vector3d pos = ft->point->pos_;
 		ft->point->pos_mutex.unlock_shared();
-		Eigen::Matrix3d pi = viframe_i->getCVFrame() * pos;
-		if(pi[2] < 0.00000001 || std::isinf(pi[2])) {
+		Eigen::Vector2d pos_;
+		Eigen::Vector2d uvi, uvj;
+		Eigen::Vector3d pi = viframe_i->getCVFrame()->getPose() * pos;
+		if (pi[2] < 0.00000001 || std::isinf(pi[2])) {
 			toErase.push_back(it);
 			goto PROJECTFAILED;
 		}
 
-		Eigen::Vector2d uvi = viframe_i->getCam()->world2cam(pi);
+		uvi = viframe_i->getCam()->world2cam(pi);
 		if (uvi(0) >= width || uvi(1) >= height || uvi(0) <= 0 || uvi(1) <= 0) {
 			pos = _SPose_j * pos;
-			if(pos[2] < 0.00000001 || std::isinf(pos[2])) {
+			if (pos[2] < 0.00000001 || std::isinf(pos[2])) {
 				toErase.push_back(it);
 				goto PROJECTFAILED;
 			}
 
 			pos /= pos[2];
-			Eigen::Vector2d uvj = viframe_j->getCam()->world2cam(pos.block<2, 1>(0, 0));
+			pos_ = pos.block<2, 1>(0, 0);
+			uvj = viframe_j->getCam()->world2cam(pos_);
 			double Ij = viframe_j->getCVFrame()->getIntensity(uvj(0), uvj(1));
 			double Ii = viframe_i->getCVFrame()->getIntensity(uvi(0), uvi(1));
+			int u = int(uvj(0) / cellwidth);
+			int v = int(uvj(1) / chellheight);
 			if (uvj(0) < width && uvj(1) < height && uvj(0) > 0 && uvj(1) > 0 && std::abs(Ii - Ij) < IuminanceErr) {
 				if (ft->isBAed != true) {
-					for(int i = 0; i < ft->level; ++i)
+					for (int i = 0; i < ft->level; ++i)
 						uvi /= 2.0;
 
 					Ii = viframe_i->getCVFrame()->getIntensityBilinear(uvi(0), uvi(1), ft->level);
@@ -285,7 +291,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 					double initPth = ft->point->pos_[2];
 					ft->point->pos_mutex.unlock_shared();
 					ceres::Problem problem;
-					ceres::CostFunction *func = new depthErr(viframe_j, Ii, ft);
+					ceres::CostFunction *func = new depthErr(viframe_j, Ii, ft, _SPose_j);
 					problem.AddResidualBlock(func, nullptr, &initPth);
 					ceres::Solver::Options option;
 					option.minimizer_type = ceres::LINE_SEARCH;
@@ -296,25 +302,25 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 						ft->point->pos_mutex.lock_shared();
 						Eigen::Vector3d normPoint = ft->point->pos_ / ft->point->pos_(2);
 						ft->point->pos_mutex.unlock_shared();
-						auto pose = viframe_j->getPose();
-						Eigen::Vector3d Pj = pose * (initPth * normPoint);
-						if(Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
+						Eigen::Vector3d Pj = _SPose_j * (initPth * normPoint);
+						if (Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
 							toErase.push_back(it);
 							goto PROJECTFAILED;
 						}
 
 						uvj = viframe_j->getCam()->world2cam(Pj);
 
-						if(uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
+						if (uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
 							toErase.push_back(it);
 							goto PROJECTFAILED;
 						}
 
 						Eigen::Matrix<double, 1, 6> Jac;
 						Jac.block<1, 3>(0, 0) = normPoint.transpose() *
-						                        Sophus::SO3d::hat(pose.so3().inverse() * (Pj - pose.translation()));
+						                        Sophus::SO3d::hat(
+								                        _SPose_j.so3().inverse() * (Pj - _SPose_j.translation()));
 
-						Jac.block<1, 3>(0, 3) = normPoint.transpose() * pose.so3().inverse().matrix();
+						Jac.block<1, 3>(0, 3) = normPoint.transpose() * _SPose_j.so3().inverse().matrix();
 						Jac = Jac / (normPoint.transpose() * normPoint);
 
 						double newJac = Jac * infomation.inverse() * Jac.transpose();
@@ -325,9 +331,13 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 						ft->point->pos_mutex.unlock_shared();
 						pos = _SPose_j * pos;
 						pos /= pos[2];
-						uvj = viframe_j->getCam()->world2cam(pos.block<2, 1>(0, 0));
+						pos_ = pos.block<2, 1>(0, 0);
+						uvj = viframe_j->getCam()->world2cam(pos_);
 
-						for(int i = 0; i < ft->level; ++i)
+						u = int(uvj(0) / cellwidth);
+						v = int(uvj(1) / chellheight);
+
+						for (int i = 0; i < ft->level; ++i)
 							uvj /= 2.0;
 
 					}
@@ -339,8 +349,6 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 					ft_->point->obsMutex.unlock();
 					viframe_j->getCVFrame()->addFeature(ft_);
 
-					int u = int(uvj(0) / cellwidth);
-					int v = int(uvj(1) / chellheight);
 
 					if (!viframe_j->getCVFrame()->checkCell(u, v)) {
 						viframe_j->getCVFrame()->setCellTrue(u, v);
@@ -348,16 +356,19 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 					}
 					ft->point->n_succeeded_reproj_++;
 					continue;
-				}
-
-				else {
+				} else {
 					std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
-						                                                         ft->point, uvj, pos, ft->level);
+					                                                         ft->point, uvj, pos, ft->level);
 					ft_->isBAed.exchange(ft->isBAed);
 					ft_->point->obsMutex.lock();
 					ft_->point->obs_.push_back(ft_);
 					ft_->point->obsMutex.unlock();
 					viframe_j->getCVFrame()->addFeature(ft_);
+					if (!viframe_j->getCVFrame()->checkCell(u, v)) {
+						viframe_j->getCVFrame()->setCellTrue(u, v);
+						cntCell++;
+					}
+
 					ft->point->n_succeeded_reproj_++;
 					continue;
 				}
@@ -480,10 +491,10 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	for (auto &ft : fts) {
 		if (ft->isProjected == false) continue;
 		ft->point->pos_mutex.lock_shared();
-		Eigen::Vector3d pj = T_ij_.so3().inverse() * T_ij_ * ft->point->pos_;
+		Eigen::Vector3d pj = T_ij_.so3().inverse() * (T_ij_ * ft->point->pos_);
 		Eigen::Vector3d normP = ft->point->pos_ / ft->point->pos_(2);
 		ft->point->pos_mutex.unlock_shared();
-		if(pj(2) < 0.000000001 || std::isinf(pj(2)))
+		if (pj(2) < 0.000000001 || std::isinf(pj(2)))
 			continue;
 
 		Eigen::Matrix<double, 1, 6> Jac;
@@ -499,5 +510,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	infomation = infomation / sq_norm / sq_norm;
 	infomation = infomation.inverse();
 	return true;
+}
+
 }
 

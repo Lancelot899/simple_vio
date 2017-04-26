@@ -12,7 +12,7 @@ TEST(Detector, Detector) {
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
     const CameraIO::pCamereParam cam = camTest.getCamera();
-    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png", 0);
+    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715278762142976.png", 0);
     GTEST_ASSERT_NE(pic.empty(), true);
     std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, pic);
     feature_detection::Detector detector(pic.cols, pic.rows, 25, IMG_LEVEL);

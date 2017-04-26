@@ -16,8 +16,8 @@ TEST(fast_detector, fast_detector) {
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
     const CameraIO::pCamereParam cam = camTest.getCamera();
-    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png");
-    cv::Mat pic1 = cv::imread("../testData/mav0/cam0/data/1403715310362142976.png");
+    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715278262142976.png");
+    cv::Mat pic1 = cv::imread("../testData/mav0/cam0/data/1403715278462142976.png");
     GTEST_ASSERT_NE(pic.empty(), true);
     std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, pic);
     std::shared_ptr<cvFrame> frame1 = std::make_shared<cvFrame>(cam, pic1);

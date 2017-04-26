@@ -74,15 +74,14 @@ Triangulater::Triangulater() {}
 int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
                               std::shared_ptr<viFrame> &nextFrame,
                               const Sophus::SE3d &T_kn,
-                              Eigen::Matrix<double, 6, 6>&infomation,
+                              Eigen::Matrix<double, 6, 6> &infomation,
                               int iter) {
 	int newCreatPoint = 0;
-
+	double Ii = 0.0, Ij = 0.0;
 	cvMeasure::features_t &fts = keyFrame->getCVFrame()->getMeasure().fts_;
 	int width = nextFrame->getCVFrame()->getWidth();
 	int height = nextFrame->getCVFrame()->getHeight();
 	Sophus::SE3d _SPose_n = keyFrame->getT_BS().inverse() * keyFrame->getPose() * T_kn;
-	nextFrame->getCVFrame()->setPose(_SPose_n);
 
 	std::list<cvMeasure::features_t::iterator> toErase;
 
@@ -91,115 +90,80 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		ft->point->pos_mutex.lock_shared();
 		Eigen::Vector3d pos = ft->point->pos_;
 		ft->point->pos_mutex.unlock_shared();
+		Eigen::Vector2d pos_;
+		Eigen::Vector2d uvj;
+		Eigen::Vector2d &uvi = ft->px;
+		pos = _SPose_n * pos;
+		if (pos[2] < 0.00000001 || std::isinf(pos[2])) {
+			toErase.push_back(it);
+			goto PROJECTFAILED;
+		}
 
-			 Eigen::Vector2d &uvi = ft->px;
-			pos = _SPose_n * pos;
-			if(pos[2] < 0.00000001 || std::isinf(pos[2])) {
-				toErase.push_back(it);
-				goto PROJECTFAILED;
-			}
+		pos /= pos[2];
+		pos_ = pos.block<2, 1>(0, 0);
+		uvj = nextFrame->getCam()->world2cam(pos_);
+		Ij = nextFrame->getCVFrame()->getIntensity(uvj(0), uvj(1));
+		Ii = nextFrame->getCVFrame()->getIntensity(uvi(0), uvi(1));
+		if (uvj(0) < width && uvj(1) < height && uvj(0) > 0 && uvj(1) > 0 && std::abs(Ii - Ij) < IuminanceErr) {
+			if (ft->isBAed != true) {
+				for (int i = 0; i < ft->level; ++i)
+					uvi /= 2.0;
 
-			pos /= pos[2];
-			Eigen::Vector2d uvj = nextFrame->getCam()->world2cam(pos.block<2, 1>(0, 0));
-			double Ij = nextFrame->getCVFrame()->getIntensity(uvj(0), uvj(1));
-			double Ii = nextFrame->getCVFrame()->getIntensity(uvi(0), uvi(1));
-			if (uvj(0) < width && uvj(1) < height && uvj(0) > 0 && uvj(1) > 0 && std::abs(Ii - Ij) < IuminanceErr) {
-				if (ft->isBAed != true) {
-					for(int i = 0; i < ft->level; ++i)
-						uvi /= 2.0;
+				Ii = keyFrame->getCVFrame()->getIntensityBilinear(uvi(0), uvi(1), ft->level);
 
-					Ii = keyFrame->getCVFrame()->getIntensityBilinear(uvi(0), uvi(1), ft->level);
+				ft->point->pos_mutex.lock_shared();
+				double initPth = ft->point->pos_[2];
+				ft->point->pos_mutex.unlock_shared();
+				if (initPth > 0.999999999999 && initPth < 1.0000000001) {
+					initPth = init_depth((T_kn.so3() * T_kn.translation())[2]);
+					ft->point->infoMutex.lock();
+					ft->point->normal_information_ = initVar + 1.0 /
+							                           (1.0 + keyFrame->getCVFrame()->getGradNorm(ft->px(0), ft->px(1),ft->level));
+					ft->point->infoMutex.unlock();
+				}
 
+				ceres::Problem problem;
+				ceres::CostFunction *func = new depthErr(nextFrame, Ii, ft);
+				problem.AddResidualBlock(func, nullptr, &initPth);
+				ceres::Solver::Options option;
+				option.minimizer_type = ceres::LINE_SEARCH;
+				option.linear_solver_type = ceres::DENSE_QR;
+				ceres::Solver::Summary summary;
+				ceres::Solve(option, &problem, &summary);
+				if (summary.termination_type == ceres::CONVERGENCE) {
 					ft->point->pos_mutex.lock_shared();
-					double initPth = ft->point->pos_[2];
+					Eigen::Vector3d normPoint = ft->point->pos_ / ft->point->pos_(2);
 					ft->point->pos_mutex.unlock_shared();
-					if(initPth > 0.999999999999 && initPth < 1.0000000001) {
-						initPth = init_depth();
-						ft->point->infoMutex.lock();
-						ft->point->normal_information_ = initVar +
-								1.0 / (1.0 + keyFrame->getCVFrame()->getGradNorm(ft->px(0), ft->px(1), ft->level);
-
-						ft->point->infoMutex.unlock();
+					Eigen::Vector3d Pj = _SPose_n * (initPth * normPoint);
+					if (Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
+						toErase.push_back(it);
+						goto PROJECTFAILED;
 					}
 
-					ceres::Problem problem;
-					ceres::CostFunction *func = new depthErr(nextFrame, Ii, ft);
-					problem.AddResidualBlock(func, nullptr, &initPth);
-					ceres::Solver::Options option;
-					option.minimizer_type = ceres::LINE_SEARCH;
-					option.linear_solver_type = ceres::DENSE_QR;
-					ceres::Solver::Summary summary;
-					ceres::Solve(option, &problem, &summary);
-					if (summary.termination_type == ceres::CONVERGENCE) {
-						ft->point->pos_mutex.lock_shared();
-						Eigen::Vector3d normPoint = ft->point->pos_ / ft->point->pos_(2);
-						ft->point->pos_mutex.unlock_shared();
-						auto pose = nextFrame->getPose();
-						Eigen::Vector3d Pj = pose * (initPth * normPoint);
-						if(Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
-							toErase.push_back(it);
-							goto PROJECTFAILED;
-						}
-
-						uvj = nextFrame->getCam()->world2cam(Pj);
-
-						if(uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
-							toErase.push_back(it);
-							goto PROJECTFAILED;
-						}
-
-						Eigen::Matrix<double, 1, 6> Jac;
-						Jac.block<1, 3>(0, 0) = normPoint.transpose() *
-						                        Sophus::SO3d::hat(pose.so3().inverse() * (Pj - pose.translation()));
-
-						Jac.block<1, 3>(0, 3) = normPoint.transpose() * pose.so3().inverse().matrix();
-						Jac = Jac / (normPoint.transpose() * normPoint);
-
-						double newJac = Jac * infomation.inverse() * Jac.transpose();
-						ft->point->updateDepth(initPth, 1.0 / newJac);
-
-						ft->point->pos_mutex.lock_shared();
-						pos = ft->point->pos_;
-						ft->point->pos_mutex.unlock_shared();
-						pos = _SPose_n * pos;
-						pos /= pos[2];
-						uvj = nextFrame->getCam()->world2cam(pos.block<2, 1>(0, 0));
-
-						for(int i = 0; i < ft->level; ++i)
-							uvj /= 2.0;
-
+					uvj = nextFrame->getCam()->world2cam(Pj);
+					if (uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
+						toErase.push_back(it);
+						goto PROJECTFAILED;
 					}
-					std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(nextFrame->getCVFrame(),
-					                                                         ft->point, uvj, pos, ft->level);
-					ft_->isBAed.exchange(ft->isBAed);
-					ft_->point->obsMutex.lock();
-					ft_->point->obs_.push_back(ft_);
-					ft_->point->obsMutex.unlock();
-					nextFrame->getCVFrame()->addFeature(ft_);
 
-					ft->point->n_succeeded_reproj_++;
-					continue;
-				}
+					Eigen::Matrix<double, 1, 6> Jac;
+					Jac.block<1, 3>(0, 0) = normPoint.transpose() *
+					                        Sophus::SO3d::hat(_SPose_n.so3().inverse() * (Pj - _SPose_n.translation()));
 
-				else {
-					std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(nextFrame->getCVFrame(),
-					                                                         ft->point, uvj, pos, ft->level);
-					ft_->isBAed.exchange(ft->isBAed);
-					ft_->point->obsMutex.lock();
-					ft_->point->obs_.push_back(ft_);
-					ft_->point->obsMutex.unlock();
-					nextFrame->getCVFrame()->addFeature(ft_);
-					ft->point->n_succeeded_reproj_++;
-					continue;
+					Jac.block<1, 3>(0, 3) = normPoint.transpose() * _SPose_n.so3().inverse().matrix();
+					Jac = Jac / (normPoint.transpose() * normPoint);
+
+					double newJac = Jac * infomation.inverse() * Jac.transpose();
+					ft->point->updateDepth(initPth, 1.0 / newJac);
+					newCreatPoint++;
 				}
 			}
+		}
 
 
 PROJECTFAILED:
 
-		if (ft->point->n_succeeded_reproj_ >= 1)
-			ft->point->n_failed_reproj_++;
-		else
+		if (ft->point->n_succeeded_reproj_ < 1)
 			toErase.push_back(it);
 	}
 

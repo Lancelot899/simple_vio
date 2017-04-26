@@ -1,5 +1,5 @@
 #include "DataStructure/cv/Point.h"
-#include "util/util.h"
+#include "util/setting.h"
 #include "DataStructure/cv/cvFrame.h"
 #include "DataStructure/cv/Feature.h"
 
@@ -13,7 +13,9 @@ Point::Point(const Vector3d& pos) :
     last_projected_kf_id_(-1),
     type_(TYPE_UNKNOWN),
     n_failed_reproj_(0),
-    n_succeeded_reproj_(0){}
+    n_succeeded_reproj_(0){
+	normal_information_ = initDepthInfo;
+}
 
 Point::Point(const Vector3d& pos, std::shared_ptr<Feature> &ftr) :
     id_(point_counter_++),
@@ -23,6 +25,7 @@ Point::Point(const Vector3d& pos, std::shared_ptr<Feature> &ftr) :
     n_failed_reproj_(0),
     n_succeeded_reproj_(0) {
     obs_.push_front(ftr);
+	normal_information_ = initDepthInfo;
 }
 
 Point::~Point() {}

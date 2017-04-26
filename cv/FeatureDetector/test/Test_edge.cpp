@@ -14,8 +14,8 @@ TEST(edge_detector, edge_detector) {
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
     CameraIO camTest(camDatafile,camParamfile);
     const CameraIO::pCamereParam cam = camTest.getCamera();
-    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715273562142976.png",0);
-    cv::Mat pic1 = cv::imread("../testData/mav0/cam0/data/1403715310362142976.png",0);
+    cv::Mat pic = cv::imread("../testData/mav0/cam0/data/1403715278462142976.png",0);
+    cv::Mat pic1 = cv::imread("../testData/mav0/cam0/data/1403715278762142976.png",0);
 
 
     cv::Mat picCanny; cv::Canny(pic,picCanny,100,150);
