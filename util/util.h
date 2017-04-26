@@ -118,6 +118,6 @@ protected:
 cv::Mat Undistort(const cv::Mat& src, std::shared_ptr<AbstractCamera> cam);
 
 extern double scale;
-double init_depth();
+double init_depth(double num);
 
 #endif // UTIL_H

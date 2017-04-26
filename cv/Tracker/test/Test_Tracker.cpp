@@ -14,8 +14,8 @@
 TEST(Tracker, Tracker) {
 
     direct_tracker::Tracker tracker;
-    cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
-	cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
+    cv::Mat pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715278262142976.png", 0);
+	cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715278262142976.png", 0);
     //cv::Mat pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
     std::string camDatafile = "../testData/mav0/cam1/data.csv";
     std::string camParamfile ="../testData/mav0/cam1/sensor.yaml";
@@ -69,7 +69,8 @@ TEST(Tracker, Tracker) {
     GTEST_ASSERT_EQ(Tij.matrix3x4(), Mij);
     //! test runing time
     printf("\t--start tracking!\n");
-    bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, 50);
+	Eigen::Matrix<double, 6, 6> info;
+    bool isTracked = tracker.Tracking(viframe_i, viframe_j, Tij, info, 50);
     if(isTracked)
         printf("\t--successful!\n");
     else
@@ -79,13 +80,13 @@ TEST(Tracker, Tracker) {
 	Sophus::SE3d se3 = viframe_i->getT_BS().inverse() * viframe_i->getPose() * Tij;
 	viframe_j->getCVFrame()->setPose(se3);
 
-	tracker.reProject(viframe_i, viframe_j);
+	tracker.reProject(viframe_i, viframe_j, Tij, info);
 
-	GTEST_ASSERT_EQ(viframe_i->getCVFrame()->getMeasure().fts_.size(), viframe_j->getCVFrame()->getMeasure().fts_
-			.size());
+	GTEST_ASSERT_EQ(viframe_i->getCVFrame()->getMeasure().fts_.size(),
+	                viframe_j->getCVFrame()->getMeasure().fts_.size());
 
-	pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715281712143104.png", 0);
-	pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715281512143104.png", 0);
+	pic_i_ = cv::imread("../testData/mav0/cam0/data/1403715278262142976.png", 0);
+	pic_j_ = cv::imread("../testData/mav0/cam0/data/1403715278312143104.png", 0);
 	pic_i = Undistort(pic_i_, cam);
 	pic_j = Undistort(pic_j_, cam);
 
@@ -105,12 +106,13 @@ TEST(Tracker, Tracker) {
 	Sophus::SE3d Tij_;
 	GTEST_ASSERT_EQ(Tij_.matrix3x4(), Mij);
 
-	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij_, 50);
-
+	isTracked = tracker.Tracking(viframe_i, viframe_j, Tij_, info,50);
+	se3 = viframe_i->getT_BS().inverse() * viframe_i->getPose() * Tij;
+	viframe_j->getCVFrame()->setPose(se3);
 //	std::cout << "--rotation:\n" << Tij_.rotationMatrix() << std::endl;
 //	std::cout << "--translation:\n" << Tij_.translation() << std::endl;
 
-	tracker.reProject(viframe_i, viframe_j);
+	tracker.reProject(viframe_i, viframe_j, Tij_, info);
 //	std::cout << "--i fts size: " << viframe_i->getCVFrame()->getMeasure().fts_.size()
 //	          << ", i fts size:" << viframe_j->getCVFrame()->getMeasure().fts_.size() << std::endl;
 

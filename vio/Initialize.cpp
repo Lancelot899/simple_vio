@@ -38,16 +38,17 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
     Sophus::SE3d T = imufactor->getPoseFac();
 	//std::cout << T.matrix3x4() << std::endl;
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
-    if(!tracker->Tracking(VecFrames.back(), viframe, T))
+	Eigen::Matrix<double, 6, 6> information;
+    if(!tracker->Tracking(VecFrames.back(), viframe, T, information))
 	    return;
 	//std::cout << T.matrix3x4() << std::endl;
     T = VecFrames.back()->getPose() * T;
 	viframe->updatePose(T);
 	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
-            triangulater->triangulate(VecFrames.back(), viframe, T, 30))
+            triangulater->triangulate(VecFrames.back(), viframe, T, information ,30))
 	    return;
 
-    tracker->reProject(VecFrames.back(), viframe);
+    tracker->reProject(VecFrames.back(), viframe, T, information);
 
 	feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
