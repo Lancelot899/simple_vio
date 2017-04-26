@@ -257,13 +257,30 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		Eigen::Vector3d pos = ft->point->pos_;
 		ft->point->pos_mutex.unlock_shared();
 		Eigen::Matrix3d pi = viframe_i->getCVFrame() * pos;
-		Eigen::Vector2d uvi = viframe_j->getCam()->world2cam(pi);
-		double Ii = viframe_i->getCVFrame()->getIntensityBilinear(uvi(0), uvi(1));
-		if (uvi(0) < width && uvi(1) < height && uvi(0) > 0 && uvi(1) > 0) {
-			Eigen::Vector2d uvj = viframe_j->getCam()->world2cam(_SPose_j * pos);
-			double Ij = viframe_j->getCVFrame()->getIntensityBilinear(uvj(0), uvj(1));
+		if(pi[2] < 0.00000001 || std::isinf(pi[2])) {
+			toErase.push_back(it);
+			goto PROJECTFAILED;
+		}
+
+		Eigen::Vector2d uvi = viframe_i->getCam()->world2cam(pi);
+		if (uvi(0) >= width || uvi(1) >= height || uvi(0) <= 0 || uvi(1) <= 0) {
+			pos = _SPose_j * pos;
+			if(pos[2] < 0.00000001 || std::isinf(pos[2])) {
+				toErase.push_back(it);
+				goto PROJECTFAILED;
+			}
+
+			pos /= pos[2];
+			Eigen::Vector2d uvj = viframe_j->getCam()->world2cam(pos.block<2, 1>(0, 0));
+			double Ij = viframe_j->getCVFrame()->getIntensity(uvj(0), uvj(1));
+			double Ii = viframe_i->getCVFrame()->getIntensity(uvi(0), uvi(1));
 			if (uvj(0) < width && uvj(1) < height && uvj(0) > 0 && uvj(1) > 0 && std::abs(Ii - Ij) < IuminanceErr) {
 				if (ft->isBAed != true) {
+					for(int i = 0; i < ft->level; ++i)
+						uvi /= 2.0;
+
+					Ii = viframe_i->getCVFrame()->getIntensityBilinear(uvi(0), uvi(1), ft->level);
+
 					ft->point->pos_mutex.lock_shared();
 					double initPth = ft->point->pos_[2];
 					ft->point->pos_mutex.unlock_shared();
@@ -281,6 +298,18 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 						ft->point->pos_mutex.unlock_shared();
 						auto pose = viframe_j->getPose();
 						Eigen::Vector3d Pj = pose * (initPth * normPoint);
+						if(Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
+							toErase.push_back(it);
+							goto PROJECTFAILED;
+						}
+
+						uvj = viframe_j->getCam()->world2cam(Pj);
+
+						if(uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
+							toErase.push_back(it);
+							goto PROJECTFAILED;
+						}
+
 						Eigen::Vector2d uv = viframe_i->getCam()->world2cam(Pj);
 						Eigen::Matrix<double, 1, 6> Jac;
 						Jac.block<1, 3>(0, 0) = normPoint.transpose() *
@@ -291,6 +320,17 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 
 						double newJac = Jac * infomation.inverse() * Jac.transpose();
 						ft->point->updateDepth(initPth, 1.0 / newJac);
+
+						ft->point->pos_mutex.lock_shared();
+						pos = ft->point->pos_;
+						ft->point->pos_mutex.unlock_shared();
+						pos = _SPose_j * pos;
+						pos /= pos[2];
+						uvj = viframe_j->getCam()->world2cam(pos.block<2, 1>(0, 0));
+
+						for(int i = 0; i < ft->level; ++i)
+							uvj /= 2.0;
+
 					}
 					std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
 					                                                         ft->point, uvj, pos, ft->level);
@@ -310,8 +350,22 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 					ft->point->n_succeeded_reproj_++;
 					continue;
 				}
+
+				else {
+					std::shared_ptr<Feature> ft_ = std::make_shared<Feature>(viframe_j->getCVFrame(),
+						                                                         ft->point, uvj, pos, ft->level);
+					ft_->isBAed.exchange(ft->isBAed);
+					ft_->point->obsMutex.lock();
+					ft_->point->obs_.push_back(ft_);
+					ft_->point->obsMutex.unlock();
+					viframe_j->getCVFrame()->addFeature(ft_);
+					ft->point->n_succeeded_reproj_++;
+					continue;
+				}
 			}
 		}
+
+PROJECTFAILED:
 
 		if (ft->point->n_succeeded_reproj_ >= 1)
 			ft->point->n_failed_reproj_++;
@@ -438,7 +492,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		cnt++;
 	}
 
-	if (cnt < 8) return false;
+	if (cnt < 16) return false;
 
 	infomation = infomation / sq_norm / sq_norm;
 	infomation = infomation.inverse();

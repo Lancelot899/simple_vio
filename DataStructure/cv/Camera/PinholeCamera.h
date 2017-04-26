@@ -40,12 +40,12 @@ public:
         return fabs(4.0*fx_*fy_);
     }
 
-    const Eigen::Matrix3d K() const { return K_; }
-    const Eigen::Matrix3d K_inv() const { return K_inv_; }
-    virtual double fx() const { return fx_; }
-    virtual double fy() const { return fy_; }
-    virtual double cx() const { return cx_; }
-    virtual double cy() const { return cy_; }
+    const Eigen::Matrix3d K(int level) const { return K_; }
+    const Eigen::Matrix3d K_inv(int level) const { return K_inv_; }
+    virtual double fx(int level) const { return fx_; }
+    virtual double fy(int level) const { return fy_; }
+    virtual double cx(int level) const { return cx_; }
+    virtual double cy(int level) const { return cy_; }
     virtual double d(int i) const { return d_[i]; }
     void undistortImage(const cv::Mat& raw, cv::Mat& rectified);
 
