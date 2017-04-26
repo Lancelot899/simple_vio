@@ -11,8 +11,7 @@ PinholeCamera::PinholeCamera(double width, double height,
                              double fx, double fy,
                              double cx, double cy,
                              double d0, double d1, double d2, double d3, double d4) :
-        AbstractCamera(width, height),        
-        distortion_(false),
+        AbstractCamera(width, height),distortion_(false),
         undist_map1_(height_, width_, CV_16SC2),
         undist_map2_(height_, width_, CV_16SC2),
         use_optimization_(false) {
@@ -26,8 +25,8 @@ PinholeCamera::PinholeCamera(double width, double height,
     cvD_ = (cv::Mat_<double>(1, 5) << d_[0], d_[1], d_[2], d_[3], d_[4]);
 
     for (int i = 1; i < IMG_LEVEL; ++i) {
-        fx_[i]  = fx[i-1]/2; fy_[i] = fy[i-1]/2;
-        cx_[i]  = cx[i-1]/2; cy_[i] = cy[i-1]/2;
+        fx_[i]  = fx_[i-1]/2; fy_[i] = fy_[i-1]/2;
+        cx_[i]  = cx_[i-1]/2; cy_[i] = cy_[i-1]/2;
         cvK_[i] = (cv::Mat_<double>(3, 3) << fx_[i], 0.0, cx_[i], 0.0, fy_[i], cy_[i], 0.0, 0.0, 1.0);
     }
 

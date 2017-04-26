@@ -50,10 +50,10 @@ public:
     void undistortImage(const cv::Mat& raw, cv::Mat& rectified);
 
 private:
-    const double * const fx_;
-    const double * const fy_;
-    const double * const cx_;
-    const double * const cy_;
+    double * fx_;
+    double * fy_;
+    double * cx_;
+    double * cy_;
     bool distortion_;             //!< is it pure pinhole model or has it radial distortion?
     double d_[5];                 //!< distortion parameters, see http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
     cv::Mat cvK_[IMG_LEVEL], cvD_;
