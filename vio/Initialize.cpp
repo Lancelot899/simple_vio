@@ -39,14 +39,19 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
 	//std::cout << T.matrix3x4() << std::endl;
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
 	Eigen::Matrix<double, 6, 6> information;
-    if(!tracker->Tracking(VecFrames.back(), viframe, T, information))
+    if(!tracker->Tracking(VecFrames.back(), viframe, T, information)) {
+	    printf("lost!\n");
 	    return;
+    }
 	//std::cout << T.matrix3x4() << std::endl;
     T = VecFrames.back()->getPose() * T;
 	viframe->updatePose(T);
-	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 4 >
-            triangulater->triangulate(VecFrames.back(), viframe, T, information ,30))
-	    return;
+	int ptNum = 0;
+	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 10 >
+			(ptNum = triangulater->triangulate(VecFrames.back(), viframe, T, information ,30))) {
+		std::cout << "new point is to less! the number of them is : " << ptNum << std::endl;
+		return;
+	}
 
     tracker->reProject(VecFrames.back(), viframe, T, information);
 

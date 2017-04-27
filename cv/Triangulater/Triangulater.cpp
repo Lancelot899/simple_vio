@@ -83,7 +83,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 	int height = nextFrame->getCVFrame()->getHeight();
 	Sophus::SE3d _SPose_n = keyFrame->getT_BS().inverse() * keyFrame->getPose() * T_kn;
 
-	std::list<cvMeasure::features_t::iterator> toErase;
+	std::list<cvMeasure::features_t::value_type> toErase;
 
 	for (cvMeasure::features_t::iterator it = fts.begin(); it != fts.end(); ++it) {
 		auto &ft = *it;
@@ -95,7 +95,7 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 		Eigen::Vector2d &uvi = ft->px;
 		pos = _SPose_n * pos;
 		if (pos[2] < 0.00000001 || std::isinf(pos[2])) {
-			toErase.push_back(it);
+			toErase.push_back(*it);
 			goto PROJECTFAILED;
 		}
 
@@ -136,13 +136,13 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 					ft->point->pos_mutex.unlock_shared();
 					Eigen::Vector3d Pj = _SPose_n * (initPth * normPoint);
 					if (Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
-						toErase.push_back(it);
+						toErase.push_back(*it);
 						goto PROJECTFAILED;
 					}
 
 					uvj = nextFrame->getCam()->world2cam(Pj);
 					if (uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
-						toErase.push_back(it);
+						toErase.push_back(*it);
 						goto PROJECTFAILED;
 					}
 
@@ -164,11 +164,12 @@ int Triangulater::triangulate(std::shared_ptr<viFrame> &keyFrame,
 PROJECTFAILED:
 
 		if (ft->point->n_succeeded_reproj_ < 1)
-			toErase.push_back(it);
+			toErase.push_back(*it);
 	}
 
-	for (auto &it : toErase)
-		fts.erase(it);
+	for (auto it = toErase.begin(); it != toErase.end(); ++it)
+		fts.remove(*it);
+
 
 	return newCreatPoint;
 }
