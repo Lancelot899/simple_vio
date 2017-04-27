@@ -256,7 +256,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 	int chellheight = viframe_j->getCVFrame()->getHeight() / detectCellHeight;
 	Sophus::SE3d _SPose_j = viframe_i->getT_BS().inverse() * viframe_i->getPose() * Tij;
 	int cntCell = 0;
-	std::list<cvMeasure::features_t::iterator> toErase;
+	std::list<cvMeasure::features_t::value_type> toErase;
 
 	for (cvMeasure::features_t::iterator it = fts.begin(); it != fts.end(); ++it) {
 		auto &ft = *it;
@@ -267,7 +267,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		Eigen::Vector2d uvi, uvj;
 		Eigen::Vector3d pi = viframe_i->getCVFrame()->getPose() * pos;
 		if (pi[2] < 0.00000001 || std::isinf(pi[2])) {
-			toErase.push_back(it);
+			toErase.push_back(*it);
 			goto PROJECTFAILED;
 		}
 
@@ -275,7 +275,7 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		if (uvi(0) >= width || uvi(1) >= height || uvi(0) <= 0 || uvi(1) <= 0) {
 			pos = _SPose_j * pos;
 			if (pos[2] < 0.00000001 || std::isinf(pos[2])) {
-				toErase.push_back(it);
+				toErase.push_back(*it);
 				goto PROJECTFAILED;
 			}
 
@@ -311,14 +311,14 @@ int Tracker::reProject(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 						ft->point->pos_mutex.unlock_shared();
 						Eigen::Vector3d Pj = _SPose_j * (initPth * normPoint);
 						if (Pj[2] < 0.00000001 || std::isinf(Pj[2])) {
-							toErase.push_back(it);
+							toErase.push_back(*it);
 							goto PROJECTFAILED;
 						}
 
 						uvj = viframe_j->getCam()->world2cam(Pj);
 
 						if (uvj(0) >= width || uvj(1) >= height || uvj(0) <= 0 || uvj(1) <= 0) {
-							toErase.push_back(it);
+							toErase.push_back(*it);
 							goto PROJECTFAILED;
 						}
 
@@ -387,11 +387,11 @@ PROJECTFAILED:
 		if (ft->point->n_succeeded_reproj_ >= 1)
 			ft->point->n_failed_reproj_++;
 		else
-			toErase.push_back(it);
+			toErase.push_back(*it);
 	}
 
 	for (auto &it : toErase)
-		fts.erase(it);
+		fts.remove(it);
 
 	return cntCell;
 }
@@ -411,7 +411,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		t_ij[i] = so3(i);
 		t_ij[3 + i] = tij(i);
 	}
-
+	bool isOpt = false;
 	std::list<cvMeasure::features_t::iterator> toErase;
 	auto &model = trackModel();
 	auto T_SB = viframe_i->getT_BS().inverse();
@@ -458,6 +458,7 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 
 							if (err < model.size() * IuminanceErr) {
 								//std::cout << "err = " << err << std::endl;
+								isOpt = true;
 								problem.AddResidualBlock(new TrackingErr(ft, viframe_i, viframe_j),
 								                         new ceres::HuberLoss(0.5), t_ij);
 								continue;
@@ -475,6 +476,9 @@ bool Tracker::Tracking(std::shared_ptr<viFrame> &viframe_i, std::shared_ptr<viFr
 		if ((*it)->point->n_succeeded_reproj_ < 2)
 			fts.erase(it);
 	}
+
+	if(isOpt == false)
+		return false;
 
 	problem.SetParameterization(t_ij, new SE3Parameterization);
 
