@@ -25,6 +25,6 @@ int main(int argc, char **argv) {
   #endif //TEST_INITIAL
 
 #endif //TEST_ALL
-
+  return 0;
   }
 
