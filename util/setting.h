@@ -19,6 +19,7 @@
 #define Gravity           9.78
 #define IuminanceErr      30
 #define initDepthInfo     0.4
+#define KeyFrameTranslateThreadThold2  0.5625
 
 const std::vector<Eigen::Vector2i>& trackModel(int mode = 0);
 extern int widowSize;
