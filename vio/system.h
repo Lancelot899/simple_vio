@@ -19,6 +19,9 @@ class IMUIO;
 class AbstractCamera;
 class BundleAdjustemt;
 
+namespace vio {
+
+
 class system {
 public:
 	system(std::string &imuDatafile,
@@ -35,6 +38,8 @@ public:
 private:
 	void workLoop();
 	bool runBA();
+    bool isInsertKeyframe(int num,Sophus::SE3d T);
+
 
 private:
 	int id;
@@ -55,7 +60,11 @@ private:
 	std::condition_variable callBA;
 	std::atomic_bool BARunning;
 	std::atomic_bool BAResult;
+    std::deque<std::shared_ptr<viFrame>> QueKeyFrames;
+    bool      isInsert;
+    std::shared_ptr<viFrame>   curframe;
 };
+}
 
 
 #endif //SIMPLE_VIO_SYSTEM_H
