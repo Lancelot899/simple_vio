@@ -87,7 +87,6 @@ bool IMUErr::Evaluate(double const *const *parameters,
 	Eigen::Vector3d dbias_g = posej.block<3, 1>(9, 0) - posei.block<3, 1>(9, 0);
 	Eigen::Vector3d dbias_a = posej.block<3, 1>(12, 0) - posei.block<3, 1>(12, 0);
 
-
 	auto imuParam = viframe_i->getImuParam();
 
 	const Eigen::Vector3d &vi = posei.block<3, 1>(6, 0);

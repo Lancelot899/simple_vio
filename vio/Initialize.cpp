@@ -36,15 +36,17 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
                              std::shared_ptr<imuFactor> &imufactor,
                              std::shared_ptr<ImuParameters> imuParam) {
     Sophus::SE3d T = imufactor->getPoseFac();
-	//std::cout << T.matrix3x4() << std::endl;
+	//std::cout << "imu data pose = \n" << T.matrix3x4() << std::endl;
+
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
 	Eigen::Matrix<double, 6, 6> information;
     if(!tracker->Tracking(VecFrames.back(), viframe, T, information)) {
 	    printf("lost!\n");
 	    return;
     }
-	//std::cout << T.matrix3x4() << std::endl;
+	//std::cout << "delta pose = \n" << T.matrix3x4() << std::endl;
     T = VecFrames.back()->getPose() * T;
+	//std::cout << "pose = \n" << T.matrix3x4() << std::endl;
 	viframe->updatePose(T);
 	int ptNum = 0;
 	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 10 >
