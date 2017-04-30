@@ -122,7 +122,7 @@ private:
     boost::shared_mutex pose_mutex;
     cov_t               Cov_;                                                //!< Covariance.
     cam_t               cam_;                                                //!< Camera model.
-    bool               is_keyframe_;                                         //!< Was this frames selected askeyframe?
+    bool                is_keyframe_;                                        //!< Was this frames selected as keyframe?
     int                 last_published_ts_;                                  //!< Timestamp of last publishing.
     bool occupy[detectCellWidth * detectCellHeight * detectHeightGrid * detectWidthGrid];  //!< whether cell is occupy by features
     bool cell[detectCellWidth * detectCellHeight];                           //!< whether the big cell is occupied

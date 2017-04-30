@@ -274,12 +274,16 @@ bool InitialImpl::init(std::vector<std::shared_ptr<viFrame>> &VecFrames,
 			const IMUMeasure::Transformation &deltaPose = VecImuFactor[i]->deltaPose;
 			const imuFactor::FacJBias_t &facJac = VecImuFactor[i]->getJBias();
 
+
+
 			VecFrames[i - 1]->spbs.block<3, 1>(0, 0) = (scale * p2 - s_g(0, 0) * p1
 			                                            + 0.5 * R_WI.matrix() * g_I_hat * G * dt12 * dt12 * delta_theta
 			                                            - (R1_wb * (deltaPose.translation()
 			                                             + facJac.block<3, 3>(9, 0) * s_dxy_ba.block<3, 1>(3, 0)))
 			                                            - (R1_wc.matrix() - R2_wc.matrix()) * cP_B
 			                                            - 0.5 * (imuParam->g) * dt12 * dt12) / dt12;
+
+			//std::cout << "speed = \n" << VecFrames[i - 1]->spbs.block<3, 1>(0, 0) << std::endl;
 		}
 	}
 

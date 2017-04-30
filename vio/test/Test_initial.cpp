@@ -19,7 +19,9 @@
 
 class drPoint {
 public:
-	drPoint(std::shared_ptr<Point>& point_) : point(point_) {}
+	drPoint(std::shared_ptr<Point>& point_) : point(point_) {
+		//std::cout << point->pos_ << std::endl << std::endl;
+	}
 	void draw() {
 		glColor3d(0.3, 0.6, 0.9);
 		point->pos_mutex.lock_shared();
@@ -34,7 +36,9 @@ private:
 
 class drPose {
 public:
-	drPose(Sophus::SE3d pose_) : pose(pose_) {}
+	drPose(Sophus::SE3d pose_) : pose(pose_) {
+		//std::cout << pose.matrix3x4() << std::endl << std::endl;
+	}
 	void draw() {
 		Eigen::Matrix3d rot = pose.so3().matrix();
 		Eigen::Vector3d p1 = pose.translation();
@@ -109,7 +113,7 @@ void testInitial(int argc, char **argv) {
 	std::pair<okvis::Time, cv::Mat> tmImgNext;
     std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(cam, tmImg.second, tmImg.first);
 	initer.setFirstFrame(firstFrame, imuParam);
-	for(int i = 0; i < 10; ++i) {
+	for(int i = 0; i < 20; ++i) {
 		tmImgNext = imageIO.popImageAndTimestamp();
         std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, tmImgNext.second, tmImgNext.first);
 		auto imuMeasure = imuIO.pop(tmImg.first, tmImgNext.first);
