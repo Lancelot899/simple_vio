@@ -99,15 +99,16 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
         Sophus::SO3d dR = Sophus::SO3d::exp((0.5*(omega_S_0 + omega_S_1) - gbias) * dt);
         Eigen::Matrix<double, 3, 3> rJac = rightJacobian(dR.log());
         VecRightJac.push_back(rJac);
-        D_rotation *= dR;
+        D_rotation = D_rotation * dR;
         VecRotation.push_back(D_rotation);
         const Eigen::Matrix<double, 3, 3> D_rMat = D_rotation.matrix();
 
         const Eigen::Vector3d acc_S_true = 0.5*(acc_S_0+acc_S_1) - abias;
         VecAcc.push_back(acc_S_true);
+       // std::cout << "time = "<<dt << std::endl;
         Eigen::Vector3d dv = D_rMat * (acc_S_true * dt);
+        Eigen::Vector3d dp = D_vec * dt + 0.5 * D_rMat * (acc_S_true) * dt * dt;
         D_vec += dv;
-        Eigen::Vector3d dp = 1.5 * D_rMat * (acc_S_true) * dt * dt;
         D_pos += dp;
 
         if (covariance) {
@@ -172,7 +173,7 @@ int IMUImplPRE::propagation(const ImuMeasureDeque &imuMeasurements,
 
     T_WS = Sophus::SE3d(D_rotation, D_pos);
     speedAndBiases.head<3>() = D_vec;
-
+    //std::cout << "t_ws = \n" << T_WS.matrix3x4() << std::endl;
     return i;
 }
 

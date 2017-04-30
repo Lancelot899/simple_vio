@@ -37,7 +37,7 @@ private:
 class drPose {
 public:
 	drPose(Sophus::SE3d pose_) : pose(pose_) {
-		std::cout << pose.matrix3x4() << std::endl << std::endl;
+		//std::cout << pose.matrix3x4() << std::endl << std::endl;
 	}
 	void draw() {
 		Eigen::Matrix3d rot = pose.so3().matrix();
@@ -113,7 +113,7 @@ void testInitial(int argc, char **argv) {
 	std::pair<okvis::Time, cv::Mat> tmImgNext;
     std::shared_ptr<cvFrame> firstFrame = std::make_shared<cvFrame>(cam, tmImg.second, tmImg.first);
 	initer.setFirstFrame(firstFrame, imuParam);
-	for(int i = 0; i < 10; ++i) {
+	for(int i = 0; i < 20; ++i) {
 		tmImgNext = imageIO.popImageAndTimestamp();
         std::shared_ptr<cvFrame> frame = std::make_shared<cvFrame>(cam, tmImgNext.second, tmImgNext.first);
 		auto imuMeasure = imuIO.pop(tmImg.first, tmImgNext.first);

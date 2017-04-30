@@ -85,8 +85,6 @@ bool system::isInsertKeyframe(int num, Sophus::SE3d T)
     if(T.translation().transpose() * T.translation() > KeyFrameTranslateThreadThold2)
         return true;
 
-
-
     return false;
 }
 

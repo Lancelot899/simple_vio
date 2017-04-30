@@ -39,31 +39,37 @@ void Initialize::pushcvFrame(std::shared_ptr<cvFrame> &cvframe,
 	//std::cout << "imu data pose = \n" << T.matrix3x4() << std::endl;
 
     std::shared_ptr<viFrame> viframe = std::make_shared<viFrame>(viFrame::ID++, cvframe, imuParam);
-	Eigen::Matrix<double, 6, 6> information;
+	Eigen::Matrix<double, 6, 6> information = Eigen::Matrix<double, 6, 6>::Identity();
+//	if(VecFrames.size() == 1) {
+		int pointNum = triangulater->triangulate(VecFrames.back(), viframe, T, information, 100);
+		std::cout << "initial point num = " << pointNum << std::endl;
+//	}
+
     if(!tracker->Tracking(VecFrames.back(), viframe, T, information)) {
-	    printf("lost!\n");
-	    return;
+	    std::cout << "now the fts of last frame is : " << VecFrames.back()->getCVFrame()->cvData.fts_.size() << "\n";
+	//    return;
     }
 	//std::cout << "delta pose = \n" << T.matrix3x4() << std::endl;
-    T = VecFrames.back()->getPose() * T;
 	//std::cout << "pose = \n" << T.matrix3x4() << std::endl;
-	viframe->updatePose(T);
-	int ptNum = 0;
-	if(VecFrames.back()->getCVFrame()->cvData.fts_.size() / 10 >
-			(ptNum = triangulater->triangulate(VecFrames.back(), viframe, T, information ,30))) {
-		std::cout << "new point is to less! the number of them is : " << ptNum << std::endl;
-		return;
-	}
-
+	Sophus::SE3d approxT = VecFrames.back()->getPose() * T;
+	viframe->updatePose(approxT);
+//	int ptNum = triangulater->triangulate(VecFrames.back(), viframe, T, information ,100);
+//	if((VecFrames.back()->getCVFrame()->cvData.fts_.size() / 10 > ptNum) || ptNum < 30) {
+//		std::cout << "the size of fts is : " << VecFrames.back()->getCVFrame()->cvData.fts_.size()
+//		          << "\nnew point is to less! the number of them is : " << ptNum << std::endl;
+//		return;
+//	}
+//	std::cout << "refine or get point : " << ptNum << std::endl;
     tracker->reProject(VecFrames.back(), viframe, T, information);
-
+	std::cout << "get new obs : " << viframe->getCVFrame()->cvData.fts_.size() << std::endl;
 	feature_detection::features_t features;
     detector->detect(viframe->getCVFrame(), viframe->getCVFrame()->getMeasure().measurement.imgPyr, features);
-	//std::cout << "new feature : " << features.size() << std::endl;
+	std::cout << "new feature : " << features.size() << std::endl;
     for(auto &feat : features)
         viframe->getCVFrame()->cvData.fts_.push_back(feat);
 	VecFrames.push_back(viframe);
 	VecImuFactor.push_back(imufactor);
+	std::cout << "add a frame!\n\n";
 }
 
 bool Initialize::init(std::shared_ptr<ImuParameters> &imuParam, int n_iter) {
